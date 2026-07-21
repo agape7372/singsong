@@ -416,6 +416,8 @@ history      (device_id, song_id, sung_at, room_code?)
 
 **MVP 정의(Phase A 종료 조건)**: 곡 검색 → 리스트 담기 → 세션 계산(코인 곡당/시간제 + 룸) → 티켓 링크 공유가 로그인 없이 웹에서 동작.
 
+> 📄 상세 엔지니어링 계획·마일스톤·AI 빌드 프롬프트(코덱스/오푸스용): **[`BUILD_PLAN.md`](./BUILD_PLAN.md)**
+
 ---
 
 ## 21. 리스크 & 대응
