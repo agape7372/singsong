@@ -2,7 +2,7 @@
 
 > 짝 문서: [`PRODUCT_SPEC.md`](./PRODUCT_SPEC.md) (제품/설계). 이 문서는 **엔지니어링 실행 계획 + 코덱스/오푸스에 붙여넣을 프롬프트**다.
 > **범위**: Phase A = 로그인 없는 PWA MVP (담기 → 계산 → 티켓 공유 → fork). 발견/셀럽·결제·네이티브는 이 문서 범위 밖(후속).
-> **버전**: v1.0 · 2026-07-21
+> **버전**: v1.1 · 2026-07-21 (§13 원샷 마스터 프롬프트 추가)
 
 ---
 
@@ -358,6 +358,61 @@ Kakao JS SDK, Vitest, pnpm, Node 20+.
 - 색·폰트는 토큰에서만. 하드코딩 금지.
 - 곡·매장·번호는 예시 데이터 OK지만, 실제 크롤링/미디어 호스팅 코드는 넣지 말 것.
 - 계산 엔진은 순수함수 + 테스트 우선(묶음 최저가 공식 정확히).
+
+---
+
+## 13. 원샷 마스터 프롬프트 (아이디어→출시 준비까지, 한 번에)
+
+> **기대치(정직)**: 이 프롬프트는 유능한 코딩 에이전트(코덱스/오푸스, 레포+툴 접근)에게 주면
+> **빈 레포 → 배포 가능한 MVP 코드베이스**까지 한 실행으로 몰고 간다.
+> 단, 계정/키 발급·실제 곡DB 확보·도메인·프로덕션 배포 로그인·스토어 심사·법무는 **사람만** 가능 →
+> 에이전트는 그 부분을 **가짜로 하지 말고 Phase 10 핸드오프 체크리스트로 넘긴다.**
+> 사용법: 아래 블록 전체를 그대로 붙여넣는다(§11-0 프리앰블은 이 안에 포함됨).
+
+```
+너는 '싱송(SingSong)' — 코인노래방 세션 플래너 PWA를 처음부터 만드는 시니어 풀스택 엔지니어 겸 프로덕트 디자이너다.
+가장 먼저 docs/PRODUCT_SPEC.md 와 docs/BUILD_PLAN.md 를 전부 읽고 그 결정을 따른다.
+
+[스택 고정] Next.js 15(App Router, TS strict) · Tailwind v4 · Dexie.js · Supabase(Postgres) · TanStack Query
+· Zustand · Zod · html-to-image · next/og · Kakao JS SDK · Framer Motion · Vitest · pnpm · Node 20+. (임의 추가 금지)
+
+[불변 원칙]
+- 로그인/회원가입/결제 없음(이번 범위 아님). 개인 데이터는 전부 로컬(Dexie). 서버엔 '공유 스냅샷'만.
+- 미디어(오디오/이미지)를 우리가 호스팅하지 않음. 앨범아트는 iTunes URL만. 실제 크롤링 코드 넣지 않음.
+- 홈은 항상 '세션 플래너'가 중심(담기→계산→티켓). 발견/셀럽은 라우트 자리만, 구현 X.
+- 디자인 토큰: 베이스 #FDF6F9 / 포인트 로즈 #FF2E74 / 코인 골드 #F5A623(금액에만) / 잉크 #1C1622. 라이트+다크.
+  번호·금액은 모노스페이스+tabular-nums. 말투는 친구톤("오늘 뭐 부를래?"). 색은 토큰에서만(하드코딩 금지).
+
+[실행 방식] 아래 Phase를 순서대로 진행한다. 각 Phase 끝에서 '완료조건'을 스스로 점검해 통과 여부를 표로 보고하고,
+실패 항목은 스스로 고친 뒤 다음 Phase로 간다. 커밋은 Phase 단위로 의미있게 나눈다.
+
+Phase 0 — 셋업: Next 15 스캐폴딩, 의존성 설치, .env.example, 폴더구조(app/ lib/ components/ test/ supabase/ scripts/).
+Phase 1 — 디자인 시스템: globals.css 토큰(라이트/다크: prefers-color-scheme + [data-theme]), Tailwind 매핑, 타이포(Pretendard/모노 스택),
+  기본 컴포넌트(Button, Card, Chip, Stepper, TabBar, SongRow). 스토리성 데모 페이지로 육안 확인.
+Phase 2 — 백엔드: supabase/migrations 에 songs·shared_lists DDL(BUILD_PLAN §4) + pg_trgm/초성 인덱스 + RPC search_songs(q) + RLS.
+  scripts/seed 에 샘플 곡 20개(제목/가수/TJ·KY번호/초성) upsert 스크립트. (실제 대량 크롤링 아님, 샘플 시드)
+Phase 3 — 프론트 코어: 라우팅(/, /search, /list/[id], /ticket/[id], /s/[slug]), lib/db.ts(Dexie), lib/chosung.ts(+테스트),
+  검색·담기, 홈 세션 플래너(현재 리스트 liveQuery, 순서변경).
+Phase 4 — 계산 엔진: lib/calc.ts(BUILD_PLAN §6 규칙) + test/calc.test.ts(§6-3 벡터 전부 통과). 홈 계산 요약 UI(3모드+역계산).
+Phase 5 — 티켓·공유·fork: components/TicketCard(절취선·타공·바코드), html-to-image PNG export, shared_lists 스냅샷+slug,
+  next/og OG 이미지, Kakao 링크공유, /s/[slug] 읽기전용 뷰 + '내 플리로 저장'(로컬 fork, forked_from 기록).
+Phase 6 — 애니메이션(Framer Motion): 페이지 전환, 담기 추가 스프링, 티켓 '절취'·발권 모션, 계산 결과 숫자 카운트업,
+  탭 전환. 반드시 prefers-reduced-motion 존중. 과하지 않게(핵심 3~4곳).
+Phase 7 — 이미지/아이콘/에셋: 코드로 생성 가능한 SVG만 — 로고(마이크), 파비콘, 마이크/동전/티켓 아이콘 세트,
+  PWA 아이콘(192/512, SVG→PNG), OG 카드 템플릿. 외부 이미지 다운로드/호스팅 금지(전부 인라인 SVG/CSS).
+Phase 8 — 품질: a11y(포커스 가시화·대비·시맨틱), 빈상태/로딩/에러 카피(친구톤), Vitest 전부 통과, eslint/tsc 0 에러.
+Phase 9 — PWA·배포 준비: manifest.webmanifest, 서비스워커(앱쉘+마지막 리스트 오프라인), vercel.json,
+  README(설치·시드·로컬실행·배포 절차), .env.example 최종.
+Phase 10 — 핸드오프 체크리스트(코드 아님, 문서 HANDOFF.md 생성): 사람이 해야 할 것을 TODO로 명확히 —
+  Supabase 프로젝트 생성·URL/anon key, service_role로 시드 실행, Kakao JS 키, 실제 곡 DB 확보(법적·출처고지),
+  도메인, Vercel 프로젝트 연결·배포, (후속) 스토어·법무·개인정보처리방침. 절대 이 단계들을 '완료했다'고 지어내지 말 것.
+
+[최종 보고] Phase 0~9 완료조건 체크표 + HANDOFF.md 요약 + '지금 로컬에서 되는 것 / 사람이 키 넣어야 되는 것' 구분.
+[금지] 로그인·결제 구현, 개인데이터 서버전송, 실제 크롤링/미디어 호스팅, 하드코딩 색, 가짜 배포/성공 보고.
+```
+
+**돌리는 팁**: 코덱스·오푸스에 각각 이 블록을 주고, Phase별 완료조건 체크표를 비교해 더 견고한 쪽을 채택.
+중간에 멈추면 "Phase N부터 이어서"로 재개. 한 방에 안 끝나면 §11의 마일스톤 프롬프트로 쪼개서 보강.
 
 ---
 
