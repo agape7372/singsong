@@ -5,7 +5,8 @@
 > **주 타깃**: 코인노래방 (메인) + 룸노래방 (확장) · 2030 혼코노/소그룹
 > **플랫폼**: 웹(PWA) 우선 → 안드로이드 → iOS
 > **인증**: **로그인 없음 (Local-first + 익명 동기화 + 링크 공유)**
-> **문서 버전**: v1.0 · 2026-07-21 · 작성: 앱 개발 총괄
+> **문서 버전**: v1.1 · 2026-07-21 · 작성: 앱 개발 총괄
+> *(v1.1: 코드리뷰 반영 — 묶음요금 최저가 공식, 웹결제 어뷰징/CS 대응, tags SQLite 호환)*
 
 ---
 
@@ -150,7 +151,9 @@ total_min = Σ song.duration_min  (없으면 avg 사용)
 ### 8-3. 모드별 금액 (정방향)
 ```
 [코인·곡당]  total_cost = N × price_per_song            # 예: 500원/곡
-             (묶음요금 지원: X원에 Y곡 → ceil(N/Y)×X)
+             (묶음요금(X원에 Y곡) + 단품가 P 동시 존재 시 최저가 조합:
+              total_cost = (floor(N/Y) × X) + min((N % Y) × P, X))
+             # 남은 곡은 '단품 결제' vs '묶음 한 번 더' 중 저렴한 쪽 — 과다청구 방지
 [코인·시간제] blocks = ceil(total_min / block_min)
              total_cost = blocks × block_price          # 예: 30분 5,000원
 [룸·시간제]  hours = ceil(total_min / 60)
@@ -233,7 +236,7 @@ per_person = total_cost / people
 |---|---|
 | 기기 초기화 시 데이터 유실 위험 | 익명 세션 서버 동기화 + 선택적 복구 코드/QR |
 | 다기기 사용 불편 | 복구 코드로 기기 연결(로그인 대체) |
-| 구독 결제를 계정에 못 묶음 | **플랫폼 IAP(StoreKit/Play Billing)는 스토어 계정에 귀속** → 우리 로그인 불필요. 웹 결제(토스)는 라이선스 키 발급 |
+| 구독 결제를 계정에 못 묶음 | **플랫폼 IAP(StoreKit/Play Billing)는 스토어 계정에 귀속** → 우리 로그인 불필요. 웹 결제(토스)는 **결제 시점에만 이메일 수신**(영수증·키 복구용, 앱 로그인 아님) + 라이선스 키에 **활성 기기 수 제한**(예: 최대 2대) → 키 공유 어뷰징·복구 CS 대응 |
 | 어뷰징/스팸 | 방/공유 링크에 rate-limit·만료·신고 기능 |
 
 ---
@@ -245,7 +248,8 @@ songs        (id, title, artist, tj_no, ky_no, chosung,
               itunes_art_url, duration_min?, added_by_user?)
 device       (id=anon_uuid, created_at)                  # 로그인 대신
 lists        (id, device_id, title, share_slug, is_public, created_at)
-list_items   (list_id, song_id, my_key, memo, tags[], last_sung_at, order)
+list_items   (list_id, song_id, my_key, memo, tags, last_sung_at, order)
+             # tags: SQLite(오프라인) 호환 위해 JSON/CSV 문자열로 저장 (PG 네이티브 배열 미사용)
 sessions     (id, room_code, mode, people, price_params,  # "모여" 룸
               expires_at)                                  # 임시
 session_items(session_id, song_id, added_by_device, order)
