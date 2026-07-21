@@ -5,19 +5,22 @@
 > **주 타깃**: 코인노래방 (메인) + 룸노래방 (확장) · 2030 혼코노/소그룹
 > **플랫폼**: 웹(PWA) 우선 → 안드로이드 → iOS
 > **인증**: **익명 우선 + 지연 이메일 가입** (첫 진입 무가입 → 결제·다기기 동기화 시에만 passwordless 이메일)
-> **문서 버전**: v1.3 · 2026-07-21 · 작성: 앱 개발 총괄
+> **문서 버전**: v1.7 · 2026-07-21 · 작성: 앱 개발 총괄
 > *(v1.1: 코드리뷰 반영 — 묶음요금 최저가 공식, 웹결제 어뷰징/CS 대응, tags SQLite 호환)*
 > *(v1.2: 신원 전략을 '익명 우선 + 지연 이메일 가입(Passwordless)' progressive 모델로 전환)*
 > *(v1.3: 플리 공유(링크+스샷 이미지) + 받으면 내 플리로 저장(fork) 기능 추가, 공유 모델 fork/live 구분)*
 > *(v1.4: 발견(Discover) 탭 + 셀럽/큐레이션 플리 기능 추가, 팬덤 유입 훅·퍼블리시티권 주의)*
 > *(v1.5: 셀럽 플리 소싱을 '팬 제보(크라우드소싱)'로 확정 — 제보→검증→게시 파이프라인, 출처 뱃지·모더레이션·takedown)*
 > *(v1.6: IA 원칙 추가(코어=주인공, 발견=2차 탭). 앱 이름은 당분간 '싱송' 유지·출시 전 재검토)*
+> *(v1.7: 상세 설계 문서 체계 도입 — SoT 범위를 §0에서 재정의, §12·§14는 이력용 초안으로 강등(정본은 docs/README.md 소유권 표), duration은 `duration_sec`으로 확정)*
 
 ---
 
 ## 0. 문서 목적
 
-이 문서는 지금까지의 모든 기획·설계 의사결정과 그 근거를 한곳에 모은 **단일 기준 문서(Source of Truth)** 다. 시장·경쟁·기술·비용·디자인·로드맵을 포함하며, 개발 착수 시 이 문서를 기준으로 태스크를 쪼갠다.
+이 문서는 **제품·시장·경쟁·기능 범위·법무·수익모델·제품 로드맵의 정본(Source of Truth)** 이다.
+
+> **(v1.7) SoT 범위 재정의**: 엔지니어링·디자인·검증의 상세 설계는 이 문서가 아니라 **[`docs/README.md`](./README.md)의 정본 소유권 표**를 따르는 14개 도메인 문서가 정본이다(디자인 토큰=`design/DESIGN_SYSTEM.md`, 화면=`design/SCREENS.md`, 서버 계약=`engineering/API_CONTRACT.md` 등). 이 문서의 §12(데이터 모델)·§14(디자인)는 **이력용 초안**으로 남는다 — 충돌 시 각 정본이 이긴다. 실행 계획은 [`BUILD_PLAN.md`](./BUILD_PLAN.md), 원샷 빌드 프롬프트는 [`prompts/ONESHOT_MASTER.md`](./prompts/ONESHOT_MASTER.md).
 
 ---
 
@@ -176,6 +179,8 @@
 
 ## 8. 계산 로직 (Session Calculator)
 
+> **(v1.7) 구현 정본은 [`BUILD_PLAN.md`](./BUILD_PLAN.md) §6**(타입·엄밀 규칙·테스트 벡터 포함). 이 절은 제품 관점 설명으로 유지 — 충돌 시 BUILD_PLAN §6이 이긴다.
+
 ### 8-1. 입력
 - `songs[]` (담은 곡, N개), 곡별 `duration_min` (기본값 사용/조정 가능)
 - `mode`: `coin_per_song` | `coin_per_time` | `room_per_time`
@@ -287,7 +292,9 @@ per_person = total_cost / people
 
 ---
 
-## 12. 데이터 모델 (초안)
+## 12. 데이터 모델 (초안 — 이력용)
+
+> ⚠ **(v1.7) 이 절은 이력용 초안이다.** 정본: 서버 스키마·RPC·RLS·공유 payload = [`engineering/API_CONTRACT.md`](./engineering/API_CONTRACT.md), 로컬(Dexie) 스키마 = [`engineering/ARCHITECTURE.md`](./engineering/ARCHITECTURE.md) §4. 특히 아래의 `duration_min?`은 **`duration_sec`(초)으로 확정 변경**됐다.
 
 ```
 songs        (id, title, artist, tj_no, ky_no, chosung,
@@ -320,7 +327,9 @@ history      (device_id, song_id, sung_at, room_code?)
 
 ---
 
-## 14. 디자인 시스템
+## 14. 디자인 시스템 (초안 — 이력용)
+
+> ⚠ **(v1.7) 이 절은 무드·방향의 이력용 초안이다.** 토큰 정본: [`design/DESIGN_SYSTEM.md`](./design/DESIGN_SYSTEM.md) — 아래 5색을 흡수해 파생 토큰·다크 매핑·**실측 대비 검증**까지 확장했다. 주의: 실측 결과 골드 원색은 라이트 배경 텍스트로 대비 미달(1.90:1)이라 **금액 텍스트는 `--gold-text`(진한 골드) 토큰을 쓴다**(아래 표의 "골드=금액" 의도는 유지하되 값이 교정됨). 컴포넌트·화면·문구 정본은 각각 `design/COMPONENTS.md`·`design/SCREENS.md`·`design/MICROCOPY.md`.
 
 **무드**: 밝은 미니멀 + 로즈/골드 포인트 · **티켓형 공유카드** · 모노스페이스 번호 시스템.
 (비주얼 컨셉 보드 아티팩트: 별도 공유 — 라이트/다크 지원, 티켓 히어로 + 3화면 목업)
