@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { createTicketSnapshot } from "@/domain/canonical";
-import { normalizeTrackText } from "@/domain/validation";
+import { DOMAIN_LIMITS, normalizeTrackText } from "@/domain/validation";
 import type { Plan, PricingConfig, Track } from "@/domain/models";
 import type { CatalogTrack } from "@/features/catalog/types";
 import { AppHeaderActions } from "@/components/app-header-actions";
@@ -288,6 +288,24 @@ export function PlanWorkspace({ view }: { view: "plan" | "search" }) {
     return success;
   }
 
+  async function addParticipant() {
+    const currentPeople = plan!.people ?? 1;
+    if (currentPeople >= DOMAIN_LIMITS.maxPeople) {
+      announce(`참여자는 최대 ${DOMAIN_LIMITS.maxPeople}명까지 추가할 수 있습니다.`);
+      return;
+    }
+    const nextPeople = currentPeople + 1;
+    const success = await mutate(
+      (current) => ({
+        items: current.items,
+        people: Math.min((current.people ?? 1) + 1, DOMAIN_LIMITS.maxPeople),
+        pricing: current.pricing,
+      }),
+      `참여자를 ${nextPeople}명으로 늘렸습니다.`,
+    );
+    if (success) setResetBackup(null);
+  }
+
   async function startNewPlan() {
     if (plan!.items.length === 0) return;
     const backup: ResetBackup = {
@@ -442,38 +460,41 @@ export function PlanWorkspace({ view }: { view: "plan" | "search" }) {
         <div className="working-session-strip">
           <WorkingStrip
             items={plan.items}
+            people={plan.people}
             disabled={isSaving}
+            onAddPerson={() => void addParticipant()}
             onMove={(index, direction) => void move(index, direction)}
             onRemove={(index) => void remove(index)}
             undoLabel={removed?.track.title ?? null}
             onUndo={() => void undo()}
           />
           {plan.items.length > 0 && (
-            <CalculationStrip
-              ref={calculationRef}
-              plan={plan}
-              disabled={isSaving}
-              onApply={applyCalculation}
-            />
+            <>
+              <CalculationStrip
+                ref={calculationRef}
+                plan={plan}
+                disabled={isSaving}
+                onApply={applyCalculation}
+              />
+              <HomeActionDock
+                songCount={plan.items.length}
+                canIssue={canIssue}
+                disabled={isSaving}
+                onIssue={() => void issueTicket()}
+                onOpenPricing={() => calculationRef.current?.openPricingAndFocusFirstInvalid()}
+              />
+            </>
           )}
         </div>
       )}
       <p className="save-announcement" aria-live="polite">
         {notice ?? (isSaving ? "이 기기에 저장하는 중…" : "")}
       </p>
-      <BottomSlot>
-        {view === "search" ? (
+      {view === "search" && (
+        <BottomSlot>
           <PlanRail plan={plan} />
-        ) : plan.items.length > 0 ? (
-          <HomeActionDock
-            songCount={plan.items.length}
-            canIssue={canIssue}
-            disabled={isSaving}
-            onIssue={() => void issueTicket()}
-            onOpenPricing={() => calculationRef.current?.openPricingAndFocusFirstInvalid()}
-          />
-        ) : null}
-      </BottomSlot>
+        </BottomSlot>
+      )}
     </div>
   );
 }

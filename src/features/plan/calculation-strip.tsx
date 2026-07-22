@@ -2,7 +2,13 @@
 
 import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
-import { calculatePlan, maxAffordablePrefix } from "@/domain/calculation";
+import {
+  calculateCostRange,
+  calculatePlan,
+  estimateDuration,
+  maxAffordablePrefix,
+  roundDurationOutward,
+} from "@/domain/calculation";
 import type { Plan, PricingConfig } from "@/domain/models";
 import { trackAnalytics } from "@/analytics/port";
 
@@ -11,6 +17,11 @@ const won = new Intl.NumberFormat("ko-KR", {
   currency: "KRW",
   maximumFractionDigits: 0,
 });
+
+function formatWonRange(lowWon: number, highWon: number) {
+  const low = won.format(lowWon);
+  return lowWon === highWon ? low : `${low}–${won.format(highWon)}`;
+}
 
 function positiveInteger(form: FormData, name: string) {
   const raw = String(form.get(name) ?? "").trim();
@@ -70,6 +81,31 @@ export const CalculationStrip = forwardRef<CalculationStripHandle, CalculationSt
         return null;
       }
     }, [plan.items.length, plan.people, plan.pricing]);
+
+    const duration = useMemo(
+      () => roundDurationOutward(estimateDuration(plan.items.length)),
+      [plan.items.length],
+    );
+
+    const cost = useMemo(() => {
+      if (plan.items.length === 0 || plan.pricing === null) return null;
+      try {
+        return calculateCostRange(plan.items.length, plan.pricing);
+      } catch {
+        return null;
+      }
+    }, [plan.items.length, plan.pricing]);
+
+    const durationLabel =
+      duration.lowMinutes === duration.highMinutes
+        ? `${duration.lowMinutes}분`
+        : `${duration.lowMinutes}–${duration.highMinutes}분`;
+    const costLabel =
+      plan.pricing === null
+        ? "요금 입력 필요"
+        : cost
+          ? formatWonRange(cost.lowWon, cost.highWon)
+          : "요금 확인 필요";
 
     const reverse = useMemo(() => {
       if (!plan.pricing || !/^\d+$/u.test(budget)) return null;
@@ -151,24 +187,34 @@ export const CalculationStrip = forwardRef<CalculationStripHandle, CalculationSt
 
     return (
       <section className="calculation-strip" aria-labelledby="calculation-title">
-        <div className="calculation-form-side">
-          <div className="section-heading">
-            <div>
-              <p className="step-label">
-                계산하기{" "}
-                <span className="serial-meta" aria-hidden="true">
-                  CALC / 02
-                </span>
-              </p>
-              <h2 id="calculation-title">시간과 비용 맞추기</h2>
-            </div>
-          </div>
-          <details ref={pricingDisclosureRef} className="pricing-disclosure">
-            <summary>
-              <span>요금과 인원 설정</span>
-              <span>{plan.people !== null && plan.pricing !== null ? "설정됨" : "입력 필요"}</span>
-            </summary>
-            <div className="pricing-disclosure-body">
+        <h2 className="sr-only" id="calculation-title">
+          시간과 비용 예상
+        </h2>
+        <details ref={pricingDisclosureRef} className="pricing-disclosure">
+          <summary className="estimate-strip">
+            <span className="estimate-cell estimate-cell-time">
+              <span className="estimate-label">시간</span>
+              <strong className="estimate-value">약 {durationLabel}</strong>
+            </span>
+            <span className="estimate-cell estimate-cell-cost">
+              <span className="estimate-label">예상 비용</span>
+              <strong className="estimate-value">{costLabel}</strong>
+            </span>
+            <span className="estimate-disclosure-label sr-only">상세 요금과 인원 설정</span>
+          </summary>
+          <div className="pricing-disclosure-body calculation-expanded-panel">
+            <div className="calculation-form-side">
+              <div className="section-heading">
+                <div>
+                  <p className="step-label">
+                    계산하기{" "}
+                    <span className="serial-meta" aria-hidden="true">
+                      CALC / 02
+                    </span>
+                  </p>
+                  <h3>현장 요금과 인원</h3>
+                </div>
+              </div>
               <p className="section-copy">
                 현장 가격표 그대로 입력하면 범위로 계산해요. 임의의 값은 미리 채우지 않아요.
               </p>
@@ -302,89 +348,89 @@ export const CalculationStrip = forwardRef<CalculationStripHandle, CalculationSt
                 </button>
               </form>
             </div>
-          </details>
-        </div>
-        <div className="calculation-result-side">
-          {calculation ? (
-            <>
-              <div className="calculation-summary" aria-live="polite" aria-atomic="true">
-                <p className="result-kicker">
-                  <span>계산 결과</span>
-                  <span className="serial-meta" aria-hidden="true">
-                    CURRENT RANGE · {calculation.songCount}곡
-                  </span>
-                </p>
-                <dl className="calculation-dl">
-                  <div>
-                    <dt>예상 시간</dt>
-                    <dd>
-                      {calculation.displayDuration.lowMinutes}–
-                      {calculation.displayDuration.highMinutes}분
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>총 비용</dt>
-                    <dd>
-                      {won.format(calculation.derived.totalLowWon)}
-                      {calculation.derived.totalLowWon !== calculation.derived.totalHighWon &&
-                        `–${won.format(calculation.derived.totalHighWon)}`}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>1인당</dt>
-                    <dd>
-                      {won.format(calculation.derived.perPersonLowWon)}
-                      {calculation.derived.perPersonLowWon !==
-                        calculation.derived.perPersonHighWon &&
-                        `–${won.format(calculation.derived.perPersonHighWon)}`}
-                    </dd>
-                  </div>
-                </dl>
-                <p className="coverage-note">
-                  평균 곡 길이 기준이에요. 대기·간주·재선곡 시간은 빠져 있어요.
-                </p>
-              </div>
-              <details className="budget-helper">
-                <summary>예산 안에 몇 곡인지 계산하기</summary>
-                <div className="budget-helper-body">
-                  <label>
-                    <span>예산 (원)</span>
-                    <input
-                      value={budget}
-                      onChange={(event) => setBudget(event.target.value)}
-                      type="number"
-                      inputMode="numeric"
-                      min={0}
-                      max={100_000_000}
-                      placeholder="예산 원 단위"
-                    />
-                  </label>
-                  {reverse?.kind === "song" && (
-                    <p>현재 순서 앞에서 최대 {reverse.maxSongs}곡까지 가능합니다.</p>
-                  )}
-                  {reverse?.kind === "time" && (
-                    <p>
-                      확실히 {reverse.guaranteedSongs}곡, 짧게 끝나면 {reverse.possibleSongs}곡까지
-                      가능해요.
+            <div className="calculation-result-side">
+              {calculation ? (
+                <>
+                  <div className="calculation-summary" aria-live="polite" aria-atomic="true">
+                    <p className="result-kicker">
+                      <span>계산 결과</span>
+                      <span className="serial-meta" aria-hidden="true">
+                        CURRENT RANGE · {calculation.songCount}곡
+                      </span>
                     </p>
-                  )}
-                  {reverse && <small>목록을 자동으로 줄이지 않아요.</small>}
+                    <dl className="calculation-dl">
+                      <div>
+                        <dt>예상 시간</dt>
+                        <dd>
+                          {calculation.displayDuration.lowMinutes}–
+                          {calculation.displayDuration.highMinutes}분
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>총 비용</dt>
+                        <dd>
+                          {won.format(calculation.derived.totalLowWon)}
+                          {calculation.derived.totalLowWon !== calculation.derived.totalHighWon &&
+                            `–${won.format(calculation.derived.totalHighWon)}`}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>1인당</dt>
+                        <dd>
+                          {won.format(calculation.derived.perPersonLowWon)}
+                          {calculation.derived.perPersonLowWon !==
+                            calculation.derived.perPersonHighWon &&
+                            `–${won.format(calculation.derived.perPersonHighWon)}`}
+                        </dd>
+                      </div>
+                    </dl>
+                    <p className="coverage-note">
+                      평균 곡 길이 기준이에요. 대기·간주·재선곡 시간은 빠져 있어요.
+                    </p>
+                  </div>
+                  <details className="budget-helper">
+                    <summary>예산 안에 몇 곡인지 계산하기</summary>
+                    <div className="budget-helper-body">
+                      <label>
+                        <span>예산 (원)</span>
+                        <input
+                          value={budget}
+                          onChange={(event) => setBudget(event.target.value)}
+                          type="number"
+                          inputMode="numeric"
+                          min={0}
+                          max={100_000_000}
+                          placeholder="예산 원 단위"
+                        />
+                      </label>
+                      {reverse?.kind === "song" && (
+                        <p>현재 순서 앞에서 최대 {reverse.maxSongs}곡까지 가능합니다.</p>
+                      )}
+                      {reverse?.kind === "time" && (
+                        <p>
+                          확실히 {reverse.guaranteedSongs}곡, 짧게 끝나면 {reverse.possibleSongs}
+                          곡까지 가능해요.
+                        </p>
+                      )}
+                      {reverse && <small>목록을 자동으로 줄이지 않아요.</small>}
+                    </div>
+                  </details>
+                </>
+              ) : (
+                <div className="empty-calculation" aria-live="polite" aria-atomic="true">
+                  <p className="result-kicker">
+                    <span>계산 대기</span>
+                    <span className="serial-meta" aria-hidden="true">
+                      RANGE WAITING
+                    </span>
+                  </p>
+                  <h3>요금과 인원을 입력하면 바로 계산해요.</h3>
+                  <p>한 숫자로 단정하지 않고, 달라질 수 있는 시간과 비용을 범위로 보여줘요.</p>
                 </div>
-              </details>
-            </>
-          ) : (
-            <div className="empty-calculation" aria-live="polite" aria-atomic="true">
-              <p className="result-kicker">
-                <span>계산 대기</span>
-                <span className="serial-meta" aria-hidden="true">
-                  RANGE WAITING
-                </span>
-              </p>
-              <h3>요금과 인원을 입력하면 바로 계산해요.</h3>
-              <p>한 숫자로 단정하지 않고, 달라질 수 있는 시간과 비용을 범위로 보여줘요.</p>
+              )}
             </div>
-          )}
-        </div>
+          </div>
+        </details>
       </section>
     );
   },

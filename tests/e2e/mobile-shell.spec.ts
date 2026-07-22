@@ -93,10 +93,7 @@ test("one two-item nav changes from the mobile bottom to the wide header without
     await expect(empty).toBeVisible();
     await expect(empty.locator("a, button")).toHaveCount(1);
     await expect(empty.getByRole("link", { name: "노래 찾으러 가기" })).toBeVisible();
-    const bottomSlot = page.locator("[data-bottom-slot='true']");
-    await expect(bottomSlot).toHaveCount(1);
-    await expect(bottomSlot).toHaveAttribute("data-layout", "flow");
-    expect(await bottomSlot.evaluate((element) => getComputedStyle(element).display)).toBe("none");
+    await expect(page.locator("[data-bottom-slot='true']")).toHaveCount(0);
     await expect
       .poll(() =>
         page
@@ -151,7 +148,9 @@ test("search keeps a sticky input, continuous ledger and current-plan rail", asy
   await expectNoHorizontalOverflow(page);
 });
 
-test("home preserves queue to calculator to BottomSlot action flow", async ({ page }, testInfo) => {
+test("home matches the station demo ledger, estimate and inline confirmation flow", async ({
+  page,
+}, testInfo) => {
   desktopOnly(testInfo.project.name);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/search");
@@ -165,46 +164,102 @@ test("home preserves queue to calculator to BottomSlot action flow", async ({ pa
   await planRail.getByRole("link", { name: "플랜 보기" }).click();
 
   await expect(page.getByRole("heading", { name: "오늘의 플랜" })).toBeAttached();
-  await expect(page.getByRole("heading", { name: "오늘의 순서" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "SINGSONG" })).toBeVisible();
+  await expect(page.getByRole("list", { name: "참여자 1명" })).toBeVisible();
+  await expect(page.getByText("함께하는 사람", { exact: true })).not.toBeAttached();
+  const addParticipant = page.getByRole("button", { name: "참여자 한 명 추가" });
+  const participantButtonShape = await addParticipant.evaluate((element) => {
+    const style = getComputedStyle(element);
+    const bounds = element.getBoundingClientRect();
+    return {
+      width: bounds.width,
+      height: bounds.height,
+      borderRadius: style.borderRadius,
+    };
+  });
+  expect(participantButtonShape.width).toBeGreaterThanOrEqual(44);
+  expect(participantButtonShape.height).toBe(participantButtonShape.width);
+  expect(participantButtonShape.borderRadius).toBe("50%");
+  await addParticipant.click();
+  await expect(page.getByRole("list", { name: "참여자 2명" })).toBeVisible();
   await expectTwoItemPrimaryNav(page, "플랜");
   await expect(page.locator(".working-session-strip")).toHaveCount(1);
   await expect(page.locator(".working-strip")).toHaveCount(1);
   await expect(page.locator(".calculation-strip")).toHaveCount(1);
-  await expect(page.locator("[data-bottom-slot='true'] .home-action-dock")).toHaveCount(1);
+  await expect(page.locator(".working-session-strip > .home-action-dock")).toHaveCount(1);
+  await expect(page.locator("[data-bottom-slot='true']")).toHaveCount(0);
+  await expect(page.getByText("QUEUE / 01")).not.toBeAttached();
+  await expect(page.getByText("01 / 100")).not.toBeAttached();
+  await expect(page.getByText("TJ 91001")).not.toBeAttached();
+  await expect(page.getByText("빼기", { exact: true })).not.toBeAttached();
+  await expect(page.getByRole("button", { name: "밤의 체크인 삭제" })).toBeVisible();
+
+  const restingReorder = await page.locator(".station-reorder-controls").evaluate((element) => ({
+    opacity: getComputedStyle(element).opacity,
+    pointerEvents: getComputedStyle(element).pointerEvents,
+  }));
+  expect(restingReorder).toEqual({ opacity: "0", pointerEvents: "none" });
 
   const order = await page.evaluate(() => {
-    const queue = document.querySelector(".working-strip");
-    const calculator = document.querySelector(".calculation-strip");
-    const bottomSlot = document.querySelector("[data-bottom-slot='true']");
-    if (!queue || !calculator || !bottomSlot) return null;
+    const ledger = document.querySelector(".working-strip");
+    const estimate = document.querySelector(".calculation-strip");
+    const confirmation = document.querySelector(".home-action-dock");
+    if (!ledger || !estimate || !confirmation) return null;
     return {
-      queueBeforeCalculator: Boolean(
-        queue.compareDocumentPosition(calculator) & Node.DOCUMENT_POSITION_FOLLOWING,
+      ledgerBeforeEstimate: Boolean(
+        ledger.compareDocumentPosition(estimate) & Node.DOCUMENT_POSITION_FOLLOWING,
       ),
-      calculatorBeforeBottomSlot: Boolean(
-        calculator.compareDocumentPosition(bottomSlot) & Node.DOCUMENT_POSITION_FOLLOWING,
+      estimateBeforeConfirmation: Boolean(
+        estimate.compareDocumentPosition(confirmation) & Node.DOCUMENT_POSITION_FOLLOWING,
       ),
     };
   });
-  expect(order).toEqual({ queueBeforeCalculator: true, calculatorBeforeBottomSlot: true });
+  expect(order).toEqual({ ledgerBeforeEstimate: true, estimateBeforeConfirmation: true });
 
-  const calculatorBoundary = await page.locator(".calculation-strip").evaluate((element) => {
+  const ledgerGeometry = await page.locator(".station-ledger").evaluate((element) => {
     const style = getComputedStyle(element);
     return {
+      borderRadius: style.borderRadius,
       borderStyle: style.borderTopStyle,
-      borderWidth: Number.parseFloat(style.borderTopWidth),
+      borderWidth: style.borderTopWidth,
     };
   });
-  expect(calculatorBoundary.borderStyle).toBe("dashed");
-  expect(calculatorBoundary.borderWidth).toBeGreaterThan(0);
+  expect(ledgerGeometry).toEqual({
+    borderRadius: "0px",
+    borderStyle: "solid",
+    borderWidth: "1px",
+  });
 
   const pricingDisclosure = page.locator("details.pricing-disclosure");
-  const pricingSummary = pricingDisclosure.locator("summary");
-  const bottomSlot = page.locator("[data-bottom-slot='true']");
-  await page.getByRole("button", { name: "요금과 인원 입력하기" }).click();
+  const pricingSummary = pricingDisclosure.locator("summary.estimate-strip");
+  await expect(pricingSummary.locator(".estimate-cell")).toHaveCount(2);
+  await expect(pricingSummary).toContainText("시간");
+  await expect(pricingSummary).toContainText("예상 비용");
+  await expect(pricingSummary).toContainText("요금 입력 필요");
+  const estimateGeometry = await pricingSummary.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      borderRadius: style.borderRadius,
+      borderStyle: style.borderTopStyle,
+      borderWidth: style.borderTopWidth,
+    };
+  });
+  expect(estimateGeometry).toEqual({
+    borderRadius: "0px",
+    borderStyle: "solid",
+    borderWidth: "1px",
+  });
+
+  const confirmation = page.locator(".home-action-dock");
+  await expect(confirmation).toContainText("완료");
+  await expect(confirmation).not.toContainText("확정하는 순간");
+  expect(await confirmation.evaluate((element) => getComputedStyle(element).position)).toBe(
+    "static",
+  );
+
+  await page.locator(".home-confirm-action").click();
   await expect(pricingDisclosure).toHaveAttribute("open", "");
   await expect(page.getByLabel("나눌 인원")).toBeFocused();
-  expect(await bottomSlot.evaluate((element) => getComputedStyle(element).position)).toBe("static");
   await page.getByLabel("나눌 인원").fill("2");
   await page.getByLabel("낱곡 가격 (원)").fill("1000");
   await page.getByRole("button", { name: "계산에 적용" }).click();
@@ -214,37 +269,14 @@ test("home preserves queue to calculator to BottomSlot action flow", async ({ pa
   await expect(page.locator(".calculation-summary")).toContainText("계산 결과");
   await expect(page.locator(".calculation-summary")).toContainText("1곡");
   await expect(page.locator(".calculation-summary")).toContainText("₩1,000");
-  await expect(page.getByRole("button", { name: "1곡 티켓 만들기" })).toBeEnabled();
-  await expect
-    .poll(() => bottomSlot.evaluate((element) => getComputedStyle(element).position))
-    .toBe("fixed");
-  await expect(bottomSlot).toHaveAttribute("data-layout", "fixed");
-  const fixedStack = await page.evaluate(() => {
-    const slot = document.querySelector<HTMLElement>("[data-bottom-slot='true']");
-    const nav = document.querySelector<HTMLElement>(".primary-nav");
-    if (!slot || !nav) return null;
-    return {
-      height: slot.getBoundingClientRect().height + nav.getBoundingClientRect().height,
-      cap: window.innerHeight * 0.25,
-    };
-  });
-  expect(fixedStack).not.toBeNull();
-  expect(fixedStack!.height).toBeLessThanOrEqual(fixedStack!.cap + 1);
+  await expect(pricingSummary).toContainText("₩1,000");
+  await expect(page.locator(".home-confirm-action")).toBeEnabled();
   await expectNoHorizontalOverflow(page);
 
   await page.evaluate(() => {
     document.documentElement.style.fontSize = "200%";
   });
-  await expect(bottomSlot).toHaveAttribute("data-layout", "flow");
-  await expect
-    .poll(() => bottomSlot.evaluate((element) => getComputedStyle(element).position))
-    .toBe("static");
-  await expect
-    .poll(() =>
-      page
-        .locator(".task-shell")
-        .evaluate((element) => getComputedStyle(element).getPropertyValue("--bottom-slot-height")),
-    )
-    .toBe("0px");
+  await expect(page.locator("[data-bottom-slot='true']")).toHaveCount(0);
+  await expect(page.locator(".home-confirm-action")).toBeVisible();
   await expectNoHorizontalOverflow(page);
 });

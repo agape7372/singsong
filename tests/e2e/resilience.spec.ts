@@ -22,7 +22,7 @@ async function addFixtureSong(page: import("@playwright/test").Page) {
   await expect(planRail).toContainText("1곡");
   await planRail.getByRole("link", { name: "플랜 보기" }).click();
   await expect(page.getByRole("heading", { name: "오늘의 플랜" })).toBeAttached();
-  await expect(page.getByRole("heading", { name: "오늘의 순서" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "SINGSONG" })).toBeVisible();
 }
 
 test("IME pause, stale-response rejection, duplicate confirmation and both undo paths", async ({
@@ -74,23 +74,23 @@ test("IME pause, stale-response rejection, duplicate confirmation and both undo 
   await latestResult.getByRole("button", { name: /최신 검색 결과.*담기/u }).click();
   await expect(latestResult.getByLabel(/최신 검색 결과.*담김/u)).toHaveText("✓ 담김");
   await expect(latestResult.getByRole("button", { name: /담김/u })).not.toBeAttached();
-  await page.getByRole("button", { name: "실행 취소" }).click();
+  await page.getByRole("button", { name: "되돌리기" }).click();
   await expect(latestResult.getByRole("button", { name: /담기/u })).toBeEnabled();
 
   await page.getByRole("button", { name: "목록에 없나요? 직접 입력" }).click();
   await page.getByLabel("곡 제목").fill("같은 수동곡");
   await page.getByRole("textbox", { name: "가수", exact: true }).fill("같은 가수");
-  await page.getByRole("button", { name: "세션에 담기" }).click();
+  await page.getByRole("button", { name: "플랜에 담기" }).click();
   const planRail = page.getByRole("complementary", { name: "현재 플랜 요약" });
   await expect(planRail).toContainText("1곡");
 
   await page.getByRole("button", { name: "목록에 없나요? 직접 입력" }).click();
   await page.getByLabel("곡 제목").fill("같은 수동곡");
   await page.getByRole("textbox", { name: "가수", exact: true }).fill("같은 가수");
-  await page.getByRole("button", { name: "세션에 담기" }).click();
+  await page.getByRole("button", { name: "플랜에 담기" }).click();
   await expect(page.getByText(/같은 제목과 가수의 곡이 이미 있습니다/u)).toBeVisible();
   await expect(planRail).toContainText("1곡");
-  await page.getByRole("button", { name: "세션에 담기" }).click();
+  await page.getByRole("button", { name: "플랜에 담기" }).click();
   await expect(planRail).toContainText("2곡");
 
   await page.getByRole("link", { name: "플랜 보기" }).click();
@@ -129,7 +129,7 @@ test("exact responsive layouts, dark/forced colors, reduced motion and text refl
 
   await page.setViewportSize({ width: 1440, height: 1000 });
   await addFixtureSong(page);
-  await page.getByRole("button", { name: "요금과 인원 입력하기" }).click();
+  await page.locator(".home-confirm-action").click();
   await page.getByLabel("나눌 인원").fill("2");
   await page.getByLabel("낱곡 가격 (원)").fill("1000");
   await page.getByRole("button", { name: "계산에 적용" }).click();
@@ -138,7 +138,7 @@ test("exact responsive layouts, dark/forced colors, reduced motion and text refl
       document.documentElement.style.fontSize = size;
     }, fontSize);
     await expectNoHorizontalOverflow(page);
-    await expect(page.getByRole("button", { name: "1곡 티켓 만들기" })).toBeVisible();
+    await expect(page.locator(".home-confirm-action")).toBeVisible();
   }
 });
 
@@ -190,10 +190,10 @@ test("100 long tracks remain bounded and export a nonblank fixed-size ticket", a
   });
 
   await page.reload();
-  await expect(page.getByText("100 / 100")).toBeVisible();
+  await expect(page.locator(".station-ledger-count")).toHaveText("100");
   await expect(page.locator(".track-list li")).toHaveCount(100);
   await expectNoHorizontalOverflow(page);
-  await page.getByRole("button", { name: "100곡 티켓 만들기" }).click();
+  await page.locator(".home-confirm-action").click();
   await expect(page.getByRole("heading", { name: "오늘의 세션 스트립" })).toBeVisible();
   await expect(page.getByText("나머지 96곡")).toBeVisible();
   await expect(page.locator(".ticket-track-list li")).toHaveCount(5);
@@ -222,11 +222,11 @@ test("revocation removes HTML/API access while OG stays generic and import recov
   desktopOnly(testInfo.project.name);
   await page.goto("/");
   await addFixtureSong(page);
-  await page.getByRole("button", { name: "요금과 인원 입력하기" }).click();
+  await page.locator(".home-confirm-action").click();
   await page.getByLabel("나눌 인원").fill("2");
   await page.getByLabel("낱곡 가격 (원)").fill("1000");
   await page.getByRole("button", { name: "계산에 적용" }).click();
-  await page.getByRole("button", { name: "1곡 티켓 만들기" }).click();
+  await page.locator(".home-confirm-action").click();
   await page.getByRole("checkbox", { name: /위 공개 범위/u }).check();
   await page.getByRole("button", { name: "공유 링크 발급" }).click();
   const href = await page.getByRole("link", { name: "발급된 티켓 열기" }).getAttribute("href");

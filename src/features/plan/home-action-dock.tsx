@@ -33,19 +33,13 @@ export function HomeActionDock({
 
   return (
     <div className="home-action-dock">
-      <div className="dock-copy" aria-live="polite">
-        <strong>
-          {canIssue ? "이 순서를 티켓으로 발권할 수 있어요." : "요금과 인원을 먼저 입력해요."}
-        </strong>
-        <span>{canIssue ? `${songCount}곡 · 계산 완료` : `${songCount}곡 · 요금과 인원 필요`}</span>
-      </div>
       <button
-        className="button"
+        className="button home-confirm-action"
         type="button"
         disabled={disabled}
         onClick={() => (canIssue ? void onIssue() : onOpenPricing())}
       >
-        {canIssue ? `${songCount}곡 티켓 만들기` : "요금과 인원 입력하기"}
+        <span className="home-confirm-label">완료</span>
       </button>
     </div>
   );

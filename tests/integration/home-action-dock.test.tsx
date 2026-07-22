@@ -33,14 +33,17 @@ describe("HomeActionDock", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "요금과 인원 입력하기" }));
+    const confirmAction = screen.getByRole("button", { name: "완료" });
+    expect(confirmAction).toHaveClass("home-confirm-action");
+    expect(screen.queryByText(/확정하는 순간/u)).not.toBeInTheDocument();
+    fireEvent.click(confirmAction);
     expect(onOpenPricing).toHaveBeenCalledOnce();
     expect(onIssue).not.toHaveBeenCalled();
 
     view.rerender(
       <HomeActionDock songCount={3} canIssue onOpenPricing={onOpenPricing} onIssue={onIssue} />,
     );
-    fireEvent.click(screen.getByRole("button", { name: "3곡 티켓 만들기" }));
+    fireEvent.click(screen.getByRole("button", { name: "완료" }));
     expect(onIssue).toHaveBeenCalledOnce();
   });
 
@@ -56,7 +59,7 @@ describe("HomeActionDock", () => {
       />,
     );
 
-    const button = screen.getByRole("button", { name: "요금과 인원 입력하기" });
+    const button = screen.getByRole("button", { name: "완료" });
     expect(button).toBeDisabled();
     fireEvent.click(button);
     expect(onOpenPricing).not.toHaveBeenCalled();

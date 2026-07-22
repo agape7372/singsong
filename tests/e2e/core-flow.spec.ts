@@ -43,13 +43,13 @@ test("organizer issues, shares, receives and explicitly imports one session stri
   await expect(page.getByRole("complementary", { name: "현재 플랜 요약" })).toContainText("3곡");
   await page.getByRole("link", { name: "플랜 보기" }).click();
   await expect(page).toHaveURL(/\/$/u);
-  await expect(page.getByText("03 / 100")).toBeVisible();
+  await expect(page.locator(".station-ledger-count")).toHaveText("3");
 
-  const secondTrack = page.getByRole("listitem").filter({ hasText: "분홍 영수증" });
-  await secondTrack.getByRole("button", { name: "분홍 영수증 한 칸 위로" }).click();
+  const secondTrack = page.locator(".station-track-row").filter({ hasText: "분홍 영수증" });
+  await secondTrack.press("Alt+ArrowUp");
   await expect(page.locator(".track-list li").nth(0)).toContainText("분홍 영수증");
 
-  await page.getByRole("button", { name: "요금과 인원 입력하기" }).click();
+  await page.locator(".home-confirm-action").click();
   await expect(page.locator("details.pricing-disclosure")).toHaveAttribute("open", "");
   await expect(page.getByLabel("나눌 인원")).toBeFocused();
   await page.getByLabel("나눌 인원").fill("3");
@@ -58,7 +58,7 @@ test("organizer issues, shares, receives and explicitly imports one session stri
   await page.getByLabel("묶음 가격 (원)").fill("2500");
   await page.getByRole("button", { name: "계산에 적용" }).click();
   await expect(page.getByText("₩2,500").first()).toBeVisible();
-  const issueButton = page.getByRole("button", { name: "3곡 티켓 만들기" });
+  const issueButton = page.locator(".home-confirm-action");
   await expect(issueButton).toBeEnabled();
 
   await page.evaluate(() => {
@@ -68,6 +68,11 @@ test("organizer issues, shares, receives and explicitly imports one session stri
   await expect(page).toHaveURL(/\/ticket$/u);
   expect(await page.evaluate(() => "__singsongDocumentMarker" in globalThis)).toBe(false);
   await expect(page.getByRole("heading", { name: "오늘의 세션 스트립" })).toBeVisible();
+  const ticketPunchBorders = await page.locator(".ticket-card").evaluate((element) => ({
+    before: getComputedStyle(element, "::before").borderWidth,
+    after: getComputedStyle(element, "::after").borderWidth,
+  }));
+  expect(ticketPunchBorders).toEqual({ before: "0px", after: "0px" });
   await expectNoCriticalA11y(page);
 
   const downloadPromise = page.waitForEvent("download");
@@ -98,7 +103,7 @@ test("organizer issues, shares, receives and explicitly imports one session stri
   await expect(page.getByRole("heading", { name: "현재 플랜을 바꿀까요?" })).toBeVisible();
   await page.getByRole("button", { name: "현재 플랜 바꾸기" }).click();
   await expect(page).toHaveURL(/\/$/u);
-  await expect(page.getByText("03 / 100")).toBeVisible();
+  await expect(page.locator(".station-ledger-count")).toHaveText("3");
 
   await page.locator("details.workspace-overflow > summary").click();
   await page.getByRole("button", { name: "새 플랜 시작" }).click();
@@ -106,14 +111,14 @@ test("organizer issues, shares, receives and explicitly imports one session stri
   const newPlanDialog = page.getByRole("alertdialog");
   await expect(newPlanDialog).toContainText("현재 3곡과 계산 설정이 새 플랜으로 교체됩니다.");
   await newPlanDialog.getByRole("button", { name: "취소" }).click();
-  await expect(page.getByText("03 / 100")).toBeVisible();
+  await expect(page.locator(".station-ledger-count")).toHaveText("3");
 
   await page.locator("details.workspace-overflow > summary").click();
   await page.getByRole("button", { name: "새 플랜 시작" }).click();
   await page.getByRole("alertdialog").getByRole("button", { name: "새 플랜 시작" }).click();
   await expect(page.getByText("00 / 100")).toBeVisible();
   await page.getByRole("button", { name: "이전 플랜 되돌리기" }).click();
-  await expect(page.getByText("03 / 100")).toBeVisible();
+  await expect(page.locator(".station-ledger-count")).toHaveText("3");
 });
 
 test("empty, invalid and compact states provide recovery without horizontal overflow", async ({
@@ -169,7 +174,7 @@ test("keyboard skip navigation exposes focus and enters the planner without a tr
     };
   });
   expect(focusPresentation.outlineWidth).toBe(2);
-  expect(focusPresentation.outlineOffset).toBe(2);
+  expect(focusPresentation.outlineOffset).toBe(3);
   expect(focusPresentation.outlineColor).toBe(focusPresentation.inkColor);
   expect(focusPresentation.top).toBeGreaterThanOrEqual(0);
   expect(focusPresentation.bottom).toBeGreaterThan(focusPresentation.top);

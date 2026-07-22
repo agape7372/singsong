@@ -2,7 +2,7 @@
 
 import "@testing-library/jest-dom/vitest";
 import { createRef } from "react";
-import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Plan, Track } from "@/domain/models";
 
@@ -64,6 +64,43 @@ function deferred<T>() {
 }
 
 describe("CalculationStrip authoritative form state", () => {
+  it("uses the collapsed estimate strip as the honest pricing disclosure", () => {
+    const view = render(
+      <CalculationStrip
+        plan={plan({ items: tracks(3), people: null, pricing: null })}
+        disabled={false}
+        onApply={vi.fn(async () => true)}
+      />,
+    );
+
+    const estimate = screen.getByText("시간", { selector: ".estimate-label" }).closest("summary");
+    const disclosure = estimate?.closest("details");
+    expect(estimate).toHaveClass("estimate-strip");
+    expect(disclosure).not.toHaveAttribute("open");
+    expect(within(estimate!).getByText("약 5–15분")).toBeVisible();
+    expect(within(estimate!).getByText("요금 입력 필요")).toBeVisible();
+
+    fireEvent.click(estimate!);
+    expect(disclosure).toHaveAttribute("open");
+    expect(screen.getByLabelText("나눌 인원")).toBeInTheDocument();
+
+    view.rerender(
+      <CalculationStrip
+        plan={plan({
+          revision: 2,
+          items: tracks(3),
+          people: null,
+          pricing: { kind: "song", singlePriceWon: 1_000 },
+        })}
+        disabled={false}
+        onApply={vi.fn(async () => true)}
+      />,
+    );
+    expect(
+      within(screen.getByText("예상 비용").closest("summary")!).getByText("₩3,000"),
+    ).toBeVisible();
+  });
+
   it("resets imported pricing while preserving an in-progress edit across unrelated revisions", async () => {
     const props = {
       disabled: false,
@@ -226,7 +263,7 @@ describe("CalculationStrip authoritative form state", () => {
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
-  it("renders a compact result and keeps reverse calculations in a disclosure", async () => {
+  it("keeps the detailed result and reverse calculation inside the expanded panel", async () => {
     const view = render(
       <CalculationStrip
         plan={plan({
@@ -243,9 +280,14 @@ describe("CalculationStrip authoritative form state", () => {
       />,
     );
 
-    const summary = screen.getByText("계산 결과").closest(".calculation-summary");
+    const estimate = screen.getByText("시간", { selector: ".estimate-label" }).closest("summary")!;
+    expect(estimate.closest("details")).not.toHaveAttribute("open");
+    expect(within(estimate).getByText("₩2,500")).toBeVisible();
+    fireEvent.click(estimate);
+
+    const summary = screen.getByText("계산 결과").closest(".calculation-summary") as HTMLElement;
     expect(summary).toHaveTextContent("3곡");
-    expect(screen.getByText("₩2,500")).toBeVisible();
+    expect(within(summary).getByText("₩2,500")).toBeVisible();
     const budgetDisclosure = screen.getByText("예산 안에 몇 곡인지 계산하기").closest("details");
     expect(budgetDisclosure).not.toHaveAttribute("open");
     fireEvent.click(screen.getByText("예산 안에 몇 곡인지 계산하기"));
@@ -271,8 +313,11 @@ describe("CalculationStrip authoritative form state", () => {
     fireEvent.change(screen.getByLabelText("예산 (원)"), {
       target: { value: "15000" },
     });
-    expect(screen.getByText("₩2,000–₩3,000")).toBeVisible();
-    expect(screen.getByText("₩1,000–₩1,500")).toBeVisible();
+    const updatedSummary = screen
+      .getByText("계산 결과")
+      .closest(".calculation-summary") as HTMLElement;
+    expect(within(updatedSummary).getByText("₩2,000–₩3,000")).toBeVisible();
+    expect(within(updatedSummary).getByText("₩1,000–₩1,500")).toBeVisible();
     expect(screen.getByText(/확실히/u)).toBeVisible();
 
     for (const invalidBudget of ["text", "-1", "100000001"]) {
@@ -298,7 +343,9 @@ describe("CalculationStrip authoritative form state", () => {
       />,
     );
 
-    const pricingDisclosure = screen.getByText("요금과 인원 설정").closest("details");
+    const pricingDisclosure = screen
+      .getByText("시간", { selector: ".estimate-label" })
+      .closest("details");
     expect(pricingDisclosure).not.toHaveAttribute("open");
     act(() => ref.current?.openPricingAndFocusFirstInvalid());
     expect(pricingDisclosure).toHaveAttribute("open");
