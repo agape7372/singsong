@@ -1,5 +1,7 @@
 # SECURITY.md — 보안 정본
 
+> **v3 보안 경고 (2026-07-21)**: 위협 목록 참고용이다. 무제한 anon insert, slug만을 보호수단으로 보는 모델, 영구 공유는 폐기됐다. [`../FINAL_BLUEPRINT.md`](../FINAL_BLUEPRINT.md) §6·§10을 따른다.
+
 > **정본 범위**: 위협모델 · XSS 대응 · 어뷰징 대응 · CSP · env·비밀 규칙 · takedown 운영 절차.
 > 이 문서와 다른 문서(API_CONTRACT DDL 값, PRODUCT_SPEC §9 법적 리스크 포함)가 어긋나면, **DDL·RPC·RLS 값은 API_CONTRACT.md가 이기고, 곡 DB 법적 리스크 서술은 PRODUCT_SPEC.md가 이긴다.** 이 문서는 그 둘에 대한 위협모델·대응 관점만 정본이다.
 > **버전**: v1.0 · 2026-07-21 · 짝 문서: [`API_CONTRACT.md`](./API_CONTRACT.md)(DDL·RLS·Zod 정본), [`ARCHITECTURE.md`](./ARCHITECTURE.md)(에러 전략)

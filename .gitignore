@@ -1,0 +1,33 @@
+# Dependencies and build products
+node_modules/
+.pnpm-store/
+.next/
+out/
+coverage/
+
+# Generated Serwist worker
+public/sw.js
+public/sw.js.map
+public/swe-worker-*.js
+public/swe-worker-*.js.map
+
+# Test evidence and local browser state
+test-results/*
+!test-results/.gitkeep
+playwright-report/
+blob-report/
+
+# Local environment values (the value-free example stays tracked)
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Local runtime artifacts
+*.pid
+*.tsbuildinfo
+.DS_Store
+Thumbs.db
+
+# Run lock is operational and removed at a clean handoff
+ACTIVE_RUN.lock/

@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#faf7f0" />
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+    <title>오프라인 · 싱송</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+        background: #faf7f0;
+        color: #15131a;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        min-width: 320px;
+        min-height: 100vh;
+        margin: 0;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background: #faf7f0;
+      }
+      main {
+        width: min(100%, 620px);
+        border: 2px solid #15131a;
+        padding: clamp(28px, 7vw, 58px);
+        background: #fff;
+        box-shadow: 10px 10px 0 #f2ede3;
+      }
+      .eyebrow {
+        margin: 0 0 12px;
+        color: #d91f52;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+      }
+      h1 {
+        margin: 0;
+        font-size: clamp(2rem, 8vw, 3.5rem);
+        line-height: 1.12;
+        letter-spacing: -0.04em;
+      }
+      p {
+        margin: 18px 0 26px;
+        color: #665f68;
+        line-height: 1.65;
+      }
+      a {
+        min-height: 48px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #15131a;
+        padding: 12px 18px;
+        background: #ff3d6e;
+        color: #15131a;
+        font-weight: 800;
+        text-decoration: none;
+      }
+      nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      a.secondary {
+        background: #fff;
+      }
+      a:focus-visible {
+        outline: 3px solid #3b64d8;
+        outline-offset: 4px;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root,
+        body {
+          background: #16111c;
+          color: #f5eef3;
+        }
+        main {
+          border-color: #f5eef3;
+          background: #221b29;
+          box-shadow: 10px 10px 0 #2a2130;
+        }
+        .eyebrow {
+          color: #ff8ab1;
+        }
+        p {
+          color: #b8a9bc;
+        }
+        a.secondary {
+          border-color: #f5eef3;
+          background: #221b29;
+          color: #f5eef3;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">연결 없음 · LOCAL STRIP</p>
+      <h1>연결은 없어도 세션은 남아 있어요.</h1>
+      <p>
+        이 기기에 저장한 곡 순서와 계산은 계속 사용할 수 있어요. 검색과 공유 링크는 연결이 돌아오면
+        다시 시도해 주세요.
+      </p>
+      <nav aria-label="오프라인 복구">
+        <a href="">다시 시도</a>
+        <a class="secondary" href="/">세션으로 돌아가기</a>
+      </nav>
+    </main>
+  </body>
+</html>

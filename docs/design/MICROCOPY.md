@@ -1,5 +1,7 @@
 # MICROCOPY.md — 싱송 화면 문구 정본
 
+> **v3 레거시 경고 (2026-07-21)**: 톤·표기 참고용이다. 정확성을 과장하는 시간 문구, 공개범위, 설치 보존, Kakao 우선 문구는 [`../FINAL_BLUEPRINT.md`](../FINAL_BLUEPRINT.md)의 의미에 맞게 새로 작성한다.
+
 > 정본 범위: 화면에 보이는 **모든 문구**·톤 스펙트럼 규칙·표기 규칙(원화·시간·조사). hex 색상값·컴포넌트 props·라우팅·계산 규칙은 여기 없음 — 각 정본 문서 참조.
 > 버전 v1.0 · 2026-07-21
 > 짝 문서: [`SCREENS.md`](./SCREENS.md) · [`COMPONENTS.md`](./COMPONENTS.md) · [`../engineering/API_CONTRACT.md`](../engineering/API_CONTRACT.md) §5(에러 분류) · [`../BUILD_PLAN.md`](../BUILD_PLAN.md) §11-6

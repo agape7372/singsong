@@ -1,5 +1,7 @@
 # PLATFORM_NOTES.md — 싱송 플랫폼 특이사항 정본
 
+> **v3 레거시 경고 (2026-07-21)**: 플랫폼 엣지 참고용이다. IME network pause, WebView/Safari/PWA 저장소 비연속성, paste import, 설치 카피는 [`../FINAL_BLUEPRINT.md`](../FINAL_BLUEPRINT.md) §3.3·§6.5·§7.3이 우선한다.
+
 > 정본 범위: IME 처리·초성 검색 엣지케이스·브라우저/OS별 특이사항(iOS Safari 저장소 축출·카카오 인앱)·PWA 설치 동작. 계산 규칙·DDL·문구 원문은 여기 없음 — 각 정본 문서 참조.
 > 버전 v1.0 · 2026-07-21
 > 짝 문서: [`../engineering/ARCHITECTURE.md`](./ARCHITECTURE.md) §에러 전략 · [`../design/MICROCOPY.md`](../design/MICROCOPY.md) §4-2/§4-8 · [`../verification/TEST_PLAN.md`](../verification/TEST_PLAN.md)

@@ -1,5 +1,7 @@
 # COMPONENTS.md — 공통 컴포넌트 정본
 
+> **v3 레거시 경고 (2026-07-21)**: 16개 선구현 계약은 폐기됐다. Base UI 기반 primitive와 vertical slice 패턴은 [`VISUAL_MOTION_DIRECTION.md`](./VISUAL_MOTION_DIRECTION.md) 및 [`../FINAL_BLUEPRINT.md`](../FINAL_BLUEPRINT.md)가 우선한다.
+
 > **정본 범위**: 16개 공통 컴포넌트의 목록·props·상태·변형(README §3). 색·타이포·스페이싱·모션의 **값**은 여기 안 씀 — 전부 [`DESIGN_SYSTEM.md`](./DESIGN_SYSTEM.md) 토큰 이름만 참조.
 > **버전**: v1.0 · 2026-07-21 · 짝 문서: [`DESIGN_SYSTEM.md`](./DESIGN_SYSTEM.md)
 

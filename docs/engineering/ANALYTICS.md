@@ -1,5 +1,7 @@
 # ANALYTICS.md — 계측 정본
 
+> **v3 레거시 경고 (2026-07-21)**: 기존 이벤트 아이디어 참고용이다. Vercel Hobby custom event 가정과 viewer/k-factor/retention 공식은 폐기됐다. [`../FINAL_BLUEPRINT.md`](../FINAL_BLUEPRINT.md) §9가 우선한다.
+
 > **정본 범위**: 계측 이벤트 이름·트리거 시점·속성 스키마 · 의사결정 게이트 지표의 정의(공식) · 구현 수위(도구 선택)와 `lib/analytics.ts` 인터페이스 · 프라이버시 원칙.
 > 이 문서와 다른 문서가 이벤트/지표 관련 사실에서 어긋나면 **이 문서가 이긴다**.
 > **버전**: v1.0 · 2026-07-21 · 짝 문서: [`ARCHITECTURE.md`](./ARCHITECTURE.md)(`lib/analytics.ts`가 사는 폴더 구조), [`PLATFORM_NOTES.md`](./PLATFORM_NOTES.md)(PWA 설치 이벤트 발화 조건)

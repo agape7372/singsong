@@ -1,5 +1,7 @@
 # 싱송 — 구현 계획 (Build Plan) & AI 빌드 프롬프트
 
+> **v3 레거시 경고 (2026-07-21)**: 기존 M0~M6 이력 참고용이다. 이 문서의 계산식·Node/Next 스택·수평 Phase·공유 구현은 폐기됐다. [`FINAL_BLUEPRINT.md`](./FINAL_BLUEPRINT.md)와 [`prompts/ONESHOT_MASTER.md`](./prompts/ONESHOT_MASTER.md)를 사용한다.
+
 > 짝 문서: [`PRODUCT_SPEC.md`](./PRODUCT_SPEC.md) (제품/설계) · **문서 지도: [`README.md`](./README.md)** (14개 상세 설계 문서의 읽기 순서·정본 소유권 표 — 반드시 여기서 시작).
 > 이 문서는 **엔지니어링 실행 계획(스택·마일스톤·계산 엔진 스펙 §6)**의 정본이다. 상세 설계(디자인·화면·계약·보안·검증)는 각 도메인 문서가 정본(README §3).
 > **범위**: Phase A = 로그인 없는 PWA MVP (담기 → 계산 → 티켓 공유 → fork). 발견/셀럽·결제·네이티브는 이 문서 범위 밖(후속).

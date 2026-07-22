@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="description" content="SingSong 모바일 홈 화면 디자인 방향 10종 비교 보드" />
+  <title>SingSong — Design Directions 10</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#gallery">시안 목록으로 건너뛰기</a>
+
+  <header class="board-header">
+    <div class="board-header__topline">
+      <a class="board-brand" href="#top" aria-label="SingSong 디자인 보드 맨 위로">
+        <span class="board-brand__mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span>SINGSONG</span>
+      </a>
+      <span class="board-edition">DESIGN EXPLORATION · 2026.07</span>
+    </div>
+
+    <div class="board-hero" id="top">
+      <div>
+        <p class="eyebrow">ONE PLAN · TEN ATTITUDES</p>
+        <h1>같은 플랜,<br /><em>열 가지 태도.</em></h1>
+      </div>
+      <div class="board-intro">
+        <p>노래를 고르고, 시간과 비용을 맞추고, 친구에게 보내는 같은 흐름을 열 가지 시각 언어로 풀었습니다. 색만 바꾼 스킨이 아니라 정보 구조와 리듬부터 다르게 설계했습니다.</p>
+        <dl class="board-facts">
+          <div><dt>고정 상태</dt><dd>8곡 · 4명</dd></div>
+          <div><dt>계산 범위</dt><dd>20–40분 · ₩10–20K</dd></div>
+          <div><dt>채택 방향</dt><dd>CUTLINE</dd></div>
+        </dl>
+      </div>
+    </div>
+  </header>
+
+  <nav class="filter-bar" aria-label="시안 필터">
+    <div class="filter-bar__inner">
+      <div class="filter-group" role="group" aria-label="분류 선택">
+        <button class="filter-button is-active" type="button" data-filter="all" aria-pressed="true">전체 <span>10</span></button>
+        <button class="filter-button" type="button" data-filter="light" aria-pressed="false">라이트 <span>6</span></button>
+        <button class="filter-button" type="button" data-filter="dark" aria-pressed="false">다크 <span>4</span></button>
+        <button class="filter-button" type="button" data-filter="experimental" aria-pressed="false">실험적 <span>4</span></button>
+      </div>
+      <p class="filter-note"><span aria-hidden="true">↗</span> 시안을 눌러 크게 비교할 수 있어요</p>
+    </div>
+  </nav>
+
+  <main class="gallery" id="gallery">
+    <!-- 01 CUTLINE -->
+    <article class="concept-card is-adopted" data-theme="light" data-tags="light editorial">
+      <header class="concept-card__header">
+        <div>
+          <span class="concept-index">01 · ADOPTED</span>
+          <h2>CUTLINE</h2>
+          <p>에디토리얼 발권지</p>
+        </div>
+        <button class="open-preview" type="button" aria-label="CUTLINE 시안 크게 보기">↗</button>
+      </header>
+      <div class="phone-stage">
+        <section class="phone concept-01" aria-label="CUTLINE 모바일 화면 시안">
+          <div class="statusbar"><span>9:41</span><span>5G&nbsp; ▰</span></div>
+          <header class="mobile-appbar">
+            <div class="c1-brand"><b>S</b><span>SingSong</span></div>
+            <button type="button" aria-label="더보기">•••</button>
+          </header>
+          <div class="c1-canvas">
+            <section class="c1-strip">
+              <div class="c1-strip-head">
+                <div><small>WORKING STRIP · TEST DATA</small><h3>금요일 2차</h3></div>
+                <strong>08</strong>
+              </div>
+              <ol class="c1-ledger">
+                <li><b>01</b><span><strong>밤 산책</strong><small>윤슬</small></span><i>↕</i></li>
+                <li><b>02</b><span><strong>초여름</strong><small>수평선</small></span><i>↕</i></li>
+                <li><b>03</b><span><strong>서울의 밤</strong><small>모노시티</small></span><i>↕</i></li>
+              </ol>
+              <button class="c1-add mock-action" type="button">＋ 곡 담기 <span>5곡 더 있음</span></button>
+              <div class="c1-perf" aria-hidden="true"></div>
+              <div class="c1-calc">
+                <div class="c1-toggle"><b>시간 요금</b><span>곡 요금</span></div>
+                <dl>
+                  <div><dt>예상 시간</dt><dd>약 20–40분</dd></div>
+                  <div><dt>총 예상</dt><dd>₩10,000–20,000</dd></div>
+                  <div><dt>1인당 · 4명</dt><dd>₩2,500–5,000</dd></div>
+                </dl>
+                <small>30분 / 10,000원 · 평균 곡 길이 기준</small>
+              </div>
+            </section>
+          </div>
+          <div class="mobile-bottom c1-bottom">
+            <button class="primary-action mock-action" type="button">8곡 티켓 만들기 <span>→</span></button>
+            <nav aria-label="앱 메뉴"><a class="active" href="#">플랜</a><a href="#">검색</a></nav>
+          </div>
+        </section>
+      </div>
+      <footer class="concept-card__footer">
+        <p>정본에 가장 가까운 방향. 절취선 하나로 큐와 계산을 연결하고, 큰 숫자보다 정보 관계를 주인공으로 둡니다.</p>
+        <div class="swatches" aria-label="색상 팔레트"><i style="--swatch:#FAF7F0"></i><i style="--swatch:#15131A"></i><i style="--swatch:#FF3D6E"></i><i style="--swatch:#B76E00"></i></div>
+      </footer>
+    </article>
+
+    <!-- 02 NIGHT ROUTE -->
+    <article class="concept-card" data-theme="dark" data-tags="dark experimental">
+      <header class="concept-card__header">
+        <div><span class="concept-index">02 · DARK</span><h2>NIGHT ROUTE</h2><p>노래로 만든 밤의 경로</p></div>
+        <button class="open-preview" type="button" aria-label="NIGHT ROUTE 시안 크게 보기">↗</button>
+      </header>
+      <div class="phone-stage">
+        <section class="phone concept-02" aria-label="NIGHT ROUTE 모바일 화면 시안">
+          <div class="statusbar"><span>9:41</span><span>5G&nbsp; ▰</span></div>
+          <header class="c2-header"><b>SS/</b><span>FRI NIGHT ROUTE</span><button type="button" aria-label="더보기">•••</button></header>
+          <main class="c2-main">
+            <div class="c2-overview">
+              <span>ROUTE 08</span>
+              <h3>20—40<small>MIN</small></h3>
+              <div><b>₩10—20K</b><small>4명 · 30분 요금</small></div>
+            </div>
+            <ol class="c2-route">
+              <li><i></i><b>01</b><span><strong>밤 산책</strong><small>윤슬</small></span><em>21:40</em></li>
+              <li><i></i><b>02</b><span><strong>초여름</strong><small>수평선</small></span><em>21:44</em></li>
+              <li class="current"><i></i><b>03</b><span><strong>서울의 밤</strong><small>모노시티</small></span><em>21:49</em></li>
+              <li><i></i><b>04</b><span><strong>파도 사이</strong><small>여름편지</small></span><em>21:53</em></li>
+              <li class="more"><i></i><b>＋</b><span><strong>4곡 더 보기</strong><small>예상 종착 22:20</small></span></li>
+            </ol>
+            <div class="c2-terminal"><span>FINAL STOP</span><strong>1인 ₩2.5—5K</strong><small>평균 곡 길이 기준</small></div>
+          </main>
+          <div class="mobile-bottom c2-bottom">
+            <button class="primary-action mock-action" type="button">ROUTE PASS 발권 <span>→</span></button>
+            <nav aria-label="앱 메뉴"><a class="active" href="#">PLAN</a><a href="#">SEARCH</a></nav>
+          </div>
+        </section>
+      </div>
+      <footer class="concept-card__footer">
+        <p>곡을 ‘역’으로 연결한 야간 노선도. 네온 대신 선·점·정밀한 숫자로 도시적인 밤의 분위기를 냅니다.</p>
+        <div class="swatches" aria-label="색상 팔레트"><i style="--swatch:#101217"></i><i style="--swatch:#F4F1E8"></i><i style="--swatch:#A8FF3E"></i><i style="--swatch:#6977FF"></i></div>
+      </footer>
+    </article>
+
+    <!-- 03 CONTROL ROOM -->
+    <article class="concept-card" data-theme="light" data-tags="light utility">
+      <header class="concept-card__header">
+        <div><span class="concept-index">03 · UTILITY</span><h2>CONTROL ROOM</h2><p>정밀한 세션 컨트롤 보드</p></div>
+        <button class="open-preview" type="button" aria-label="CONTROL ROOM 시안 크게 보기">↗</button>
+      </header>
+      <div class="phone-stage">
+        <section class="phone concept-03" aria-label="CONTROL ROOM 모바일 화면 시안">
+          <div class="statusbar"><span>9:41</span><span>5G&nbsp; ▰</span></div>
+          <header class="c3-header"><b>SINGSONG / CONTROL</b><span>READY</span></header>
+          <main class="c3-main">
+            <div class="c3-title"><div><small>ACTIVE PLAN / 001</small><h3>금요일 2차</h3></div><button type="button" aria-label="더보기">•••</button></div>
+            <div class="c3-metrics">
+              <div><small>SONGS</small><strong>08</strong><em>TRACKS</em></div>
+              <div><small>TIME</small><strong>20—40</strong><em>MIN</em></div>
+              <div><small>TOTAL</small><strong>10—20K</strong><em>KRW</em></div>
+              <div class="accent"><small>PER PERSON</small><strong>2.5—5K</strong><em>× 04</em></div>
+            </div>
+            <section class="c3-queue">
+              <header><b>QUEUE / 08</b><button class="mock-action" type="button">＋ ADD SONG</button></header>
+              <ol>
+                <li><b>01</b><span>밤 산책 <small>윤슬</small></span><i>↑ ↓</i></li>
+                <li><b>02</b><span>초여름 <small>수평선</small></span><i>↑ ↓</i></li>
+                <li><b>03</b><span>서울의 밤 <small>모노시티</small></span><i>↑ ↓</i></li>
+                <li><b>＋5</b><span>QUEUED</span><i>···</i></li>
+              </ol>
+            </section>
+            <div class="c3-control"><span>TIME RATE</span><b>30 MIN / ₩10,000</b><small>AVG. SONG LENGTH · TEST DATA</small></div>
+          </main>
+          <div class="mobile-bottom c3-bottom">
+            <button class="primary-action mock-action" type="button"><span>STATUS / READY</span> ISSUE TICKET →</button>
+            <nav aria-label="앱 메뉴"><a class="active" href="#">01 PLAN</a><a href="#">02 SEARCH</a></nav>
+          </div>
+        </section>
+      </div>
+      <footer class="concept-card__footer">
+        <p>계산 신뢰감을 가장 앞에 둔 고밀도 도구형 UI. 입력 조건이 맞으면 DRAFT가 READY로 바뀌는 구조입니다.</p>
+        <div class="swatches" aria-label="색상 팔레트"><i style="--swatch:#EEF0EC"></i><i style="--swatch:#111315"></i><i style="--swatch:#FF5A36"></i><i style="--swatch:#146BFF"></i></div>
+      </footer>
+    </article>
+
+    <!-- 04 THREE BEATS -->
+    <article class="concept-card" data-theme="light" data-tags="light progressive">
+      <header class="concept-card__header">
+        <div><span class="concept-index">04 · PROGRESSIVE</span><h2>THREE BEATS</h2><p>고르기 · 맞추기 · 보내기</p></div>
+        <button class="open-preview" type="button" aria-label="THREE BEATS 시안 크게 보기">↗</button>
+      </header>
+      <div class="phone-stage">
+        <section class="phone concept-04" aria-label="THREE BEATS 모바일 화면 시안">
+          <div class="statusbar"><span>9:41</span><span>5G&nbsp; ▰</span></div>
+          <header class="c4-header"><b>SingSong</b><span>금요일 2차</span><button type="button" aria-label="더보기">•••</button></header>
+          <main class="c4-main">
+            <p class="c4-kicker">SESSION BUILDER · TEST DATA</p>
+            <h3>딱 세 박자로<br />약속을 맞춰요.</h3>
+            <section class="c4-step is-done">
+              <div class="c4-number">01</div>
+              <div><small>PICK</small><strong>부를 곡 고르기</strong><p>밤 산책 외 7곡</p></div>
+              <button type="button" aria-label="곡 목록 펼치기">＋</button>
+            </section>
+            <section class="c4-step is-open">
+              <div class="c4-number">02</div>
+              <div class="c4-step-body"><small>FIT</small><strong>시간과 비용 맞추기</strong><div class="c4-fit"><b>20—40<span>분</span></b><b>₩10—20K<span>총 예상</span></b></div><p>4명 · 1인 ₩2,500–5,000</p></div>
+              <span class="c4-check">✓</span>
+            </section>
+            <section class="c4-step is-next">
+              <div class="c4-number">03</div>
+              <div><small>SEND</small><strong>한 장으로 보내기</strong><p>친구가 바로 이해하는 세션 티켓</p></div>
+            </section>
+          </main>
+          <div class="mobile-bottom c4-bottom">
+            <button class="primary-action mock-action" type="button">03 · 티켓 만들기 <span>→</span></button>
+            <nav aria-label="앱 메뉴"><a class="active" href="#">플랜</a><a href="#">검색</a></nav>
+          </div>
+        </section>
+      </div>
+      <footer class="concept-card__footer">
+        <p>작업을 세 장으로 접고 펴는 초보 친화형 구조. 지금 할 일 하나만 크게 보여 복잡한 설정 피로를 줄입니다.</p>
+        <div class="swatches" aria-label="색상 팔레트"><i style="--swatch:#FBFAF6"></i><i style="--swatch:#181A1B"></i><i style="--swatch:#3155FF"></i><i style="--swatch:#D8FF52"></i></div>
+      </footer>
+    </article>
+
+    <!-- 05 POSTER STACK -->
+    <article class="concept-card" data-theme="dark" data-tags="dark editorial experimental">
+      <header class="concept-card__header">
+        <div><span class="concept-index">05 · SOCIAL</span><h2>POSTER STACK</h2><p>공유물이 먼저 보이는 플래너</p></div>
+        <button class="open-preview" type="button" aria-label="POSTER STACK 시안 크게 보기">↗</button>
+      </header>
+      <div class="phone-stage">
+        <section class="phone concept-05" aria-label="POSTER STACK 모바일 화면 시안">
+          <div class="statusbar"><span>9:41</span><span>5G&nbsp; ▰</span></div>
+          <header class="c5-header"><b>S/S</b><span>LIVE TICKET PREVIEW</span><button type="button" aria-label="더보기">•••</button></header>
+          <main class="c5-main">
+            <section class="c5-poster">
+              <span class="c5-date">FRI / 08</span>
+              <p>금요일<br /><b>2차</b></p>
+              <div class="c5-band"><strong>8 TRACKS</strong><small>20—40 MIN</small></div>
+              <div class="c5-price"><small>4 PEOPLE</small><b>₩2.5—5K</b><em>PER PERSON</em></div>
+            </section>
+            <section class="c5-ledger">
+              <header><b>SETLIST / 08</b><button class="mock-action" type="button">＋ 곡 담기</button></header>
+              <p><b>01</b> 밤 산책 <span>윤슬</span></p>
+              <p><b>02</b> 초여름 <span>수평선</span></p>
+              <p><b>03</b> 서울의 밤 <span>모노시티</span></p>
+              <small>＋ 5 TRACKS · TOTAL ₩10—20K</small>
+            </section>
+          </main>
+          <div class="mobile-bottom c5-bottom">
+            <button class="primary-action mock-action" type="button">포스터를 티켓으로 <span>↗</span></button>
+            <nav aria-label="앱 메뉴"><a class="active" href="#">PLAN</a><a href="#">SEARCH</a></nav>
+          </div>
+        </section>
+      </div>
+      <footer class="concept-card__footer">
+        <p>편집하면서 공유 결과를 바로 보는 소셜 우선 방향. 사진 없이 큰 한글과 컬러 밴드만으로 존재감을 만듭니다.</p>
+        <div class="swatches" aria-label="색상 팔레트"><i style="--swatch:#241027"></i><i style="--swatch:#FFF8E8"></i><i style="--swatch:#FF2E74"></i><i style="--swatch:#D9FF4F"></i></div>
+      </footer>
+    </article>
+
+    <!-- 06 SETLIST JOURNAL -->
+    <article class="concept-card" data-theme="light" data-tags="light editorial">
+      <header class="concept-card__header">
+        <div><span class="concept-index">06 · EDITORIAL</span><h2>SETLIST JOURNAL</h2><p>한 권의 세션 저널</p></div>
+        <button class="open-preview" type="button" aria-label="SETLIST JOURNAL 시안 크게 보기">↗</button>
+      </header>
+      <div class="phone-stage">
+        <section class="phone concept-06" aria-label="SETLIST JOURNAL 모바일 화면 시안">
+          <div class="statusbar"><span>9:41</span><span>5G&nbsp; ▰</span></div>
+          <header class="c6-header"><b>SingSong Journal</b><span>ISSUE 08</span></header>
+          <main class="c6-main">
+            <div class="c6-coverline"><span>FRIDAY EDITION</span><span>TEST DATA</span></div>
+            <h3>금요일 밤을 위한<br /><em>여덟 곡의 순서</em></h3>
+            <div class="c6-deck"><p>4명이 부를 곡과 예상 시간을 한 장으로 정리한 세션 노트.</p><b>20—40<small>MINUTES</small></b></div>
+            <section class="c6-list">
+              <div><b>01</b><span><strong>밤 산책</strong><small>윤슬</small></span></div>
+              <div><b>02</b><span><strong>초여름</strong><small>수평선</small></span></div>
+              <div><b>03</b><span><strong>서울의 밤</strong><small>모노시티</small></span></div>
+              <div><b>＋5</b><span><strong>다음 곡들</strong><small>순서 편집하기</small></span></div>
+            </section>
+            <div class="c6-summary"><span>TOTAL</span><strong>₩10,000—20,000</strong><small>1인 ₩2,500—5,000</small></div>
+          </main>
+          <div class="mobile-bottom c6-bottom">
+            <button class="primary-action mock-action" type="button">이 세션 발행하기 <span>→</span></button>
+            <nav aria-label="앱 메뉴"><a class="active" href="#">목차</a><a href="#">곡 찾기</a></nav>
+          </div>
+        </section>
+      </div>
+      <footer class="concept-card__footer">
+        <p>매거진의 표지와 목차 문법을 빌린 여백 중심 방향. 명조와 산세리프의 대비로 감성과 계산을 분리합니다.</p>
+        <div class="swatches" aria-label="색상 팔레트"><i style="--swatch:#F4F0E8"></i><i style="--swatch:#171717"></i><i style="--swatch:#315CFF"></i><i style="--swatch:#F04B32"></i></div>
+      </footer>
+    </article>
+
+    <!-- 07 NOCTURNE STAGE -->
+    <article class="concept-card" data-theme="dark" data-tags="dark immersive">
+      <header class="concept-card__header">
+        <div><span class="concept-index">07 · IMMERSIVE</span><h2>NOCTURNE STAGE</h2><p>조용한 다크 프리미엄</p></div>
+        <button class="open-preview" type="button" aria-label="NOCTURNE STAGE 시안 크게 보기">↗</button>
+      </header>
+      <div class="phone-stage">
+        <section class="phone concept-07" aria-label="NOCTURNE STAGE 모바일 화면 시안">
+          <div class="statusbar"><span>9:41</span><span>5G&nbsp; ▰</span></div>
+          <header class="c7-header"><b>SINGSONG</b><span>SESSION / 08</span><button type="button" aria-label="더보기">•••</button></header>
+          <main class="c7-main">
+            <div class="c7-title"><small>FRIDAY · SECOND ROUND</small><h3>Tonight’s<br />queue</h3></div>
+            <section class="c7-stage">
+              <div class="c7-stage-line" aria-hidden="true"></div>
+              <article><b>01</b><span><small>윤슬</small>밤 산책</span><em>04′</em></article>
+              <article class="active"><b>02</b><span><small>수평선</small>초여름</span><em>05′</em></article>
+              <article><b>03</b><span><small>모노시티</small>서울의 밤</span><em>04′</em></article>
+              <article class="more"><b>＋5</b><span>다음 무대</span><em>···</em></article>
+            </section>
+            <div class="c7-totals"><p><span>DURATION</span><b>20—40 MIN</b></p><p><span>TOTAL</span><b>₩10—20K</b></p><p><span>PER / 04</span><b>₩2.5—5K</b></p><small>30분 / ₩10,000 · 평균 곡 길이 기준</small></div>
+          </main>
+          <div class="mobile-bottom c7-bottom">
+            <button class="primary-action mock-action" type="button">8곡 티켓 만들기 <span>→</span></button>
+            <nav aria-label="앱 메뉴"><a class="active" href="#">QUEUE</a><a href="#">SEARCH</a></nav>
+          </div>
+        </section>
+      </div>
+      <footer class="concept-card__footer">
+        <p>글로우 없는 다크 무대. 현재 곡 하나만 밝히고 전후 흐름은 낮춰, 밤에도 편안한 집중감을 만듭니다.</p>
+        <div class="swatches" aria-label="색상 팔레트"><i style="--swatch:#09090B"></i><i style="--swatch:#241B2D"></i><i style="--swatch:#EDE7DC"></i><i style="--swatch:#62F5C7"></i></div>
+      </footer>
+    </article>
+
+    <!-- 08 STICKER JAM -->
+    <article class="concept-card" data-theme="light" data-tags="light playful experimental">
+      <header class="concept-card__header">
+        <div><span class="concept-index">08 · PLAYFUL</span><h2>STICKER JAM</h2><p>친구끼리 빠른 자석 보드</p></div>
+        <button class="open-preview" type="button" aria-label="STICKER JAM 시안 크게 보기">↗</button>
+      </header>
+      <div class="phone-stage">
+        <section class="phone concept-08" aria-label="STICKER JAM 모바일 화면 시안">
+          <div class="statusbar"><span>9:41</span><span>5G&nbsp; ▰</span></div>
+          <header class="c8-header"><b>SS!</b><span>금요일 2차</span><button type="button" aria-label="더보기">•••</button></header>
+          <main class="c8-main">
+            <div class="c8-hero"><small>FRIDAY JAM · TEST DATA</small><h3>8곡이면<br />딱 좋아!</h3><span>4 PEOPLE</span></div>
+            <section class="c8-board">
+              <header><b>QUEUE BOARD</b><button class="mock-action" type="button">＋ 곡 붙이기</button></header>
+              <div class="c8-sticker coral"><b>01</b><span>밤 산책<small>윤슬</small></span><i>↕</i></div>
+              <div class="c8-sticker lilac"><b>02</b><span>초여름<small>수평선</small></span><i>↕</i></div>
+              <div class="c8-sticker green"><b>03</b><span>서울의 밤<small>모노시티</small></span><i>↕</i></div>
+              <p>＋ 5개의 곡 자석</p>
+            </section>
+            <div class="c8-summary"><div><small>걸리는 시간</small><b>20—40분</b></div><div><small>한 사람당</small><b>₩2.5—5K</b></div><span>총 ₩10—20K</span></div>
+          </main>
+          <div class="mobile-bottom c8-bottom">
+            <button class="primary-action mock-action" type="button">우리 티켓 만들기 <span>→</span></button>
+            <nav aria-label="앱 메뉴"><a class="active" href="#">PLAN</a><a href="#">FIND</a></nav>
+          </div>
+        </section>
+      </div>
+      <footer class="concept-card__footer">
+        <p>친구 모임에 맞춘 밝은 스트리트 굿즈 톤. 컬러 토큰이 순서 블록이 되어 장난스럽지만 정보는 또렷합니다.</p>
+        <div class="swatches" aria-label="색상 팔레트"><i style="--swatch:#FFE98A"></i><i style="--swatch:#FF6B65"></i><i style="--swatch:#B6A1FF"></i><i style="--swatch:#BDF44A"></i></div>
+      </footer>
+    </article>
+
+    <!-- 09 CUE RAIL -->
+    <article class="concept-card" data-theme="light" data-tags="light utility">
+      <header class="concept-card__header">
+        <div><span class="concept-index">09 · PRECISION</span><h2>CUE RAIL</h2><p>시간표처럼 정확한 플랜</p></div>
+        <button class="open-preview" type="button" aria-label="CUE RAIL 시안 크게 보기">↗</button>
+      </header>
+      <div class="phone-stage">
+        <section class="phone concept-09" aria-label="CUE RAIL 모바일 화면 시안">
+          <div class="statusbar"><span>9:41</span><span>5G&nbsp; ▰</span></div>
+          <header class="c9-header"><b>SS / CUE RAIL</b><span>금요일 2차</span><button type="button" aria-label="더보기">•••</button></header>
+          <main class="c9-main">
+            <div class="c9-route-head"><div><small>DEPARTURE</small><h3>21:40</h3></div><div><small>WINDOW</small><b>20—40 MIN</b></div></div>
+            <section class="c9-timetable">
+              <div class="c9-rail" aria-hidden="true"></div>
+              <article><time>21:40</time><i></i><span><strong>밤 산책</strong><small>윤슬 · 01</small></span><em>4′</em></article>
+              <article><time>21:44</time><i></i><span><strong>초여름</strong><small>수평선 · 02</small></span><em>5′</em></article>
+              <article><time>21:49</time><i></i><span><strong>서울의 밤</strong><small>모노시티 · 03</small></span><em>4′</em></article>
+              <article><time>21:53</time><i></i><span><strong>파도 사이</strong><small>여름편지 · 04</small></span><em>5′</em></article>
+              <article class="c9-more"><time>＋5</time><i></i><span><strong>남은 곡</strong><small>순서 확인하기</small></span><em>···</em></article>
+            </section>
+            <div class="c9-fare"><span>FARE / 04 PEOPLE</span><strong>₩2,500—5,000</strong><small>총 ₩10,000—20,000 · 30분 블록</small></div>
+          </main>
+          <div class="mobile-bottom c9-bottom">
+            <button class="primary-action mock-action" type="button">21:40 플랜 발권 <span>→</span></button>
+            <nav aria-label="앱 메뉴"><a class="active" href="#">TIMELINE</a><a href="#">SEARCH</a></nav>
+          </div>
+        </section>
+      </div>
+      <footer class="concept-card__footer">
+        <p>철도 시간표와 큐시트를 결합한 정밀형. 장식 대신 정렬과 시간 축으로 세련된 신뢰감을 만듭니다.</p>
+        <div class="swatches" aria-label="색상 팔레트"><i style="--swatch:#F5F5F1"></i><i style="--swatch:#202124"></i><i style="--swatch:#9AA0A6"></i><i style="--swatch:#FF5C35"></i></div>
+      </footer>
+    </article>
+
+    <!-- 10 VOICE TOPOGRAPHY -->
+    <article class="concept-card" data-theme="dark" data-tags="dark experimental">
+      <header class="concept-card__header">
+        <div><span class="concept-index">10 · EXPERIMENTAL</span><h2>VOICE TOPOGRAPHY</h2><p>세션을 한눈에 읽는 지형도</p></div>
+        <button class="open-preview" type="button" aria-label="VOICE TOPOGRAPHY 시안 크게 보기">↗</button>
+      </header>
+      <div class="phone-stage">
+        <section class="phone concept-10" aria-label="VOICE TOPOGRAPHY 모바일 화면 시안">
+          <div class="statusbar"><span>9:41</span><span>5G&nbsp; ▰</span></div>
+          <header class="c10-header"><b>SINGSONG / FIELD 08</b><button type="button" aria-label="더보기">•••</button></header>
+          <main class="c10-main">
+            <div class="c10-title"><small>FRIDAY SECOND ROUND</small><h3>밤의<br />세션 지형</h3><span>TEST DATA</span></div>
+            <div class="c10-plot">
+              <svg viewBox="0 0 340 170" role="img" aria-label="8곡의 흐름을 표현한 추상 지형도">
+                <path class="plot-fill" d="M0 146 C34 132 42 78 75 86 C102 92 111 126 139 119 C168 112 170 38 205 43 C238 48 248 104 275 96 C304 87 309 64 340 52 L340 170 L0 170Z" />
+                <path class="plot-line" d="M0 146 C34 132 42 78 75 86 C102 92 111 126 139 119 C168 112 170 38 205 43 C238 48 248 104 275 96 C304 87 309 64 340 52" />
+                <circle cx="75" cy="86" r="5" /><circle cx="139" cy="119" r="5" /><circle cx="205" cy="43" r="5" /><circle cx="275" cy="96" r="5" />
+              </svg>
+              <span class="c10-label l1">01 밤 산책</span><span class="c10-label l2">03 서울의 밤</span><span class="c10-label l3">08 LAST</span>
+            </div>
+            <div class="c10-tracks"><p><b>01—02</b><span>밤 산책 · 초여름</span><i>LOW</i></p><p><b>03—05</b><span>서울의 밤 · 외 2곡</span><i>PEAK</i></p><p><b>06—08</b><span>파도 사이 · 외 2곡</span><i>FLOW</i></p></div>
+            <div class="c10-metrics"><div><small>DURATION</small><b>20—40 MIN</b></div><div><small>PER PERSON / 04</small><b>₩2.5—5K</b></div><span>총 ₩10—20K · 30분 블록</span></div>
+          </main>
+          <div class="mobile-bottom c10-bottom">
+            <button class="primary-action mock-action" type="button">지형을 티켓으로 <span>→</span></button>
+            <nav aria-label="앱 메뉴"><a class="active" href="#">FIELD</a><a href="#">SEARCH</a></nav>
+          </div>
+        </section>
+      </div>
+      <footer class="concept-card__footer">
+        <p>곡 순서를 하나의 흐르는 지형으로 요약한 실험형. 목록을 읽기 전에 세션의 리듬을 먼저 보게 합니다.</p>
+        <div class="swatches" aria-label="색상 팔레트"><i style="--swatch:#10101A"></i><i style="--swatch:#7B61FF"></i><i style="--swatch:#56D6FF"></i><i style="--swatch:#FFAA8A"></i></div>
+      </footer>
+    </article>
+  </main>
+
+  <footer class="board-footer">
+    <div><b>SINGSONG · TEN DIRECTIONS</b><p>같은 제품 계약 위에서 시각 문법과 상호작용 리듬만 비교한 탐색 시안입니다.</p></div>
+    <a href="#top">맨 위로 ↑</a>
+  </footer>
+
+  <dialog class="preview-dialog" id="previewDialog" aria-labelledby="previewTitle">
+    <div class="preview-dialog__bar">
+      <div><span>FULL-SCALE PREVIEW</span><h2 id="previewTitle">CUTLINE</h2></div>
+      <button class="close-preview" type="button" aria-label="미리보기 닫기">×</button>
+    </div>
+    <div class="preview-dialog__stage" id="previewStage"></div>
+  </dialog>
+
+  <div class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+  <script src="./app.js"></script>
+</body>
+</html>

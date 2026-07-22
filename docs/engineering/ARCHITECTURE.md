@@ -1,5 +1,7 @@
 # ARCHITECTURE.md — 클라이언트 구조·상태 소유권·에러/성능/캐싱 정본
 
+> **v3 레거시 경고 (2026-07-21)**: 기존 구조 이력 참고용이다. 단일 플랜, BFF 공유 경계, 최소 상태 라이브러리, PWA cache 정책은 [`../FINAL_BLUEPRINT.md`](../FINAL_BLUEPRINT.md)가 우선한다.
+
 > **정본 범위**: 데이터 흐름 · 상태 소유권(Dexie/Zustand/TanStack Query/URL) · 폴더 구조와 모듈 의존 규칙 · Dexie 스키마와 마이그레이션 정책 · 클라 에러 처리 전략 · 성능 예산 · PWA 캐싱 전략 · 무거운 의존성 지연 로드 규칙.
 > 다른 문서(BUILD_PLAN 구§4-2 포함)와 이 문서가 어긋나면 **이 문서가 이긴다**.
 > **버전**: v1.0 · 2026-07-21 · 짝 문서: [`API_CONTRACT.md`](./API_CONTRACT.md)(서버 쪽 소유권), [`ANALYTICS.md`](./ANALYTICS.md)(계측)

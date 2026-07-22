@@ -1,5 +1,7 @@
 # SCREENS.md — 화면 정본
 
+> **v3 레거시 경고 (2026-07-21)**: 6화면·멀티리스트·색인 가능한 공유 계약은 P0에서 폐기됐다. 최종 route/화면은 [`../FINAL_BLUEPRINT.md`](../FINAL_BLUEPRINT.md) §3, composition은 [`VISUAL_MOTION_DIRECTION.md`](./VISUAL_MOTION_DIRECTION.md)를 따른다.
+
 > **정본 범위**: 6화면(`/`, `/search`, `/list/[id]`, `/ticket/[id]`, `/s/[slug]`, not-found)의 레이아웃·구성요소·상태 매트릭스·인터랙션·meta/SEO. (README §3)
 > **버전**: v1.0 · 2026-07-21
 > 짝 문서: [`UX_FLOWS.md`](./UX_FLOWS.md)(여정·내비게이션·신뢰 UX)

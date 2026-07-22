@@ -1,0 +1,19 @@
+.next
+node_modules
+.pnpm-store
+coverage
+playwright-report
+test-results
+public/sw.js
+docs/design/concepts-10
+docs/design/ticket-concepts-10
+docs/design/ticket-directions
+docs/design/assets
+*.png
+pnpm-lock.yaml
+
+# Preserve pre-existing product evidence and historical/user-authored records byte-for-byte.
+# Newly generated release Markdown is checked separately in the documentation audit.
+**/*.md
+**/*.log
+**/*.txt

@@ -1,5 +1,7 @@
 # API_CONTRACT — 서버 계약 정본
 
+> **v3 보안 경고 (2026-07-21)**: public table SELECT/INSERT, client share upsert, 기존 payload/RLS를 구현하지 않는다. 교정된 exact-key BFF·grant·expiry/revoke 계약은 [`../FINAL_BLUEPRINT.md`](../FINAL_BLUEPRINT.md) §5~§6이 정본이다.
+
 > **정본 범위**: Postgres DDL · RPC 시그니처와 의미론 · RLS 정책 · 공유 payload Zod 스키마 · 서버 에러 계약 · 마이그레이션 파일 규칙.
 > 이 문서와 다른 문서(PRODUCT_SPEC §12, BUILD_PLAN 구§4 포함)가 어긋나면 **이 문서가 이긴다**.
 > **버전**: v1.0 · 2026-07-21 · 짝 문서: [`ARCHITECTURE.md`](./ARCHITECTURE.md)(클라 쪽 소유권), [`SECURITY.md`](./SECURITY.md)(위협모델)

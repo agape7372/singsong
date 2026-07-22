@@ -1,5 +1,7 @@
 # DESIGN_SYSTEM.md — 디자인 토큰 정본
 
+> **v3 레거시 경고 (2026-07-21)**: 기존 토큰·대비 근거 참고용이다. 새 semantic token·형태·모션은 [`VISUAL_MOTION_DIRECTION.md`](./VISUAL_MOTION_DIRECTION.md)가 우선한다.
+
 > **정본 범위**: 색·타이포·스페이싱·라운드·그림자·모션 토큰·브레이크포인트·아이콘 규칙 (README §3).
 > hex 색상값이 존재해도 되는 **유일한 문서**. 다른 문서는 토큰 이름(`--point`, `--gold-text` 등)만 쓴다.
 > **버전**: v1.0 · 2026-07-21 · 짝 문서: [`COMPONENTS.md`](./COMPONENTS.md)
