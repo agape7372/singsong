@@ -1,0 +1,477 @@
+@charset "UTF-8";
+
+:root {
+  --board-canvas: #f0eee8;
+  --board-paper: #fbfaf7;
+  --board-ink: #18171a;
+  --board-muted: #6f6c67;
+  --board-rule: #d7d3cb;
+  --board-accent: #ff3d6e;
+  --phone-scale: .66;
+  color-scheme: light;
+  font-family: "Noto Sans KR", "Segoe UI Variable", "Malgun Gothic", system-ui, sans-serif;
+  font-synthesis: none;
+  text-rendering: geometricPrecision;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  min-width: 320px;
+  overflow-x: clip;
+  background: var(--board-canvas);
+  color: var(--board-ink);
+  -webkit-font-smoothing: antialiased;
+}
+button, a { font: inherit; }
+button { color: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+button:focus-visible, a:focus-visible { outline: 3px solid #3468ff; outline-offset: 3px; }
+.skip-link { position: fixed; left: 16px; top: -80px; z-index: 1000; padding: 12px 16px; background: #fff; color: #111; border: 2px solid #111; text-decoration: none; }
+.skip-link:focus { top: 16px; }
+
+.board-header { padding: 26px clamp(24px, 4vw, 72px) 52px; background: var(--board-paper); border-bottom: 1px solid var(--board-rule); }
+.board-header__topline { display: flex; align-items: center; justify-content: space-between; padding-bottom: 58px; }
+.board-brand { display: inline-flex; align-items: center; gap: 11px; color: inherit; font-size: 13px; font-weight: 850; letter-spacing: .16em; text-decoration: none; }
+.board-brand__mark { display: grid; width: 27px; gap: 3px; }
+.board-brand__mark i { display: block; height: 3px; background: currentColor; }
+.board-brand__mark i:nth-child(2) { width: 19px; margin-left: auto; background: var(--board-accent); }
+.board-edition { font: 700 11px/1.2 "Cascadia Mono", Consolas, monospace; letter-spacing: .12em; color: var(--board-muted); }
+.board-hero { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(320px, .75fr); align-items: end; gap: 7vw; }
+.eyebrow { margin: 0 0 18px; font: 750 11px/1.2 "Cascadia Mono", Consolas, monospace; letter-spacing: .17em; color: var(--board-accent); }
+.board-hero h1 { margin: 0; font-size: clamp(58px, 7.2vw, 132px); line-height: .89; letter-spacing: -.07em; font-weight: 850; }
+.board-hero h1 em { color: var(--board-accent); font-style: normal; }
+.board-intro { padding-bottom: .5vw; }
+.board-intro > p { margin: 0 0 28px; max-width: 650px; color: #4c4945; font-size: 15px; line-height: 1.72; word-break: keep-all; }
+.board-facts { display: grid; grid-template-columns: repeat(3, 1fr); margin: 0; border-top: 1px solid var(--board-rule); }
+.board-facts div { padding: 13px 14px 0 0; }
+.board-facts dt { margin-bottom: 6px; font-size: 10px; font-weight: 700; color: var(--board-muted); }
+.board-facts dd { margin: 0; font-size: 12px; font-weight: 750; white-space: nowrap; }
+
+.filter-bar { position: sticky; top: 0; z-index: 100; background: rgba(240, 238, 232, .96); border-bottom: 1px solid var(--board-rule); }
+.filter-bar__inner { display: flex; align-items: center; justify-content: space-between; min-height: 70px; padding: 10px clamp(24px, 4vw, 72px); }
+.filter-group { display: flex; align-items: center; gap: 8px; }
+.filter-button { min-height: 38px; padding: 8px 13px; border: 1px solid #bdb9b1; border-radius: 999px; background: transparent; font-size: 12px; font-weight: 720; cursor: pointer; }
+.filter-button span { margin-left: 4px; color: var(--board-muted); font-variant-numeric: tabular-nums; }
+.filter-button.is-active { background: var(--board-ink); border-color: var(--board-ink); color: white; }
+.filter-button.is-active span { color: #aaa7a0; }
+.filter-note { margin: 0; font-size: 11px; color: var(--board-muted); }
+.filter-note span { margin-right: 6px; color: var(--board-accent); }
+
+.gallery { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 22px; padding: 44px clamp(24px, 3vw, 54px) 88px; }
+.concept-card { min-width: 0; overflow: hidden; background: var(--board-paper); border: 1px solid var(--board-rule); border-radius: 22px; transition: opacity .18s ease, transform .18s ease; }
+.concept-card[hidden] { display: none; }
+.concept-card__header { display: flex; align-items: flex-start; justify-content: space-between; min-height: 104px; padding: 22px 20px 18px; border-bottom: 1px solid var(--board-rule); }
+.concept-index { display: block; margin-bottom: 7px; font: 700 9px/1.2 "Cascadia Mono", Consolas, monospace; letter-spacing: .13em; color: #807c76; }
+.is-adopted .concept-index { color: #db2657; }
+.concept-card__header h2 { margin: 0; font-size: 20px; line-height: 1.05; letter-spacing: -.035em; }
+.concept-card__header p { margin: 6px 0 0; color: #77736d; font-size: 11px; }
+.open-preview { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid #c9c5bd; border-radius: 50%; background: transparent; font-size: 17px; cursor: pointer; transition: background .16s ease, color .16s ease; }
+.open-preview:hover { background: #18171a; color: #fff; }
+.phone-stage { display: flex; justify-content: center; height: calc(844px * var(--phone-scale) + 24px); padding-top: 24px; overflow: hidden; background: #e8e5df; border-bottom: 1px solid var(--board-rule); }
+.phone { position: relative; flex: 0 0 auto; width: 390px; height: 844px; overflow: hidden; border: 1px solid rgba(0,0,0,.28); border-radius: 42px; transform: scale(var(--phone-scale)); transform-origin: top center; box-shadow: 0 20px 50px rgba(34, 29, 22, .18); }
+.statusbar { display: flex; align-items: center; justify-content: space-between; height: 29px; padding: 8px 23px 0; font: 700 10px/1 "Cascadia Mono", Consolas, monospace; letter-spacing: .01em; }
+.phone button { cursor: pointer; }
+.phone button, .phone a { -webkit-user-select: none; user-select: none; }
+.phone button:focus-visible, .phone a:focus-visible { outline-width: 2px; outline-offset: 2px; }
+.mobile-bottom { position: absolute; z-index: 20; right: 0; bottom: 0; left: 0; }
+.primary-action { display: flex; align-items: center; justify-content: space-between; width: calc(100% - 32px); height: 52px; margin: 12px 16px; padding: 0 18px; border: 0; border-radius: 10px; font-size: 14px; font-weight: 800; }
+.mobile-bottom nav { display: grid; grid-template-columns: 1fr 1fr; height: 51px; border-top: 1px solid currentColor; }
+.mobile-bottom nav a { display: grid; place-items: center; position: relative; color: inherit; font-size: 11px; font-weight: 700; text-decoration: none; opacity: .58; }
+.mobile-bottom nav a.active { opacity: 1; }
+.mobile-bottom nav a.active::after { position: absolute; right: 31%; bottom: 7px; left: 31%; height: 2px; content: ""; background: currentColor; }
+.concept-card__footer { display: flex; flex-direction: column; justify-content: space-between; min-height: 136px; padding: 18px 20px 20px; }
+.concept-card__footer p { margin: 0; color: #5e5a55; font-size: 11px; line-height: 1.65; word-break: keep-all; }
+.swatches { display: flex; align-items: center; margin-top: 16px; }
+.swatches i { width: 20px; height: 20px; margin-left: -4px; border: 2px solid var(--board-paper); border-radius: 50%; background: var(--swatch); box-shadow: 0 0 0 1px rgba(0,0,0,.12); }
+.swatches i:first-child { margin-left: 0; }
+
+.board-footer { display: flex; align-items: flex-end; justify-content: space-between; min-height: 220px; padding: 64px clamp(24px, 4vw, 72px); background: #18171a; color: #f5f2eb; }
+.board-footer b { font-size: 16px; letter-spacing: .06em; }
+.board-footer p { margin: 8px 0 0; color: #aaa7a0; font-size: 12px; }
+.board-footer a { color: #fff; font-size: 12px; text-underline-offset: 4px; }
+
+.preview-dialog { width: min(570px, calc(100vw - 28px)); height: min(980px, calc(100vh - 28px)); padding: 0; overflow: hidden; border: 1px solid #4b4945; border-radius: 24px; background: #eeece6; color: #18171a; box-shadow: 0 30px 100px rgba(0,0,0,.45); }
+.preview-dialog::backdrop { background: rgba(15,14,17,.78); }
+.preview-dialog__bar { display: flex; align-items: center; justify-content: space-between; height: 84px; padding: 18px 22px; border-bottom: 1px solid #cac6bd; background: #fbfaf7; }
+.preview-dialog__bar span { display: block; margin-bottom: 4px; color: #817c74; font: 700 9px/1 "Cascadia Mono", Consolas, monospace; letter-spacing: .13em; }
+.preview-dialog__bar h2 { margin: 0; font-size: 20px; line-height: 1; }
+.close-preview { display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid #bab6ae; border-radius: 50%; background: transparent; font-size: 25px; line-height: 1; cursor: pointer; }
+.preview-dialog__stage { display: flex; justify-content: center; height: calc(100% - 84px); padding-top: 22px; overflow: auto; }
+.preview-dialog__stage .phone { transform: scale(.88); }
+.toast { position: fixed; z-index: 200; right: 24px; bottom: 24px; max-width: min(420px, calc(100vw - 32px)); padding: 13px 17px; border-radius: 10px; background: #18171a; color: #fff; font-size: 12px; opacity: 0; pointer-events: none; transform: translateY(12px); transition: opacity .18s ease, transform .18s ease; }
+.toast.is-visible { opacity: 1; transform: translateY(0); }
+
+/* 01 — CUTLINE */
+.concept-01 { background: #fdf6f9; color: #1c1622; }
+.concept-01 .statusbar { background: #fdf6f9; }
+.mobile-appbar { display: flex; align-items: center; justify-content: space-between; height: 52px; padding: 0 18px; }
+.mobile-appbar button, .c2-header button, .c5-header button, .c7-header button, .c8-header button, .c9-header button, .c10-header button { width: 42px; height: 42px; border: 0; background: transparent; }
+.c1-brand { display: flex; align-items: center; gap: 9px; font-size: 15px; font-weight: 820; }
+.c1-brand b { display: grid; place-items: center; width: 26px; height: 28px; background: #ff2e74; color: #1c1622; font-size: 16px; clip-path: polygon(0 0,100% 0,100% 38%,76% 50%,100% 62%,100% 100%,0 100%,0 62%,24% 50%,0 38%); }
+.c1-canvas { padding: 4px 18px 130px; }
+.c1-strip { overflow: hidden; background: #fff; border: 1px solid #f0dce4; border-radius: 20px; box-shadow: 0 12px 30px rgba(56,23,40,.08); }
+.c1-strip-head { display: flex; align-items: flex-end; justify-content: space-between; padding: 21px 20px 14px; }
+.c1-strip-head small { display: block; margin-bottom: 6px; color: #8d7681; font: 650 8px/1 "Cascadia Mono", Consolas, monospace; letter-spacing: .1em; }
+.c1-strip-head h3 { margin: 0; font-size: 24px; letter-spacing: -.045em; }
+.c1-strip-head > strong { font: 800 42px/.9 "Cascadia Mono", Consolas, monospace; color: #ff2e74; letter-spacing: -.08em; }
+.c1-ledger { margin: 0; padding: 0 20px; list-style: none; border-top: 1px solid #f0dce4; }
+.c1-ledger li { display: grid; grid-template-columns: 32px 1fr 24px; align-items: center; min-height: 52px; border-bottom: 1px solid #f0dce4; }
+.c1-ledger li > b { font: 700 10px/1 "Cascadia Mono", Consolas, monospace; color: #8d7681; }
+.c1-ledger li span { display: flex; align-items: baseline; gap: 8px; }
+.c1-ledger li span strong { font-size: 13px; }
+.c1-ledger li span small { color: #75636c; font-size: 10px; }
+.c1-ledger li i { font-style: normal; color: #a78c99; font-size: 12px; }
+.c1-add { display: flex; align-items: center; justify-content: space-between; width: 100%; height: 46px; padding: 0 20px; border: 0; background: #fff; color: #d3155b; font-size: 12px; font-weight: 760; }
+.c1-add span { color: #8d7681; font-size: 9px; font-weight: 600; }
+.c1-perf { height: 1px; margin: 2px 0; background: repeating-linear-gradient(90deg,#c9aab7 0 6px,transparent 6px 12px); }
+.c1-calc { padding: 15px 20px 17px; }
+.c1-toggle { display: inline-grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 3px; border: 1px solid #9b7f8a; border-radius: 9px; font-size: 9px; }
+.c1-toggle b, .c1-toggle span { padding: 6px 9px; border-radius: 6px; }
+.c1-toggle b { background: #1c1622; color: #fff; }
+.c1-calc dl { margin: 13px 0 8px; }
+.c1-calc dl div { display: flex; align-items: baseline; justify-content: space-between; margin-top: 8px; }
+.c1-calc dt { color: #6b5d6e; font-size: 9px; }
+.c1-calc dd { margin: 0; font: 760 13px/1.1 "Cascadia Mono", Consolas, monospace; letter-spacing: -.05em; }
+.c1-calc dl div:nth-child(n+2) dd { color: #995f00; }
+.c1-calc > small { color: #8d7681; font-size: 8px; }
+.c1-bottom { background: #fdf6f9; color: #1c1622; border-top: 1px solid #f0dce4; }
+.c1-bottom .primary-action { background: #ff2e74; color: #1c1622; }
+.c1-bottom nav { border-color: #f0dce4; }
+.c1-bottom nav a.active { color: #d3155b; }
+
+/* 02 — NIGHT ROUTE */
+.concept-02 { background: #101217; color: #f4f1e8; }
+.c2-header { display: grid; grid-template-columns: 42px 1fr 42px; align-items: center; height: 54px; padding: 0 16px; border-bottom: 1px solid #30343c; }
+.c2-header b { display: grid; place-items: center; width: 38px; height: 30px; background: #a8ff3e; color: #101217; font: 900 12px/1 "Cascadia Mono", Consolas, monospace; }
+.c2-header > span { padding-left: 12px; font: 700 9px/1 "Cascadia Mono", Consolas, monospace; letter-spacing: .12em; color: #a7a8a6; }
+.c2-main { padding: 18px 22px 132px; }
+.c2-overview { position: relative; padding-bottom: 18px; border-bottom: 1px solid #353943; }
+.c2-overview > span { color: #a8ff3e; font: 700 9px/1 "Cascadia Mono", Consolas, monospace; letter-spacing: .12em; }
+.c2-overview h3 { margin: 10px 0 0; font: 700 52px/.9 "Cascadia Mono", Consolas, monospace; letter-spacing: -.09em; }
+.c2-overview h3 small { margin-left: 7px; color: #8b8d91; font-size: 10px; letter-spacing: .1em; }
+.c2-overview > div { position: absolute; right: 0; bottom: 20px; text-align: right; }
+.c2-overview > div b { display: block; color: #ffb547; font: 700 16px/1.1 "Cascadia Mono", Consolas, monospace; }
+.c2-overview > div small { color: #85888f; font-size: 8px; }
+.c2-route { position: relative; margin: 18px 0 0; padding: 0; list-style: none; }
+.c2-route::before { position: absolute; top: 24px; bottom: 24px; left: 10px; width: 2px; content: ""; background: #6977ff; }
+.c2-route li { display: grid; grid-template-columns: 21px 27px 1fr 43px; align-items: center; min-height: 58px; position: relative; }
+.c2-route li > i { z-index: 1; width: 10px; height: 10px; border: 2px solid #6977ff; border-radius: 50%; background: #101217; }
+.c2-route li.current > i { width: 14px; height: 14px; margin-left: -2px; background: #a8ff3e; border-color: #a8ff3e; box-shadow: 0 0 0 5px #22272d; }
+.c2-route li > b { color: #747984; font: 700 9px/1 "Cascadia Mono", Consolas, monospace; }
+.c2-route li span strong { display: block; font-size: 13px; }
+.c2-route li span small { color: #777b83; font-size: 9px; }
+.c2-route li > em { color: #8c9098; font: 500 8px/1 "Cascadia Mono", Consolas, monospace; font-style: normal; text-align: right; }
+.c2-route li.current span strong { color: #a8ff3e; }
+.c2-route li.more > i { background: #6977ff; }
+.c2-terminal { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 6px; margin-top: 4px; padding: 13px 0 0 48px; border-top: 1px solid #353943; }
+.c2-terminal span { font: 700 8px/1 "Cascadia Mono", Consolas, monospace; color: #7b7f87; }
+.c2-terminal strong { color: #ffb547; font: 700 14px/1 "Cascadia Mono", Consolas, monospace; }
+.c2-terminal small { grid-column: 1/-1; color: #656970; font-size: 8px; }
+.c2-bottom { background: #101217; color: #f4f1e8; border-top: 1px solid #30343c; }
+.c2-bottom .primary-action { background: #a8ff3e; color: #101217; font-family: "Cascadia Mono", Consolas, monospace; }
+.c2-bottom nav { border-color: #30343c; }
+.c2-bottom nav a.active { color: #a8ff3e; }
+
+/* 03 — CONTROL ROOM */
+.concept-03 { background: #eef0ec; color: #111315; }
+.c3-header { display: flex; align-items: center; justify-content: space-between; height: 51px; padding: 0 18px; border-bottom: 1px solid #acb1aa; font: 700 9px/1 "Cascadia Mono", Consolas, monospace; letter-spacing: .08em; }
+.c3-header span { padding: 6px 8px; background: #146bff; color: white; }
+.c3-main { padding: 18px 16px 132px; }
+.c3-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.c3-title small { color: #626862; font: 650 8px/1 "Cascadia Mono", Consolas, monospace; }
+.c3-title h3 { margin: 4px 0 0; font-size: 23px; letter-spacing: -.04em; }
+.c3-title button { width: 40px; height: 40px; border: 1px solid #878d87; background: transparent; }
+.c3-metrics { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid #111315; border-left: 1px solid #111315; }
+.c3-metrics > div { min-height: 91px; padding: 10px 11px; border-right: 1px solid #111315; border-bottom: 1px solid #111315; background: #f8f9f6; }
+.c3-metrics small { display: block; margin-bottom: 10px; color: #646a64; font: 700 8px/1 "Cascadia Mono", Consolas, monospace; }
+.c3-metrics strong { display: block; font: 780 26px/.95 "Cascadia Mono", Consolas, monospace; letter-spacing: -.09em; }
+.c3-metrics em { display: block; margin-top: 5px; color: #747a73; font: 650 8px/1 "Cascadia Mono", Consolas, monospace; font-style: normal; }
+.c3-metrics .accent { background: #ff5a36; color: #111315; }
+.c3-metrics .accent small, .c3-metrics .accent em { color: #35140c; }
+.c3-queue { margin-top: 14px; border: 1px solid #111315; background: #f8f9f6; }
+.c3-queue header { display: flex; align-items: center; justify-content: space-between; height: 37px; padding: 0 10px; border-bottom: 1px solid #111315; font: 700 8px/1 "Cascadia Mono", Consolas, monospace; }
+.c3-queue header button { height: 26px; padding: 0 9px; border: 0; background: #111315; color: white; font: 700 8px/1 "Cascadia Mono", Consolas, monospace; }
+.c3-queue ol { margin: 0; padding: 0 10px; list-style: none; }
+.c3-queue li { display: grid; grid-template-columns: 28px 1fr 40px; align-items: center; min-height: 41px; border-bottom: 1px solid #ccd0ca; font-size: 11px; }
+.c3-queue li:last-child { border-bottom: 0; color: #666d66; }
+.c3-queue li > b, .c3-queue li > i { font: 700 8px/1 "Cascadia Mono", Consolas, monospace; font-style: normal; }
+.c3-queue li span small { margin-left: 7px; color: #767c76; font-size: 8px; }
+.c3-queue li i { text-align: right; }
+.c3-control { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-top: 10px; padding: 10px 0; border-top: 1px solid #919790; border-bottom: 1px solid #919790; }
+.c3-control span, .c3-control small { color: #626862; font: 650 7px/1 "Cascadia Mono", Consolas, monospace; }
+.c3-control b { font: 700 10px/1 "Cascadia Mono", Consolas, monospace; }
+.c3-bottom { background: #eef0ec; color: #111315; border-top: 1px solid #111315; }
+.c3-bottom .primary-action { background: #111315; color: white; border-radius: 0; font-family: "Cascadia Mono", Consolas, monospace; font-size: 11px; }
+.c3-bottom .primary-action > span { color: #69a0ff; font-size: 8px; }
+.c3-bottom nav { border-color: #111315; }
+.c3-bottom nav a.active { color: #146bff; }
+
+/* 04 — THREE BEATS */
+.concept-04 { background: #fbfaf6; color: #181a1b; }
+.c4-header { display: grid; grid-template-columns: 1fr auto 42px; align-items: center; height: 54px; padding: 0 17px; border-bottom: 1px solid #dedcd5; }
+.c4-header b { font-size: 15px; letter-spacing: -.04em; }
+.c4-header span { color: #77746f; font-size: 10px; }
+.c4-header button { width: 42px; height: 42px; border: 0; background: transparent; }
+.c4-main { padding: 24px 18px 134px; }
+.c4-kicker { margin: 0 0 8px; color: #3155ff; font: 700 8px/1 "Cascadia Mono", Consolas, monospace; letter-spacing: .11em; }
+.c4-main > h3 { margin: 0 0 22px; font-size: 30px; line-height: 1.14; letter-spacing: -.055em; }
+.c4-step { display: grid; grid-template-columns: 46px 1fr 32px; gap: 10px; align-items: start; padding: 17px 0; border-top: 1px solid #c9c6bf; }
+.c4-number { font: 700 26px/.95 "Cascadia Mono", Consolas, monospace; letter-spacing: -.09em; color: #9a9791; }
+.c4-step small { display: block; margin-bottom: 4px; color: #77746f; font: 700 8px/1 "Cascadia Mono", Consolas, monospace; letter-spacing: .1em; }
+.c4-step strong { font-size: 14px; }
+.c4-step p { margin: 5px 0 0; color: #76736e; font-size: 9px; }
+.c4-step > button { width: 30px; height: 30px; border: 1px solid #a7a39b; border-radius: 50%; background: transparent; }
+.c4-step.is-done .c4-number { color: #3155ff; }
+.c4-step.is-open { margin: 0 -8px; padding: 18px 8px; background: #e9e6ff; border-top: 0; }
+.c4-step.is-open .c4-number { color: #3155ff; }
+.c4-fit { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+.c4-fit b { font: 760 24px/.9 "Cascadia Mono", Consolas, monospace; letter-spacing: -.08em; }
+.c4-fit b span { display: block; margin-top: 8px; color: #6b6681; font: 650 7px/1 "Noto Sans KR", sans-serif; letter-spacing: 0; }
+.c4-check { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #d8ff52; font-weight: 900; }
+.c4-step.is-next { border-bottom: 1px solid #c9c6bf; }
+.c4-bottom { background: #fbfaf6; color: #181a1b; border-top: 1px solid #d6d3cc; }
+.c4-bottom .primary-action { background: #3155ff; color: white; }
+.c4-bottom nav { border-color: #d6d3cc; }
+.c4-bottom nav a.active { color: #3155ff; }
+
+/* 05 — POSTER STACK */
+.concept-05 { background: #241027; color: #fff8e8; }
+.c5-header { display: grid; grid-template-columns: 46px 1fr 42px; align-items: center; height: 52px; padding: 0 16px; border-bottom: 1px solid #58325a; }
+.c5-header b { display: grid; place-items: center; width: 38px; height: 30px; background: #d9ff4f; color: #241027; font-size: 13px; }
+.c5-header span { padding-left: 9px; font: 700 8px/1 "Cascadia Mono", Consolas, monospace; letter-spacing: .12em; }
+.c5-main { padding: 13px 16px 130px; }
+.c5-poster { position: relative; height: 338px; overflow: hidden; background: #fff8e8; color: #241027; }
+.c5-date { position: absolute; top: 17px; left: 18px; font: 800 9px/1 "Cascadia Mono", Consolas, monospace; letter-spacing: .1em; }
+.c5-poster > p { margin: 0; padding: 48px 18px 0; font-size: 56px; line-height: .88; font-weight: 850; letter-spacing: -.085em; }
+.c5-poster > p b { color: #ff2e74; font-weight: 900; }
+.c5-band { position: absolute; right: 0; bottom: 99px; left: 0; display: flex; justify-content: space-between; align-items: center; height: 55px; padding: 0 18px; background: #d9ff4f; transform: rotate(-3deg) scale(1.03); }
+.c5-band strong { font: 850 18px/1 "Cascadia Mono", Consolas, monospace; }
+.c5-band small { font: 700 9px/1 "Cascadia Mono", Consolas, monospace; }
+.c5-price { position: absolute; right: 18px; bottom: 15px; left: 18px; display: grid; grid-template-columns: 1fr auto; align-items: end; padding-top: 15px; border-top: 2px solid #241027; }
+.c5-price small { font: 700 8px/1 "Cascadia Mono", Consolas, monospace; }
+.c5-price b { font: 800 23px/1 "Cascadia Mono", Consolas, monospace; color: #ff2e74; letter-spacing: -.06em; }
+.c5-price em { grid-column: 2; margin-top: 4px; font: 700 7px/1 "Cascadia Mono", Consolas, monospace; font-style: normal; text-align: right; }
+.c5-ledger { margin-top: 10px; background: #331637; }
+.c5-ledger header { display: flex; align-items: center; justify-content: space-between; height: 38px; padding: 0 12px; border-bottom: 1px solid #634067; font: 700 8px/1 "Cascadia Mono", Consolas, monospace; }
+.c5-ledger header button { border: 0; background: transparent; color: #d9ff4f; font-size: 9px; }
+.c5-ledger p { display: grid; grid-template-columns: 28px 1fr auto; align-items: center; min-height: 36px; margin: 0; padding: 0 12px; border-bottom: 1px solid #58325a; font-size: 10px; }
+.c5-ledger p b { color: #ff2e74; font: 700 8px/1 "Cascadia Mono", Consolas, monospace; }
+.c5-ledger p span { color: #aa90ab; font-size: 8px; }
+.c5-ledger > small { display: block; padding: 9px 12px; color: #aa90ab; font: 650 7px/1 "Cascadia Mono", Consolas, monospace; }
+.c5-bottom { background: #241027; color: #fff8e8; border-top: 1px solid #58325a; }
+.c5-bottom .primary-action { background: #ff2e74; color: #241027; }
+.c5-bottom nav { border-color: #58325a; }
+.c5-bottom nav a.active { color: #d9ff4f; }
+
+/* 06 — SETLIST JOURNAL */
+.concept-06 { background: #f4f0e8; color: #171717; }
+.concept-06, .concept-06 button { font-family: "Noto Sans KR", "Segoe UI", sans-serif; }
+.c6-header { display: flex; align-items: center; justify-content: space-between; height: 53px; margin: 0 20px; border-bottom: 1px solid #171717; }
+.c6-header b { font-family: "Noto Serif KR", Batang, serif; font-size: 15px; }
+.c6-header span { font: 700 8px/1 "Cascadia Mono", Consolas, monospace; letter-spacing: .1em; }
+.c6-main { padding: 14px 20px 132px; }
+.c6-coverline { display: flex; justify-content: space-between; color: #315cff; font: 700 8px/1 "Cascadia Mono", Consolas, monospace; letter-spacing: .08em; }
+.c6-main > h3 { margin: 20px 0 14px; font-family: "Noto Serif KR", Batang, serif; font-size: 31px; line-height: 1.18; letter-spacing: -.055em; font-weight: 650; }
+.c6-main > h3 em { color: #315cff; font-style: normal; }
+.c6-deck { display: grid; grid-template-columns: 1fr 126px; gap: 18px; align-items: end; padding: 13px 0; border-top: 1px solid #171717; border-bottom: 1px solid #171717; }
+.c6-deck p { margin: 0; color: #69645c; font-size: 10px; line-height: 1.6; }
+.c6-deck > b { font: 700 29px/.9 "Cascadia Mono", Consolas, monospace; letter-spacing: -.08em; text-align: right; }
+.c6-deck > b small { display: block; margin-top: 7px; font-size: 7px; letter-spacing: .11em; }
+.c6-list { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid #171717; }
+.c6-list > div { display: grid; grid-template-columns: 25px 1fr; align-items: center; min-height: 60px; border-bottom: 1px solid #c5beb2; }
+.c6-list > div:nth-child(odd) { padding-right: 8px; border-right: 1px solid #c5beb2; }
+.c6-list > div:nth-child(even) { padding-left: 8px; }
+.c6-list > div:nth-last-child(-n+2) { border-bottom: 0; }
+.c6-list b { color: #f04b32; font: 700 8px/1 "Cascadia Mono", Consolas, monospace; }
+.c6-list strong { display: block; font-size: 11px; }
+.c6-list small { color: #777169; font-size: 8px; }
+.c6-summary { display: grid; grid-template-columns: auto 1fr; align-items: baseline; gap: 6px 14px; margin-top: 15px; }
+.c6-summary span { font: 700 8px/1 "Cascadia Mono", Consolas, monospace; color: #6c665e; }
+.c6-summary strong { color: #f04b32; font: 700 17px/1 "Cascadia Mono", Consolas, monospace; text-align: right; }
+.c6-summary small { grid-column: 2; color: #6c665e; font-size: 8px; text-align: right; }
+.c6-bottom { background: #f4f0e8; color: #171717; border-top: 1px solid #171717; }
+.c6-bottom .primary-action { background: #315cff; color: white; border-radius: 0; font-family: "Noto Serif KR", Batang, serif; }
+.c6-bottom nav { border-color: #171717; }
+.c6-bottom nav a.active { color: #315cff; }
+
+/* 07 — NOCTURNE STAGE */
+.concept-07 { background: #09090b; color: #ede7dc; }
+.c7-header { display: grid; grid-template-columns: 1fr auto 42px; align-items: center; height: 51px; padding: 0 16px; border-bottom: 1px solid #332b38; }
+.c7-header b { font-size: 12px; letter-spacing: .11em; }
+.c7-header span { color: #776e7c; font: 650 8px/1 "Cascadia Mono", Consolas, monospace; }
+.c7-main { padding: 22px 22px 132px; }
+.c7-title small { color: #62f5c7; font: 650 8px/1 "Cascadia Mono", Consolas, monospace; letter-spacing: .1em; }
+.c7-title h3 { margin: 8px 0 21px; font-size: 39px; line-height: .95; font-weight: 580; letter-spacing: -.055em; }
+.c7-stage { position: relative; padding-left: 20px; }
+.c7-stage-line { position: absolute; top: 0; bottom: 0; left: 27px; width: 1px; background: #514459; }
+.c7-stage article { position: relative; display: grid; grid-template-columns: 34px 1fr 30px; align-items: center; min-height: 65px; color: #69626e; }
+.c7-stage article > b { z-index: 2; display: grid; place-items: center; width: 16px; height: 16px; border: 1px solid #514459; border-radius: 50%; background: #09090b; font: 650 6px/1 "Cascadia Mono", Consolas, monospace; }
+.c7-stage article span { display: flex; flex-direction: column; font-size: 14px; font-weight: 650; }
+.c7-stage article span small { margin-bottom: 3px; font-size: 8px; font-weight: 450; }
+.c7-stage article em { font: 600 8px/1 "Cascadia Mono", Consolas, monospace; font-style: normal; text-align: right; }
+.c7-stage article.active { min-height: 91px; margin-left: -8px; padding: 10px 12px 10px 8px; background: #ede7dc; color: #09090b; border-radius: 12px; }
+.c7-stage article.active > b { background: #62f5c7; border-color: #62f5c7; color: #09090b; }
+.c7-stage article.more { color: #8a808e; }
+.c7-totals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 13px; padding-top: 13px; border-top: 1px solid #332b38; }
+.c7-totals p { margin: 0; }
+.c7-totals p span { display: block; margin-bottom: 6px; color: #756d7a; font: 650 7px/1 "Cascadia Mono", Consolas, monospace; }
+.c7-totals p b { font: 700 10px/1 "Cascadia Mono", Consolas, monospace; color: #62f5c7; }
+.c7-totals > small { grid-column: 1/-1; color: #625a67; font-size: 8px; }
+.c7-bottom { background: #09090b; color: #ede7dc; border-top: 1px solid #332b38; }
+.c7-bottom .primary-action { background: #62f5c7; color: #09090b; }
+.c7-bottom nav { border-color: #332b38; }
+.c7-bottom nav a.active { color: #62f5c7; }
+
+/* 08 — STICKER JAM */
+.concept-08 { background: #ffe98a; color: #222; }
+.c8-header { display: grid; grid-template-columns: 46px 1fr 42px; align-items: center; height: 54px; padding: 0 16px; border-bottom: 2px solid #222; }
+.c8-header b { display: grid; place-items: center; width: 40px; height: 31px; background: #222; color: #ffe98a; font-size: 14px; transform: rotate(-3deg); }
+.c8-header span { padding-left: 10px; font-size: 11px; font-weight: 800; }
+.c8-main { padding: 19px 17px 132px; }
+.c8-hero { position: relative; }
+.c8-hero small { font: 750 8px/1 "Cascadia Mono", Consolas, monospace; letter-spacing: .1em; }
+.c8-hero h3 { margin: 7px 0 13px; font-size: 38px; line-height: .97; letter-spacing: -.065em; }
+.c8-hero > span { position: absolute; top: 19px; right: 3px; padding: 8px 10px; border: 2px solid #222; background: #b6a1ff; font: 800 8px/1 "Cascadia Mono", Consolas, monospace; transform: rotate(5deg); }
+.c8-board { padding: 13px; border: 2px solid #222; background: #fff9da; }
+.c8-board header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 13px; }
+.c8-board header b { font: 800 8px/1 "Cascadia Mono", Consolas, monospace; }
+.c8-board header button { height: 28px; padding: 0 9px; border: 2px solid #222; background: white; font-size: 8px; font-weight: 800; }
+.c8-sticker { display: grid; grid-template-columns: 30px 1fr 22px; align-items: center; min-height: 54px; margin-top: 7px; padding: 0 11px; border: 2px solid #222; box-shadow: 3px 3px 0 #222; }
+.c8-sticker:nth-of-type(1) { transform: rotate(-1deg); }
+.c8-sticker:nth-of-type(2) { margin-left: 10px; transform: rotate(1deg); }
+.c8-sticker:nth-of-type(3) { margin-right: 8px; transform: rotate(-.5deg); }
+.c8-sticker.coral { background: #ff6b65; }
+.c8-sticker.lilac { background: #b6a1ff; }
+.c8-sticker.green { background: #bdf44a; }
+.c8-sticker > b { font: 800 9px/1 "Cascadia Mono", Consolas, monospace; }
+.c8-sticker span { font-size: 12px; font-weight: 850; }
+.c8-sticker span small { margin-left: 7px; font-size: 8px; font-weight: 650; }
+.c8-sticker i { font-style: normal; }
+.c8-board > p { margin: 13px 0 3px; font-size: 9px; font-weight: 750; text-align: center; }
+.c8-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: 11px; }
+.c8-summary > div { padding: 10px; border: 2px solid #222; background: #fff9da; }
+.c8-summary small { display: block; margin-bottom: 6px; font-size: 8px; }
+.c8-summary b { font: 800 15px/1 "Cascadia Mono", Consolas, monospace; letter-spacing: -.05em; }
+.c8-summary > span { grid-column: 1/-1; padding: 7px 10px; background: #222; color: #fff; font: 700 8px/1 "Cascadia Mono", Consolas, monospace; text-align: center; }
+.c8-bottom { background: #ffe98a; color: #222; border-top: 2px solid #222; }
+.c8-bottom .primary-action { background: #222; color: #ffe98a; border-radius: 3px; }
+.c8-bottom nav { border-color: #222; }
+.c8-bottom nav a.active::after { height: 3px; }
+
+/* 09 — CUE RAIL */
+.concept-09 { background: #f5f5f1; color: #202124; }
+.c9-header { display: grid; grid-template-columns: 1fr auto 40px; align-items: center; height: 53px; padding: 0 16px; border-bottom: 1px solid #c4c6c2; }
+.c9-header b { font: 760 9px/1 "Cascadia Mono", Consolas, monospace; letter-spacing: .09em; }
+.c9-header span { color: #676c70; font-size: 9px; }
+.c9-main { padding: 19px 18px 132px; }
+.c9-route-head { display: grid; grid-template-columns: 1fr 1fr; align-items: end; padding-bottom: 15px; border-bottom: 2px solid #202124; }
+.c9-route-head > div:last-child { text-align: right; }
+.c9-route-head small { display: block; margin-bottom: 7px; color: #777c80; font: 700 7px/1 "Cascadia Mono", Consolas, monospace; letter-spacing: .09em; }
+.c9-route-head h3 { margin: 0; font: 750 37px/.9 "Cascadia Mono", Consolas, monospace; letter-spacing: -.08em; }
+.c9-route-head b { font: 700 13px/1 "Cascadia Mono", Consolas, monospace; color: #ff5c35; }
+.c9-timetable { position: relative; padding: 10px 0 5px; }
+.c9-rail { position: absolute; top: 32px; bottom: 30px; left: 75px; width: 2px; background: #ff5c35; }
+.c9-timetable article { display: grid; grid-template-columns: 61px 26px 1fr 24px; align-items: center; min-height: 63px; border-bottom: 1px solid #d5d6d2; }
+.c9-timetable time { font: 650 9px/1 "Cascadia Mono", Consolas, monospace; }
+.c9-timetable article > i { z-index: 1; width: 11px; height: 11px; border: 2px solid #ff5c35; border-radius: 50%; background: #f5f5f1; }
+.c9-timetable article span strong { display: block; font-size: 12px; }
+.c9-timetable article span small { color: #777c80; font-size: 8px; }
+.c9-timetable article em { font: 650 8px/1 "Cascadia Mono", Consolas, monospace; font-style: normal; text-align: right; }
+.c9-timetable article.c9-more { color: #72777a; }
+.c9-timetable article.c9-more > i { background: #ff5c35; }
+.c9-fare { display: grid; grid-template-columns: 1fr auto; gap: 5px; padding-top: 12px; border-top: 2px solid #202124; }
+.c9-fare span { color: #777c80; font: 700 7px/1 "Cascadia Mono", Consolas, monospace; }
+.c9-fare strong { color: #ff5c35; font: 750 15px/1 "Cascadia Mono", Consolas, monospace; }
+.c9-fare small { grid-column: 1/-1; color: #777c80; font-size: 8px; }
+.c9-bottom { background: #f5f5f1; color: #202124; border-top: 1px solid #202124; }
+.c9-bottom .primary-action { background: #ff5c35; color: #202124; border-radius: 2px; }
+.c9-bottom nav { border-color: #202124; }
+.c9-bottom nav a.active { color: #ff5c35; }
+
+/* 10 — VOICE TOPOGRAPHY */
+.concept-10 { background: #10101a; color: #eef0f6; }
+.c10-header { display: flex; align-items: center; justify-content: space-between; height: 50px; padding: 0 16px; border-bottom: 1px solid #333347; }
+.c10-header b { font: 700 8px/1 "Cascadia Mono", Consolas, monospace; letter-spacing: .1em; color: #56d6ff; }
+.c10-main { padding: 20px 18px 132px; }
+.c10-title { position: relative; }
+.c10-title small { color: #8f91a5; font: 650 8px/1 "Cascadia Mono", Consolas, monospace; letter-spacing: .09em; }
+.c10-title h3 { margin: 7px 0 0; font-size: 38px; line-height: .97; letter-spacing: -.06em; }
+.c10-title > span { position: absolute; top: 17px; right: 0; padding: 7px 8px; border: 1px solid #7b61ff; color: #b6a9ff; font: 700 7px/1 "Cascadia Mono", Consolas, monospace; }
+.c10-plot { position: relative; height: 186px; margin: 12px 0 6px; overflow: hidden; border-top: 1px solid #313147; border-bottom: 1px solid #313147; }
+.c10-plot svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.c10-plot .plot-fill { fill: #242343; }
+.c10-plot .plot-line { fill: none; stroke: #56d6ff; stroke-width: 3; }
+.c10-plot circle { fill: #ffaa8a; stroke: #10101a; stroke-width: 3; }
+.c10-label { position: absolute; padding: 4px 6px; background: #10101a; color: #eef0f6; font: 650 7px/1 "Cascadia Mono", Consolas, monospace; }
+.c10-label.l1 { top: 77px; left: 24px; }
+.c10-label.l2 { top: 21px; left: 175px; }
+.c10-label.l3 { top: 42px; right: 2px; color: #ffaa8a; }
+.c10-tracks p { display: grid; grid-template-columns: 43px 1fr auto; align-items: center; min-height: 39px; margin: 0; border-bottom: 1px solid #29293d; }
+.c10-tracks p b, .c10-tracks p i { font: 650 7px/1 "Cascadia Mono", Consolas, monospace; font-style: normal; }
+.c10-tracks p b { color: #7b61ff; }
+.c10-tracks p span { font-size: 9px; }
+.c10-tracks p i { color: #56d6ff; }
+.c10-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 15px; }
+.c10-metrics div { padding-top: 10px; border-top: 2px solid #7b61ff; }
+.c10-metrics small { display: block; margin-bottom: 6px; color: #8b8da0; font: 650 7px/1 "Cascadia Mono", Consolas, monospace; }
+.c10-metrics b { color: #ffaa8a; font: 700 13px/1 "Cascadia Mono", Consolas, monospace; }
+.c10-metrics > span { grid-column: 1/-1; color: #8b8da0; font-size: 8px; text-align: right; }
+.c10-bottom { background: #10101a; color: #eef0f6; border-top: 1px solid #333347; }
+.c10-bottom .primary-action { background: #7b61ff; color: #fff; }
+.c10-bottom nav { border-color: #333347; }
+.c10-bottom nav a.active { color: #56d6ff; }
+
+@media (max-width: 1700px) {
+  :root { --phone-scale: .69; }
+  .gallery { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+@media (max-width: 1320px) {
+  :root { --phone-scale: .72; }
+  .gallery { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .board-hero h1 { font-size: clamp(58px, 8vw, 102px); }
+}
+
+@media (max-width: 980px) {
+  :root { --phone-scale: .76; }
+  .board-header__topline { padding-bottom: 38px; }
+  .board-hero { grid-template-columns: 1fr; gap: 32px; }
+  .board-intro { max-width: 680px; }
+  .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .filter-note { display: none; }
+}
+
+@media (max-width: 680px) {
+  :root { --phone-scale: .82; }
+  .board-header { padding-inline: 20px; }
+  .board-header__topline { align-items: flex-start; gap: 16px; width: 100%; padding-bottom: 34px; }
+  .board-edition { display: none; }
+  .board-hero h1 { font-size: clamp(51px, 16vw, 78px); }
+  .board-hero > *, .board-intro, .board-facts { min-width: 0; }
+  .board-intro > p { overflow-wrap: anywhere; word-break: normal; }
+  .board-facts { grid-template-columns: 1fr; }
+  .board-facts div { display: flex; justify-content: space-between; gap: 16px; min-width: 0; border-bottom: 1px solid #e5e1da; }
+  .board-facts dt { flex: none; }
+  .board-facts dd { min-width: 0; max-width: 68%; font-size: 11px; overflow-wrap: anywhere; white-space: normal; text-align: right; }
+  .filter-bar__inner { padding-inline: 12px; overflow-x: auto; }
+  .filter-group { min-width: max-content; }
+  .gallery { grid-template-columns: 1fr; padding: 22px 12px 60px; }
+  .concept-card__header, .concept-card__footer { padding-inline: 18px; }
+  .board-footer { display: block; min-height: 190px; padding: 48px 24px; }
+  .board-footer a { display: inline-block; margin-top: 34px; }
+  .preview-dialog__stage .phone { transform: scale(.78); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .001ms !important; animation-duration: .001ms !important; animation-iteration-count: 1 !important; }
+}
+
+@media print {
+  .filter-bar, .open-preview, .board-footer, .toast, .skip-link { display: none !important; }
+  .board-header { padding-bottom: 24px; }
+  .gallery { grid-template-columns: repeat(2, 1fr); }
+  .concept-card { break-inside: avoid; }
+}
