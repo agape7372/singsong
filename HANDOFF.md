@@ -43,11 +43,12 @@ audit/install의 sandbox package/cache `EACCES`와 Chromium spawn `EPERM`은 승
 
 ## 임시 스마트폰 preview
 
-- URL: `https://bond-athletics-calculations-putting.trycloudflare.com`
-- owner process: fixture app PID 30596 (`127.0.0.1:3000`), Quick Tunnel PID 32848
+- URL: `https://interactions-suffered-participate-empire.trycloudflare.com`
+- owner process: fixture app PID 35632 (`127.0.0.1:34173`), Quick Tunnel PID 43376
 - lifecycle: `ACTIVE_PREVIEW/READY`; stable host, staging 또는 production 아님
 - current public flow: 홈·참조 자산 14개·검색 API·manifest·service worker 200, Chromium organizer→recipient→import와 반응형·접근성 전체 13 pass/7 intentional skip
 - current Station UI: `SINGSONG`, bold numeric count, single `+`, `시간`, centered `완료`, redundant completion hint 없음
+- isolation: 이전 3000번 포트 기반 터널은 싱송 종료 뒤 Podoal을 오노출해 종료했다. 다른 앱을 중지하지 않고 싱송을 전용 34173번 포트로 분리했다.
 - Android Chrome 설치: **더보기 → 홈 화면에 추가 → 설치**
 - iPhone Safari 설치: **더보기/공유 → 홈 화면에 추가 → ‘웹 앱으로 열기’ 활성화 → 추가**
 
@@ -152,7 +153,7 @@ Root가 이 항목을 이번 run에서 해결하면 `UNKNOWN_RESOLUTIONS.md`, `R
 ## Active preview owner와 종료
 
 `ACTIVE_RUN.lock`은 존재하지 않는다. root release agent가 사용자 확인을 위해 시작한 app PID
-30596과 tunnel PID 32848은 현재 의도적으로 유지한다. clean shutdown으로 표시하지 않으며,
+35632와 tunnel PID 43376은 현재 의도적으로 유지한다. clean shutdown으로 표시하지 않으며,
 사용자가 확인을 끝냈을 때 root가 command line·listener·PID를 다시 대조한 뒤 자신이 시작한
 두 process만 종료한다. 이 문서는 다른 owner의 process를 중지하거나 broad process cleanup을
 허가하지 않는다.

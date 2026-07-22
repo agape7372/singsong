@@ -15,11 +15,11 @@
 | Fixture build | `PASS` | `main` public-origin Next.js 16.2.11 Webpack production build, 모든 route 생성 |
 | Public browser | `PASS` | Quick Tunnel 대상 Chromium 20 discovered: 13 pass / 7 intentional project-gated skip |
 | Visual review | `PASS` | 공개 390px Station 화면, count 18.4px/900, 완료 중앙 오차 0px, overflow 0 |
-| Existing public preview | `ACTIVE_PREVIEW` | app PID 30596와 tunnel PID 32848; 홈·자산 14개·검색·manifest·SW 200 |
+| Existing public preview | `ACTIVE_PREVIEW` | app PID 35632와 tunnel PID 43376, 전용 34173 포트; 홈·자산 14개 200, public Chromium 13/7 |
 
 첫 Chromium 재실행은 managed sandbox가 browser process spawn을 `EPERM`으로 차단했다. 동일 build/source를 승인된 실행 경계에서 재실행했고 3개 시나리오가 5.2초에 모두 통과했다. 임시 3100 서버와 캡처 스크립트는 검수 직후 정리했다.
 
-사용자의 명시적 재게시 승인에 따라 기존 stale app PID 26232를 검증 후 종료하고, 최종 Station build를 같은 Quick Tunnel origin에 재게시했다. stable production gate 판정은 그대로 `BLOCKED_EXTERNAL`이다.
+사용자의 명시적 재게시 승인에 따라 기존 stale app PID 26232를 검증 후 종료하고 Station build를 재게시했다. 이후 싱송 프로세스가 종료된 공용 3000번 포트를 Podoal이 점유해 기존 터널이 다른 앱을 노출했다. 기존 tunnel PID 32848만 종료하고 Podoal은 건드리지 않았으며, Station을 전용 34173번 포트와 새 Quick Tunnel origin으로 다시 빌드·재게시했다. stable production gate 판정은 그대로 `BLOCKED_EXTERNAL`이다.
 
 ## 판정 어휘
 
@@ -45,7 +45,7 @@
 | Profile contract        | `fixture` / `release`; 내부 release runtime은 production 호환값 사용              |
 | Local capability        | `LOCAL_DEMO_READY`: verified fixture production release candidate                 |
 | Production gate         | `BLOCKED_EXTERNAL`; permanent deploy not performed                                |
-| Temporary phone preview | `ACTIVE_PREVIEW/READY`: app PID 30596, tunnel PID 32848                           |
+| Temporary phone preview | `ACTIVE_PREVIEW/READY`: app PID 35632, tunnel PID 43376, port 34173               |
 
 ## 최종 자동검증
 
@@ -80,7 +80,7 @@
 | Field performance                           | same release/region/device-class RUM/CrUX p75         | `NOT_RUN`        | sample `NONE`; result `NOT_RUN + NONE`, never zero/PASS                                                                                                                                 |
 | Aggregate demo gate                         | equivalent `verify:demo` component composition        | `PASS`           | current와 clean의 모든 component exit 0; no fabricated single aggregate-process exit                                                                                                    |
 | Release fail-closed                         | credentials 없는 `pnpm preflight:release`             | `PASS`           | expected exit 1, deterministic `BLOCK_EXTERNAL`, 13 required env names; no values logged                                                                                                |
-| Temporary phone preview                     | public-hostname fixture app + Cloudflare Quick Tunnel | `ACTIVE_PREVIEW` | app PID 30596/tunnel PID 32848; home, 14 assets, search, manifest, SW 200; public Chromium 13 pass/7 intentional skip |
+| Temporary phone preview                     | dedicated-port fixture app + Cloudflare Quick Tunnel  | `ACTIVE_PREVIEW` | app PID 35632/tunnel PID 43376/port 34173; home and 14 assets 200; public Chromium 13 pass/7 intentional skip |
 
 ## 환경 재시도
 
@@ -92,6 +92,7 @@
 - Chromium 첫 spawn은 managed sandbox `EPERM`이었다. 승인된 browser 검증과 mobile-shell 추가 회귀의 최신 합계는 E2E 13 pass/7 project-gated skip, PWA 3 pass다.
 - 최초 preview app은 localhost origin으로 build돼 public search가 403이었다. 코드를 우회하지 않고 `NEXT_PUBLIC_SITE_URL`을 Quick Tunnel hostname과 일치시켜 rebuild/start했고 public search/share와 전체 phone-profile flow가 PASS했다.
 - Station hotfix 직후 첫 공개 모바일 skip-link run은 이전 service-worker 전환 중 한 번 실패하고 retry에서 PASS했다. 갱신 뒤 retries 0의 3회 연속 targeted run과 전체 public-origin 13/7 suite가 모두 PASS해 전환을 닫았다.
+- 기존 `bond-athletics-calculations-putting` 터널은 싱송 PID 30596 종료 뒤 Podoal이 공용 3000번 포트를 점유하면서 서버측 응답 자체가 Podoal로 바뀌었다. client cache를 배제하고 tunnel target을 확인한 뒤 PID 32848만 종료했다. 싱송을 전용 34173번 포트에서 public hostname 기준으로 다시 build/start하고 새 origin에서 홈·14개 자산·모바일 identity/overflow 및 전체 Chromium 13/7을 재검증했다.
 - 233-path clean install의 첫 sandbox registry 접근은 `EACCES`였고 승인된 같은 frozen install은 506 packages reused/downloaded 0으로 exit 0이었다. lockfile과 package policy는 바뀌지 않았다.
 - clean typecheck가 새 BottomSlot test mock 6곳의 암묵적 type을 발견했다. 제품 코드나 threshold를 낮추지 않고 `tests/unit/bottom-slot.test.tsx`에 명시적 test mock type을 추가·sync한 뒤 current/clean format·lint·type·37/185 coverage·build를 전부 재실행해 PASS했다.
 - clean build와 final evidence 문서 sync 뒤 exclusion 규칙을 다시 적용한 current↔clean source는 233/233, missing 0, SHA-256 mismatch 0이다.
@@ -153,7 +154,7 @@
 - retained pre-renewal coverage: `coverage/coverage-summary.json` (2026-07-22 10:39:17+09:00), full 37/185 command exit 0; latest 39/193 run은 coverage를 재측정하지 않음
 - current E2E: `C:/Users/agape/AppData/Local/Temp/singsong-playwright/e2e/report/index.html` (2026-07-22 10:12:17+09:00)와 `e2e/playwright/.last-run.json` status `passed`
 - current PWA: `C:/Users/agape/AppData/Local/Temp/singsong-playwright/production-pwa/report/index.html` (2026-07-22 10:12:42+09:00)와 `production-pwa/results/.last-run.json` status `passed`
-- phone preview: `C:/Users/Public/Documents/ESTsoft/CreatorTemp/singsong-phone-preview/`의 `station-republish-20260723-013400.stdout.log`; running app PID 30596와 Quick Tunnel PID 32848. 최종 공개 화면은 `C:/Users/agape/.codex/visualizations/2026/07/22/019f87a9-4cc1-73c3-9dbd-6825140f85e8/singsong-public-republished.png`에 보존했다.
+- phone preview: `C:/Users/Public/Documents/ESTsoft/CreatorTemp/singsong-phone-preview/`의 `station-dedicated-tunnel-20260723-023109.stderr.log`, `station-dedicated-app-20260723-023230.stdout.log`; running app PID 35632와 Quick Tunnel PID 43376. 최종 공개 화면은 `C:/Users/agape/.codex/visualizations/2026/07/22/019f87a9-4cc1-73c3-9dbd-6825140f85e8/singsong-dedicated-republished.png`에 보존했다.
 - repository `test-results/**/.last-run.json`은 이전 실패 run의 generated metadata이므로 이 최종 PASS의 근거로 사용하지 않는다.
 - generated build: `.next/`, `public/sw.js`, `public/swe-worker-*`
 - 초기 자료·Git 보존: `MATERIAL_INVENTORY.md`, `MD_READ_LEDGER.md`, `GIT_HISTORY_AUDIT.md`, `FINAL_MATERIAL_AUDIT.md`
