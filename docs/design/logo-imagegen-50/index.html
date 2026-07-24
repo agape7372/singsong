@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SingSong — Final 8 Logo Directions</title>
+    <style>
+  :root { color-scheme: light; --cream:#FAF7F0; --paper:#fff; --ink:#15131A; --muted:#665F68; --rose:#FF3D6E; --ochre:#B76E00; --line:#D9D1C5; }
+  * { box-sizing: border-box; }
+  html { background: var(--cream); }
+  body { margin: 0; background: var(--cream); color: var(--ink); font-family: Inter, Pretendard, "Noto Sans KR", system-ui, sans-serif; }
+  main { width: min(2040px, calc(100% - 56px)); margin: 0 auto; padding: 64px 0 80px; }
+  header { display:grid; grid-template-columns:1fr auto; gap:36px; align-items:end; padding-bottom:30px; border-bottom:4px solid var(--ink); }
+  .eyebrow,.serial,.pick,.meta,.palette span,.family-head>span { font-family:ui-monospace,SFMono-Regular,Consolas,monospace; letter-spacing:.08em; text-transform:uppercase; }
+  .eyebrow { margin:0 0 12px; color:var(--rose); font-size:13px; font-weight:900; }
+  h1 { max-width:1200px; margin:0; font-size:clamp(52px,5vw,90px); line-height:.92; letter-spacing:-.06em; }
+  .subtitle { max-width:940px; margin:20px 0 0; color:var(--muted); font-size:18px; line-height:1.65; }
+  .header-actions { display:grid; gap:12px; justify-items:end; }
+  .board-link { display:inline-flex; padding:12px 15px; border:2px solid var(--ink); background:var(--paper); color:var(--ink); font-size:13px; font-weight:900; text-decoration:none; }
+  .board-link:hover { background:var(--rose); }
+  .palette { display:grid; grid-template-columns:repeat(2,auto); gap:10px 18px; padding:18px; border:2px solid var(--ink); background:var(--paper); }
+  .palette span { display:flex; align-items:center; gap:8px; font-size:11px; font-weight:850; }
+  .swatch { width:15px; height:15px; border:1px solid var(--ink); }
+  .rubric { display:flex; flex-wrap:wrap; gap:8px; margin:24px 0 46px; }
+  .rubric span { padding:8px 11px; border:1px solid var(--ink); background:var(--paper); font-size:12px; font-weight:850; }
+  .family { margin-top:56px; }
+  .family-head { display:grid; grid-template-columns:120px 1fr auto; gap:18px; align-items:baseline; margin-bottom:18px; padding-bottom:12px; border-bottom:2px solid var(--ink); }
+  .family-head>span { color:var(--rose); font-size:12px; font-weight:900; }
+  .family-head h2 { margin:0; font-size:30px; letter-spacing:-.035em; }
+  .family-head p { margin:0; color:var(--muted); font-size:14px; }
+  .grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:16px; }
+  .grid.final-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }
+  .card { min-width:0; overflow:hidden; border:2px solid var(--ink); background:var(--paper); }
+  .visual { position:relative; display:grid; place-items:center; aspect-ratio:1.08; padding:16px; overflow:hidden; border-bottom:1px solid var(--line); background:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px),#F4EFE7; background-size:22px 22px; }
+  .visual>img { display:block; width:min(100%,270px); aspect-ratio:1; object-fit:cover; border-radius:18%; }
+  .serial { position:absolute; top:12px; left:12px; display:grid; min-width:38px; height:30px; padding:0 8px; place-items:center; border:2px solid var(--ink); background:var(--rose); font-size:11px; font-weight:950; }
+  .pick { position:absolute; top:12px; right:12px; padding:8px 10px; border:2px solid var(--ink); background:var(--ink); color:var(--paper); font-size:10px; font-weight:900; }
+  .copy { padding:16px; }
+  h3 { margin:0; font-size:18px; line-height:1.12; letter-spacing:-.025em; }
+  .copy>p { min-height:62px; margin:12px 0 15px; color:var(--muted); font-size:12px; line-height:1.5; }
+  .tests { display:flex; align-items:center; gap:8px; padding-top:13px; border-top:1px dashed var(--line); }
+  .mini,.micro { display:grid; place-items:center; overflow:hidden; background:var(--cream); }
+  .mini,.mini img { width:32px; height:32px; }
+  .micro,.micro img { width:24px; height:24px; }
+  .mini img,.micro img { object-fit:cover; }
+  .meta { margin-left:auto; font-size:9px; font-weight:800; }
+  footer { display:flex; justify-content:space-between; gap:24px; margin-top:42px; padding-top:18px; border-top:3px solid var(--ink); color:var(--muted); font-size:12px; }
+  footer strong { color:var(--ink); }
+  @media (max-width:1200px) { .grid,.grid.final-grid { grid-template-columns:repeat(3,1fr); } header { grid-template-columns:1fr; } .header-actions { justify-items:start; } }
+  @media (max-width:760px) { main { width:min(100% - 24px,640px); padding-top:32px; } .grid,.grid.final-grid { grid-template-columns:1fr 1fr; } .family-head { grid-template-columns:1fr; gap:6px; } .family-head p { display:none; } h1 { font-size:48px; } }
+</style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <p class="eyebrow">SINGSONG / FINAL SHORTLIST / 2026</p>
+          <h1>최종 후보<br />8가지 비교 보드</h1>
+          <p class="subtitle">Matched Tear, Bridge Pass, Folded Receipt, Double Gate, Seal Cut S, Corner Fold S, Twin Stub Negative S, Folded Session S를 최종 후보로 분리했다.</p>
+        </div>
+        <div class="header-actions">
+  <div class="palette" aria-label="palette">
+    <span><i class="swatch" style="background:#FAF7F0"></i>#FAF7F0</span>
+    <span><i class="swatch" style="background:#15131A"></i>#15131A</span>
+    <span><i class="swatch" style="background:#FF3D6E"></i>#FF3D6E</span>
+    <span><i class="swatch" style="background:#B76E00"></i>#B76E00</span>
+  </div><a class="board-link" href="html/index.html">참고용 42안 보기 →</a></div>
+      </header>
+      <div class="rubric"><span>8 FINALISTS</span><span>USER SELECTION</span><span>24PX CHECK</span><span>MASKABLE 66%</span><span>NEXT: SVG REDRAW</span></div>
+      
+  <section class="family">
+    <div class="family-head"><span>FINAL / 08</span><h2>SELECTED DIRECTIONS</h2><p>요청 순서 유지</p></div>
+    <div class="grid final-grid">
+    <article class="card">
+      <div class="visual">
+        <img src="final/39-matched-tear.png" alt="Matched Tear logo concept" />
+        <span class="serial">39</span>
+        <span class="pick">FINAL 01</span>
+      </div>
+      <div class="copy">
+        <h3>Matched Tear</h3>
+        <p>One compact ticket mass divides into two mirrored halves along a single broad zigzag cream cut. One half black, one half rose; exactly three large teeth.</p>
+        <div class="tests">
+          <span class="mini"><img src="final/39-matched-tear.png" alt="" /></span>
+          <span class="micro"><img src="final/39-matched-tear.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="final/33-bridge-pass.png" alt="Bridge Pass logo concept" />
+        <span class="serial">33</span>
+        <span class="pick">FINAL 02</span>
+      </div>
+      <div class="copy">
+        <h3>Bridge Pass</h3>
+        <p>Two offset ticket slabs are connected by one thick horizontal bridge. The bridge is rose, the slabs black, and one shared notch makes the whole mark a single system.</p>
+        <div class="tests">
+          <span class="mini"><img src="final/33-bridge-pass.png" alt="" /></span>
+          <span class="micro"><img src="final/33-bridge-pass.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="final/17-folded-receipt.png" alt="Folded Receipt logo concept" />
+        <span class="serial">17</span>
+        <span class="pick">FINAL 03</span>
+      </div>
+      <div class="copy">
+        <h3>Folded Receipt</h3>
+        <p>One long black receipt strip folds into three broad layers that make a compact square bundle. One visible fold face is rose; no text and no small perforation dots. Strictly front-facing 2D orthographic geometry: no perspective, thickness, extrusion, isometric view, or stacked 3D slabs.</p>
+        <div class="tests">
+          <span class="mini"><img src="final/17-folded-receipt.png" alt="" /></span>
+          <span class="micro"><img src="final/17-folded-receipt.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="final/13-double-gate.png" alt="Double Gate logo concept" />
+        <span class="serial">13</span>
+        <span class="pick">FINAL 04</span>
+      </div>
+      <div class="copy">
+        <h3>Double Gate</h3>
+        <p>Two thick open ticket frames interlock at right angles without forming a chain. Their overlap contains one large circular cream punch; one frame black, one rose.</p>
+        <div class="tests">
+          <span class="mini"><img src="final/13-double-gate.png" alt="" /></span>
+          <span class="micro"><img src="final/13-double-gate.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="final/10-seal-cut-s.png" alt="Seal Cut S logo concept" />
+        <span class="serial">10</span>
+        <span class="pick">FINAL 05</span>
+      </div>
+      <div class="copy">
+        <h3>Seal Cut S</h3>
+        <p>A solid rose rounded-square seal contains one broad cream S cutout. Remove one circular bite from the seal edge and add no other details.</p>
+        <div class="tests">
+          <span class="mini"><img src="final/10-seal-cut-s.png" alt="" /></span>
+          <span class="micro"><img src="final/10-seal-cut-s.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="final/08-corner-fold-s.png" alt="Corner Fold S logo concept" />
+        <span class="serial">08</span>
+        <span class="pick">FINAL 06</span>
+      </div>
+      <div class="copy">
+        <h3>Corner Fold S</h3>
+        <p>A single angular strip changes direction at two diagonal folded corners to make a compact S. Show exactly two small rose fold faces on an otherwise black mark.</p>
+        <div class="tests">
+          <span class="mini"><img src="final/08-corner-fold-s.png" alt="" /></span>
+          <span class="micro"><img src="final/08-corner-fold-s.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="final/04-twin-stub-negative-s.png" alt="Twin Stub Negative S logo concept" />
+        <span class="serial">04</span>
+        <span class="pick">FINAL 07</span>
+      </div>
+      <div class="copy">
+        <h3>Twin Stub Negative S</h3>
+        <p>Two offset solid ticket-like slabs, one black and one rose, leave one continuous cream S-shaped gap between them. Use only one large semicircle notch across the pair.</p>
+        <div class="tests">
+          <span class="mini"><img src="final/04-twin-stub-negative-s.png" alt="" /></span>
+          <span class="micro"><img src="final/04-twin-stub-negative-s.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="final/01-folded-session-s.png" alt="Folded Session S logo concept" />
+        <span class="serial">01</span>
+        <span class="pick">FINAL 08</span>
+      </div>
+      <div class="copy">
+        <h3>Folded Session S</h3>
+        <p>One broad paper strip forms a compact capital-S movement through two precise mechanical folds. One small circular registration punch sits near an outer terminal; black middle span with rose upper and lower folds.</p>
+        <div class="tests">
+          <span class="mini"><img src="final/01-folded-session-s.png" alt="" /></span>
+          <span class="micro"><img src="final/01-folded-session-s.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article></div>
+  </section>
+      <footer><span>선택 순서는 요청 순서다. 최종 확정 전 단색·24px·상표 유사성 검토와 SVG master 재작도가 필요하다.</span><strong>SINGSONG / FINAL 8</strong></footer>
+    </main>
+  </body>
+</html>

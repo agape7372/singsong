@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">SingSong SS 09 — Punch Apex</title>
+  <desc id="desc">A punched ticket apex anchors an upright upper siot while a second siot completes the lower sweep of a capital S.</desc>
+  <rect width="512" height="512" rx="112" fill="#FAF7F0"/>
+  <path d="M154 230 285 126 401 236" fill="none" stroke="#15131A" stroke-width="56" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M401 236C357 268 298 263 216 276" fill="none" stroke="#15131A" stroke-width="50" stroke-linecap="round"/>
+  <path d="M116 399 216 276 367 405" fill="none" stroke="#FF3D6E" stroke-width="50" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="285" cy="126" r="38" fill="#15131A"/>
+  <circle cx="285" cy="126" r="14" fill="#FAF7F0"/>
+</svg>

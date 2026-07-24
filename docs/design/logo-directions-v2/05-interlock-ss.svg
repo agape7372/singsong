@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">SingSong interlocking double S app icon</title>
+  <desc id="desc">Two opposing S ribbons in ink and coral weave into a balanced interlocking monogram for SingSong.</desc>
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="#FAF7F0"/>
+  <path
+    d="M360 132H240C192 132 160 156 160 194C160 232 192 252 240 252H272C320 252 352 276 352 314C352 352 320 380 272 380H152"
+    fill="none"
+    stroke="#15131A"
+    stroke-width="44"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M152 132H272C320 132 352 156 352 194C352 232 320 252 272 252H240C192 252 160 276 160 314C160 352 192 380 240 380H360"
+    fill="none"
+    stroke="#FF3D6E"
+    stroke-width="44"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <path d="M240 252H272" fill="none" stroke="#FAF7F0" stroke-width="56" stroke-linecap="round"/>
+  <path d="M240 252H272" fill="none" stroke="#15131A" stroke-width="44" stroke-linecap="round"/>
+</svg>

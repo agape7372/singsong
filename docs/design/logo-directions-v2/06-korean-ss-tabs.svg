@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">SingSong Korean SS Tabs</title>
+  <desc id="desc">Two bold folded tabs form an abstract Korean double-siot, suggesting two friends moving together.</desc>
+  <rect width="512" height="512" rx="112" fill="#FAF7F0"/>
+  <path d="M132 360 188 168l56 192" fill="none" stroke="#15131A" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M268 360 324 168l56 192" fill="none" stroke="#FF3D6E" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+const NAV_PATHS = ["/", "/library", "/discover", "/settings"] as const;
+
 const destinations = [
   {
     href: "/",
@@ -23,8 +25,8 @@ const destinations = [
     ),
   },
   {
-    href: "/search",
-    label: "검색",
+    href: "/library",
+    label: "보관함",
     icon: (
       <svg
         aria-hidden="true"
@@ -35,8 +37,45 @@ const destinations = [
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        <circle cx="10.5" cy="10.5" r="5.5" />
-        <path d="m15 15 4.5 4.5" />
+        <path d="M5 5h14v14H5z" />
+        <path d="M5 9h14" />
+        <path d="M10 14h4" />
+      </svg>
+    ),
+  },
+  {
+    href: "/discover",
+    label: "발견",
+    icon: (
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <circle cx="12" cy="12" r="8" />
+        <path d="m15 9-3.5 1.5L10 15l3.5-1.5z" />
+      </svg>
+    ),
+  },
+  {
+    href: "/settings",
+    label: "설정",
+    icon: (
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <circle cx="12" cy="12" r="3" />
+        <path d="M12 3.5v2.5M12 18v2.5M20.5 12H18M6 12H3.5M17.7 6.3l-1.8 1.8M8.1 15.9l-1.8 1.8M17.7 17.7l-1.8-1.8M8.1 8.1 6.3 6.3" />
       </svg>
     ),
   },
@@ -44,7 +83,7 @@ const destinations = [
 
 export function PrimaryNav() {
   const pathname = usePathname();
-  if (pathname !== "/" && pathname !== "/search") return null;
+  if (!(NAV_PATHS as readonly string[]).includes(pathname)) return null;
 
   return (
     <nav className="primary-nav" aria-label="주요 화면">

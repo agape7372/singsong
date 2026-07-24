@@ -1,22 +1,30 @@
 import "fake-indexeddb/auto";
 import Dexie from "dexie";
 import { afterEach, describe, expect, it } from "vitest";
-import { buildSharedSnapshot } from "@/domain/canonical";
+import { buildSharedSnapshot, createTicketSnapshot } from "@/domain/canonical";
 import { calculatePlan } from "@/domain/calculation";
+import { addCatalogTracks } from "@/features/plan/add-tracks";
+import type { CatalogTrack } from "@/features/catalog/types";
 import {
   clearLocalDataForTests,
+  clearProfilePhoto,
   completeManagedShare,
   deleteManagedShare,
   getActivePlan,
   getManagedShare,
   getManagedShareReceipt,
+  getProfile,
   importSharedPlan,
+  listImports,
   listManagedShares,
+  listTickets,
   mutateActivePlan,
   observeActivePlan,
   prepareManagedShare,
   RevisionConflictError,
   rotateManagedShare,
+  saveProfile,
+  saveTicket,
 } from "@/data/plan-database";
 
 const DATABASE_NAME = "singsong-session-strip";
@@ -244,5 +252,152 @@ describe("single active plan CAS", () => {
     expect(await listManagedShares()).toEqual([]);
     expect(await readRawStore("managedShares", fingerprint)).toBeUndefined();
     expect(await readRawStore("managedShareSecrets", fingerprint)).toBeUndefined();
+  });
+});
+
+describe("device-local profile", () => {
+  it("returns a neutral default before anything is saved", async () => {
+    const profile = await getProfile();
+    expect(profile).toMatchObject({ id: "me", nickname: "", colorId: "rose" });
+    expect(profile.photo).toBeUndefined();
+  });
+
+  it("persists nickname, color, and a local photo, then clears just the photo", async () => {
+    const photo = new Blob(["local-only"], { type: "image/png" });
+    await saveProfile({ nickname: "지민", colorId: "teal", photo });
+    const saved = await getProfile();
+    expect(saved).toMatchObject({ nickname: "지민", colorId: "teal" });
+    expect(saved.photo).toBeInstanceOf(Blob);
+
+    const cleared = await clearProfilePhoto();
+    expect(cleared.photo).toBeUndefined();
+    expect(cleared).toMatchObject({ nickname: "지민", colorId: "teal" });
+  });
+
+  it("keeps the profile out of the shared snapshot the app can build", async () => {
+    await saveProfile({ nickname: "지민", colorId: "plum" });
+    const initial = await getActivePlan();
+    const plan = await mutateActivePlan(initial.revision, () => ({
+      people: 2,
+      pricing: { kind: "song", singlePriceWon: 1_000 },
+      items: [
+        {
+          id: "t1",
+          source: "manual",
+          catalogSongId: null,
+          title: "곡",
+          artist: "가수",
+          karaokeCodes: [],
+          order: 0,
+        },
+      ],
+    }));
+    const snapshot = buildSharedSnapshot(
+      plan,
+      calculatePlan(1, plan.pricing!, plan.people!),
+      "A".repeat(21) + "A",
+    );
+    const serialized = JSON.stringify(snapshot);
+    expect(serialized).not.toContain("지민");
+    expect(serialized).not.toContain("nickname");
+    expect(serialized).not.toContain("photo");
+  });
+});
+
+describe("library accessors", () => {
+  it("lists issued tickets newest first", async () => {
+    const initial = await getActivePlan();
+    const plan = await mutateActivePlan(initial.revision, () => ({
+      people: 2,
+      pricing: { kind: "song", singlePriceWon: 1_000 },
+      items: [
+        {
+          id: "t1",
+          source: "manual",
+          catalogSongId: null,
+          title: "곡",
+          artist: "가수",
+          karaokeCodes: [],
+          order: 0,
+        },
+      ],
+    }));
+    const base = await createTicketSnapshot(plan);
+    await saveTicket({
+      ...base,
+      revision: 1,
+      createdAt: "2026-07-01T00:00:00.000Z",
+      fingerprint: "a".repeat(64),
+    });
+    await saveTicket({
+      ...base,
+      revision: 2,
+      createdAt: "2026-07-05T00:00:00.000Z",
+      fingerprint: "b".repeat(64),
+    });
+
+    const tickets = await listTickets();
+    expect(tickets.map((ticket) => ticket.revision)).toEqual([2, 1]);
+    expect(tickets[0]?.payload.items.length).toBe(1);
+  });
+
+  it("lists imported shares newest first", async () => {
+    const initial = await getActivePlan();
+    const plan = await mutateActivePlan(initial.revision, () => ({
+      people: 2,
+      pricing: { kind: "song", singlePriceWon: 500 },
+      items: [
+        {
+          id: "seed",
+          source: "manual",
+          catalogSongId: null,
+          title: "곡",
+          artist: "가수",
+          karaokeCodes: [],
+          order: 0,
+        },
+      ],
+    }));
+    const payload = buildSharedSnapshot(
+      plan,
+      calculatePlan(1, plan.pricing!, plan.people!),
+      "B".repeat(21) + "A",
+    );
+    const first = await importSharedPlan(plan.revision, "C".repeat(21) + "A", payload);
+    await importSharedPlan(first.plan.revision, "D".repeat(21) + "A", payload);
+
+    const imports = await listImports();
+    expect(imports).toHaveLength(2);
+    expect(imports.every((share) => typeof share.importedAt === "string")).toBe(true);
+  });
+});
+
+describe("addCatalogTracks (발견 담기)", () => {
+  const track = (id: string): CatalogTrack => ({
+    id,
+    title: `곡 ${id}`,
+    artist: "가수",
+    karaokeCodes: { TJ: "91234" },
+    source: "fixture",
+  });
+
+  it("appends catalog tracks and skips duplicates by catalog id", async () => {
+    const first = await addCatalogTracks([track("a"), track("b")]);
+    expect(first).toMatchObject({ added: 2, skippedDuplicate: 0, skippedFull: 0 });
+
+    const again = await addCatalogTracks([track("a"), track("c")]);
+    expect(again).toMatchObject({ added: 1, skippedDuplicate: 1 });
+
+    const plan = await getActivePlan();
+    expect(plan.items.map((item) => item.catalogSongId)).toEqual(["a", "b", "c"]);
+    expect(plan.items.every((item) => item.source === "catalog")).toBe(true);
+  });
+
+  it("never exceeds the 100-track limit", async () => {
+    const many = Array.from({ length: 130 }, (_, index) => track(`t${index}`));
+    const result = await addCatalogTracks(many);
+    expect(result.added).toBe(100);
+    expect(result.skippedFull).toBe(30);
+    expect((await getActivePlan()).items).toHaveLength(100);
   });
 });

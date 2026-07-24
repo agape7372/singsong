@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta
+      name="description"
+      content="티켓이 되기 전에는 약속을 함께 만드는 공간으로 보이는 싱송 UI 컨셉 10종"
+    />
+    <title>싱송 공간 컨셉 10 — Interactive Design Lab</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#concept-grid">컨셉 목록으로 건너뛰기</a>
+
+    <header class="lab-header">
+      <div class="lab-header-inner">
+        <a class="lab-brand" href="#top" aria-label="싱송 공간 컨셉 데모 처음으로">
+          <span class="lab-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span>
+            <strong>싱송</strong>
+            <small>SPACE CONCEPT LAB · 10</small>
+          </span>
+        </a>
+
+        <div class="lab-intro" id="top">
+          <p class="lab-kicker">약속을 발권하기 전, 우리는 어디에 있을까?</p>
+          <h1>앱은 공간이고,<br />티켓은 마지막에 나온다.</h1>
+          <p>
+            같은 기능을 열 가지 공간 언어로 비교하세요. 곡을 담고, 인원을 바꾸고, 약속을 확정하면
+            그때 처음 티켓이 나타납니다.
+          </p>
+        </div>
+
+        <div class="lab-principle" aria-label="컨셉 핵심 원칙">
+          <span>BEFORE</span>
+          <strong>함께 만드는 공간</strong>
+          <span class="lab-principle-arrow" aria-hidden="true">→</span>
+          <span>AFTER</span>
+          <strong>확정된 약속 티켓</strong>
+        </div>
+      </div>
+    </header>
+
+    <nav class="filter-bar" aria-label="컨셉 계열 필터">
+      <div class="filter-inner">
+        <p><strong>10</strong> SPACES</p>
+        <div class="filter-actions" role="group" aria-label="보여줄 계열">
+          <button
+            class="filter-button is-active"
+            type="button"
+            data-filter="all"
+            aria-pressed="true"
+          >
+            전체
+          </button>
+          <button class="filter-button" type="button" data-filter="cutline" aria-pressed="false">
+            CUTLINE 2.0
+          </button>
+          <button class="filter-button" type="button" data-filter="editorial" aria-pressed="false">
+            BOLD EDITORIAL
+          </button>
+          <button class="filter-button" type="button" data-filter="utility" aria-pressed="false">
+            UTILITY LEDGER
+          </button>
+          <button class="filter-button" type="button" data-filter="hybrid" aria-pressed="false">
+            HYBRID
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <main class="lab-main">
+      <section class="concept-grid" id="concept-grid" aria-label="싱송 공간 컨셉 10종"></section>
+
+      <section class="comparison-note" aria-labelledby="comparison-title">
+        <p class="eyebrow">HOW TO REVIEW</p>
+        <h2 id="comparison-title">스타일보다 ‘약속을 만드는 기분’을 비교하세요.</h2>
+        <div class="comparison-criteria">
+          <p><span>01</span><strong>공간감</strong>여기에 머물며 함께 정리하고 싶은가</p>
+          <p><span>02</span><strong>명료함</strong>곡·사람·시간·비용이 바로 읽히는가</p>
+          <p><span>03</span><strong>기대감</strong>확정 전까지 티켓을 기다리게 하는가</p>
+          <p><span>04</span><strong>확장성</strong>검색·계산·공유 화면까지 이어질 수 있는가</p>
+        </div>
+      </section>
+    </main>
+
+    <dialog class="ticket-dialog" id="ticket-dialog" aria-labelledby="ticket-dialog-title">
+      <div class="ticket-dialog-shell">
+        <div class="ticket-dialog-heading">
+          <div>
+            <p class="eyebrow">THE SPACE BECOMES A TICKET</p>
+            <h2 id="ticket-dialog-title">약속이 확정됐어요.</h2>
+          </div>
+          <button class="icon-button dialog-close" type="button" aria-label="티켓 닫기">×</button>
+        </div>
+
+        <article class="issued-ticket" aria-label="확정된 싱송 약속 티켓">
+          <div class="ticket-punch ticket-punch-left" aria-hidden="true"></div>
+          <div class="ticket-punch ticket-punch-right" aria-hidden="true"></div>
+          <header class="ticket-head">
+            <div>
+              <span>SINGSONG</span>
+              <strong>약속 티켓</strong>
+            </div>
+            <p id="ticket-serial">NO. SPACE-01</p>
+          </header>
+          <div class="ticket-event">
+            <p class="ticket-label">MEET AT</p>
+            <h3 id="ticket-space-name">모임의 방</h3>
+            <p>7월 26일 토요일 · 저녁 7:30</p>
+          </div>
+          <dl class="ticket-facts">
+            <div>
+              <dt>함께</dt>
+              <dd id="ticket-people">4명</dd>
+            </div>
+            <div>
+              <dt>부를 곡</dt>
+              <dd id="ticket-songs">3곡</dd>
+            </div>
+            <div>
+              <dt>예상 시간</dt>
+              <dd id="ticket-time">18–24분</dd>
+            </div>
+            <div>
+              <dt>예상 비용</dt>
+              <dd id="ticket-cost">24,000–32,000원</dd>
+            </div>
+          </dl>
+          <div class="ticket-perforation" aria-hidden="true">
+            <span>TEAR AFTER THE PROMISE</span>
+          </div>
+          <footer class="ticket-foot">
+            <div>
+              <span>HOST</span>
+              <strong>우리 넷</strong>
+            </div>
+            <div class="ticket-barcode" aria-hidden="true"></div>
+          </footer>
+        </article>
+
+        <div class="dialog-actions">
+          <button class="button button-quiet dialog-close" type="button">다른 공간 더 보기</button>
+          <button class="button button-primary" type="button" id="copy-ticket">
+            티켓 내용 복사
+          </button>
+        </div>
+        <p class="copy-status" id="copy-status" role="status" aria-live="polite"></p>
+      </div>
+    </dialog>
+
+    <template id="concept-template">
+      <article class="concept-card">
+        <header class="concept-card-heading">
+          <div class="concept-index"></div>
+          <div>
+            <p class="concept-family"></p>
+            <h2 class="concept-title"></h2>
+            <p class="concept-thesis"></p>
+          </div>
+          <button class="focus-button" type="button" aria-expanded="false">
+            <span>크게 보기</span><i aria-hidden="true"></i>
+          </button>
+        </header>
+
+        <div class="demo-stage">
+          <section class="app-demo" aria-label="공간 컨셉 인터랙티브 화면">
+            <header class="demo-topbar">
+              <a href="#" class="demo-brand" aria-label="싱송 홈" tabindex="-1">
+                <span class="demo-brand-mark" aria-hidden="true"></span>
+                <span><strong>싱송</strong><small>오늘의 약속 공간</small></span>
+              </a>
+              <button class="demo-menu" type="button" aria-label="공간 메뉴">•••</button>
+            </header>
+
+            <div class="space-scene" aria-hidden="true"></div>
+
+            <div class="demo-content">
+              <div class="demo-welcome">
+                <p class="demo-label"></p>
+                <h3 class="demo-headline"></h3>
+                <p class="demo-copy"></p>
+              </div>
+
+              <section class="people-zone" aria-label="참여 인원">
+                <div>
+                  <span>함께하는 사람</span>
+                  <div class="avatar-row" aria-hidden="true">
+                    <i>나</i><i>민</i><i>수</i><i class="avatar-extra">+</i>
+                  </div>
+                </div>
+                <div class="stepper">
+                  <button type="button" class="people-minus" aria-label="인원 줄이기">−</button>
+                  <output class="people-count" aria-live="polite">4명</output>
+                  <button type="button" class="people-plus" aria-label="인원 늘리기">＋</button>
+                </div>
+              </section>
+
+              <section class="song-zone" aria-labelledby="song-zone-title">
+                <div class="zone-heading">
+                  <div>
+                    <span class="zone-number">A</span>
+                    <h4 id="song-zone-title">같이 부를 곡</h4>
+                  </div>
+                  <strong class="song-count">3곡</strong>
+                </div>
+                <ol class="song-list"></ol>
+                <button class="add-song" type="button"><span>＋</span> 곡 하나 더 놓기</button>
+              </section>
+
+              <section class="estimate-zone" aria-label="약속 예상치">
+                <div><span>머무는 시간</span><strong class="time-value">18–24분</strong></div>
+                <div><span>예상 비용</span><strong class="cost-value">24,000–32,000원</strong></div>
+              </section>
+
+              <button class="confirm-plan" type="button">
+                <span>이 공간에서 약속 확정</span><i aria-hidden="true">→</i>
+              </button>
+              <p class="ticket-hint">확정하는 순간, 오늘의 약속이 하나의 결과물로 완성돼요.</p>
+            </div>
+
+            <nav class="demo-nav" aria-label="데모 화면 탐색">
+              <a href="#" aria-current="page" tabindex="-1"><i aria-hidden="true"></i>공간</a>
+              <a href="#" tabindex="-1"><i aria-hidden="true"></i>곡 찾기</a>
+            </nav>
+          </section>
+        </div>
+      </article>
+    </template>
+
+    <noscript>이 디자인 랩의 10개 인터랙티브 데모를 보려면 JavaScript를 켜주세요.</noscript>
+  </body>
+</html>

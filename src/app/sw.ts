@@ -44,7 +44,7 @@ const serwist = new Serwist({
         request.method === "GET" &&
         !isNetworkOnlyChunk(url.pathname) &&
         (url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/icons/")),
-      handler: new CacheFirst({ cacheName: "singsong-static-v1" }),
+      handler: new CacheFirst({ cacheName: "singsong-static-v2" }),
       method: "GET",
     },
     {

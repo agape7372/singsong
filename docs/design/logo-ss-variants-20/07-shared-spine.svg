@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">SingSong Shared Spine Siot</title>
+  <desc id="desc">Two clear upright siot marks meet through a short curved center spine, turning the staggered Korean pair into one continuous two-color S gesture.</desc>
+  <rect width="512" height="512" rx="112" fill="#FAF7F0"/>
+  <path d="M188 244 C198 248 206 253 214 258" fill="none" stroke="#15131A" stroke-width="44" stroke-linecap="round"/>
+  <path d="M116 396 L214 258 L334 396" fill="none" stroke="#15131A" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M188 244 L286 116 L396 224" fill="none" stroke="#FF3D6E" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

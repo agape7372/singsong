@@ -12,7 +12,7 @@ if (manifestStart < 0 || manifestEnd < 0) {
 
 const manifestSource = worker.slice(manifestStart, manifestEnd + 1);
 const entries = [...manifestSource.matchAll(/[,{]["']url["']:["']([^"']+)["']/gu)].map((match) =>
-  match[1].replaceAll("\\", "/"),
+  match[1].replace(/\\+/gu, "/"),
 );
 const forbidden = entries.filter(
   (url) =>
@@ -29,12 +29,25 @@ if (!entries.includes("/offline.html")) {
   throw new Error("The standalone offline fallback is missing from precache");
 }
 
+const requiredBrandAssets = [
+  "/icons/folded-session-s-180.png",
+  "/icons/folded-session-s-192.png",
+  "/icons/folded-session-s-512.png",
+];
+const missingBrandAssets = requiredBrandAssets.filter((url) => !entries.includes(url));
+if (missingBrandAssets.length > 0) {
+  throw new Error(
+    `Folded Session S assets are missing from precache: ${missingBrandAssets.join(", ")}`,
+  );
+}
+
 console.log(
   JSON.stringify(
     {
       worker: path.relative(process.cwd(), workerPath).replaceAll("\\", "/"),
       precacheEntries: entries.length,
       forbiddenEntries: forbidden,
+      brandAssets: requiredBrandAssets,
     },
     null,
     2,

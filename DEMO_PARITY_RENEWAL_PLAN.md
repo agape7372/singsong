@@ -60,7 +60,7 @@
   row, 64–72px estimate strip, and 58–60px CTA.
 - Resting reorder controls have `opacity: 0` and no pointer events; the three delete
   controls remain visible and keyboard reordering remains available.
-- TypeScript and ESLint pass; all 39 Vitest files and 193 tests pass.
+- TypeScript and ESLint pass; all 39 Vitest files and 194 tests pass, including the Folded Session S asset/cache regression contract.
 - The isolated production build completes successfully.
 - The full Chromium matrix passes with 13 active tests and seven intentional
   project-specific skips, including 320px and 200–400% reflow coverage.

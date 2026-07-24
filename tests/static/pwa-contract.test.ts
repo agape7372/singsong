@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -33,5 +33,22 @@ describe("production PWA contract", () => {
     expect(config).toContain("/static\\/chunks\\/app\\/api\\//");
     expect(config).toContain("/static\\/chunks\\/app\\/s\\//");
     expect(config).toContain("/static\\/chunks\\/app\\/search\\//");
+  });
+
+  it("ships the cache-busting Folded Session S icon set", () => {
+    const manifest = read("src/app/manifest.ts");
+    const layout = read("src/app/layout.tsx");
+    const worker = read("src/app/sw.ts");
+    const icons = [
+      "folded-session-s-180.png",
+      "folded-session-s-192.png",
+      "folded-session-s-512.png",
+    ];
+
+    for (const icon of icons) {
+      expect(existsSync(path.join(process.cwd(), "public", "icons", icon))).toBe(true);
+      expect(`${manifest}\n${layout}`).toContain(`/icons/${icon}`);
+    }
+    expect(worker).toContain('cacheName: "singsong-static-v2"');
   });
 });

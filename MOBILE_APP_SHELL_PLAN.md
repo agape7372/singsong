@@ -3,12 +3,11 @@
 > Status: COMPLETE · 2026-07-22  
 > Trigger: real-phone review found the implemented home visually reads as a landing page and violates the canonical Session Strip app-shell contract.
 
-> Latest renewal verification: 39 Vitest files / 190 tests, fixture build, responsive Chromium 3 / 3 PASS. 아래 37 / 185와 `ACTIVE_PREVIEW/READY` 기록은 리뉴얼 전 증거이며, 현재 공개 preview는 `PREVIEW_RESTART_REQUIRED`다.
+> Latest renewal verification: 39 Vitest files / 194 tests, fixture build, public Chromium 13 / 7와 PWA 3 / 3 PASS. 아래 37 / 185와 precache 45 기록은 리뉴얼 전 보존 증거이며, 현재 공개 preview는 Folded Session S를 포함한 `ACTIVE_PREVIEW/READY`다.
 
 `COMPLETE`는 repository/local fixture 범위의 구현·자동검증 완료를 뜻한다. 영구 production
 배포, 실제 iOS/Android 설치·보조기기 확인, catalog 권리와 운영 credential은 계속
-`BLOCKED_EXTERNAL`이다. 기존 Quick Tunnel process는 보존되어 있지만 최신 build 재게시
-승인 전에는 사용 가능한 preview로 안내하지 않으며 stable host가 아니다.
+`BLOCKED_EXTERNAL`이다. Quick Tunnel에는 최신 fixture build가 재게시되어 있지만 stable host가 아니다.
 
 ## Evidence and root cause
 
@@ -83,24 +82,16 @@
 | A — shell/navigation | `SiteHeader` 안의 단일 `PrimaryNav` DOM, route-aware `aria-current`, `AppHeaderActions`, viewport/safe-area 기반 `BottomSlot`                                                         | `primary-nav.test.tsx`, `mobile-shell.spec.ts`; mobile bottom↔wide header 전환과 중복 0                                                                                   |
 | B — home strip       | `PlanWorkspace`가 queue→단일 perforation→calculator 순서를 유지한다. 0곡은 `WorkingStrip`의 검색 링크 하나, 1곡 이상은 `HomeActionDock`의 요금 입력/발권 행동 하나가 다음 결정을 소유 | `working-strip.test.tsx`, `home-action-dock.test.tsx`, mobile organizer flow 1/1                                                                                          |
 | C — search ledger    | sticky search, 연속 ledger row, 현재 곡·시간·비용을 계산하는 `PlanRail`, 플랜 복귀                                                                                                    | `search-ledger.test.tsx`, `plan-rail.test.tsx`, shell E2E                                                                                                                 |
-| D — install/app feel | Android `beforeinstallprompt`, iOS Safari 안내, 14일 dismiss 구현, standalone/immersive-route 억제, temporary-host 경고, Apple metadata와 safe area                                   | `pwa-install-prompt.test.tsx`는 explicit action/iOS 안내·dismiss/standalone·immersive/error를 PASS; 14일 만료와 temporary-host 분기는 code inspection; production PWA 3/3 |
+| D — install/app feel | Android `beforeinstallprompt`, iOS Safari 안내, Folded Session S 헤더·설치 아이콘, 14일 dismiss, standalone/immersive-route 억제, temporary-host 경고, Apple metadata와 safe area | install/brand unit·static 계약과 public-origin production PWA 3/3 PASS; 14일 만료와 temporary-host 분기는 code inspection |
 | E — regression       | 기존 계산·검색·Dexie·티켓·공유·import·PWA·보안 계약을 변경하지 않고 shell 전용 unit/integration/E2E를 추가                                                                            | current·233-path clean Prettier/ESLint/tsc, Vitest 37 files/185 tests, coverage와 build/PWA/smoke PASS; current Playwright 20 discovered, 13 pass, 7 project-gated skip   |
 
-최종 fixture artifact는 built PWA precache 45/forbidden 0, home/ticket/OG 200,
-OG 30,423 bytes, home initial JS gzip 167,035 bytes로 검증됐다. 성능 최종치는 cold LCP
+리뉴얼 전 fixture artifact는 built PWA precache 45/forbidden 0, home/ticket/OG 200,
+OG 30,423 bytes, home initial JS gzip 167,035 bytes로 검증됐다. Folded Session S 반영 뒤 current artifact는 precache 49/forbidden 0/required brand assets 3이다. 성능 최종치는 cold LCP
 median/worst 324/336ms, TBT 234/240ms, CLS 0.0005; warm LCP 92/144ms, TBT 0;
 search p95 15.7ms; calculation median/worst 14/23.7ms; ticket navigation 505ms다.
 field p75는 표본 `NONE`이므로 `NOT_RUN + NONE`이다.
 
-스마트폰 확인용 임시 preview는
-`https://bond-athletics-calculations-putting.trycloudflare.com`이며, 문서 갱신 시 HTTPS
-200을 확인했다. public hostname을 `NEXT_PUBLIC_SITE_URL`로 둔 새 app PID 29532가
-`127.0.0.1:3000`을 listen하고 Quick Tunnel PID 32848이 연결한다. 공개 Origin에서 search
-200, share create 201/read 200과 Pixel 7 browser profile의 home→search→add→plan→pricing→
-ticket→share→read-only→import/replace→home 흐름이 PASS했다. 두 process는 사용자 확인을
-위해 의도적으로 유지하며 영구 배포나 종료 완료로 판정하지 않는다.
+스마트폰 확인용 현재 임시 preview는
+`https://interactions-suffered-participate-empire.trycloudflare.com`이다. public hostname으로 빌드한 app PID 43664가 `127.0.0.1:34173`을 listen하고 Quick Tunnel PID 43376이 연결한다. Folded Session S의 versioned 180/192/512 assets, manifest와 `singsong-static-v2` worker가 공개 origin에서 200이며 public Chromium PWA 3/3이 PASS했다. 두 process는 사용자 확인을 위해 의도적으로 유지하며 영구 배포나 종료 완료로 판정하지 않는다.
 
-최초 localhost-bound app의 public search 403은 위 재기동으로 해결됐다. repository shell,
-public organizer flow와 Pixel 7 Chromium profile의 same-origin service-worker ready/controller
-검증은 `ACTIVE_PREVIEW/READY`다. 실제 physical-device 설치는 별도 증거가 없어
-production/device PASS로 승격하지 않는다.
+이전 `bond-athletics-calculations-putting`/port 3000 preview는 싱송 종료 후 다른 앱을 오노출해 폐기한 역사 기록이다. 현재 repository shell과 same-origin service-worker 검증은 `ACTIVE_PREVIEW/READY`지만 실제 physical-device 설치는 사용자의 재확인이 필요하므로 production/device PASS로 승격하지 않는다.

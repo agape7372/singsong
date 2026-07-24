@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">SingSong Ribbon Siot</title>
+  <desc id="desc">Two softly bowed but pointed Korean siot ribbons pass the eye from the upper right through the center toward the lower left like a capital S.</desc>
+  <rect width="512" height="512" rx="112" fill="#FAF7F0"/>
+  <path d="M188 250 C226 208 252 164 286 116 C318 164 350 204 396 232" fill="none" stroke="#FF3D6E" stroke-width="50" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M116 388 C160 354 190 304 226 254 C260 302 292 350 344 396" fill="none" stroke="#15131A" stroke-width="50" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -8,7 +8,16 @@
 - 티켓/공유/가져오기: 의미론적 티켓 데이터, 공유 범위·30일 만료·고정 사본·철회 안내, Web Share/copy/PNG, 독립 실행 가져오기 상태를 정리했다.
 - 회귀 방지: 관련 unit/integration/E2E 테스트를 갱신하고 고유 heading ID, heading 단계, loading `aria-busy`, 공유 고지와 한국어 메타데이터 계약을 추가했다.
 - Git 보존: 기존 branch/HEAD와 사용자 변경을 유지했으며 reset, clean, checkout, stage, commit, push, deploy를 수행하지 않았다.
-- 최신 검증: Prettier, ESLint, TypeScript, Next fixture build PASS; Vitest 39 files / 190 tests; responsive Chromium 3 / 3 PASS.
+- 당시 검증: Prettier, ESLint, TypeScript, Next fixture build PASS; Vitest 39 files / 190 tests; responsive Chromium 3 / 3 PASS. 이후 누적 결과는 `VERIFICATION_REPORT.md`가 소유한다.
+
+## 2026-07-23 Folded Session S 반영
+
+- 최종 후보 8안 중 Folded Session S를 현재 앱 아이콘으로 선택하고 탐색 PNG를 `public/icons/icon.svg`의 제어된 기하로 재작도했다.
+- `src/components/site-header.tsx`의 hardcoded `S`를 새 brand asset으로 교체했다.
+- manifest·metadata·헤더는 cache-busting `folded-session-s-{180,192,512}.png`를 사용하며 기존 icon 파일명은 호환 alias로 남겼다.
+- 서비스워커 runtime cache를 `singsong-static-v2`로 갱신하고 build artifact 검증에 세 brand asset의 precache 포함을 추가했다.
+- current full Vitest 39/194, PWA artifact 49/forbidden 0/brand assets 3, 실제 Quick Tunnel origin Chromium PWA 3/3을 통과했다.
+- fixture app을 PID 43664로 재시작했으며 tunnel PID 43376과 전용 port 34173은 유지했다.
 
 ## 보존 경계
 
@@ -41,14 +50,14 @@
 | `src/analytics/port.ts`                                                                                                          | privacy-minimal typed no-op and test sink                                                                                               |
 | `src/app/*`, `src/components/*`, `src/proxy.ts`                                                                                  | six routes, search/share/OG API, app shell/errors/offline/manifest/SW/CSP/update                                                        |
 | `src/components/app-header-actions.tsx`, `bottom-slot.tsx`, `pwa-install-prompt.tsx`                                             | compact header action portal, 한 개의 viewport-safe next-action slot, Android/iOS 설치 안내와 temporary-host honesty                    |
-| `src/components/site-header.tsx`, `planner-tabs.tsx`                                                                             | task route에서 mobile bottom↔wide header로 위치만 바뀌는 플랜·검색 2-item navigation DOM과 `aria-current`                               |
+| `src/components/site-header.tsx`, `planner-tabs.tsx`                                                                             | Folded Session S brand mark와 task route에서 mobile bottom↔wide header로 위치만 바뀌는 플랜·검색 2-item navigation DOM                  |
 | `src/features/plan/home-action-dock.tsx`, `plan-rail.tsx`                                                                        | nonempty home의 요금 입력/발권 행동 하나와 search의 현재 곡·시간·비용 요약/플랜 복귀; 0곡 검색 행동은 WorkingStrip이 소유               |
 | `src/features/plan/plan-workspace.tsx`, `working-strip.tsx`, `calculation-strip.tsx`, `search-ledger.tsx`                        | marketing/card stack을 one Working Strip·single perforation·calculation disclosure·continuous ledger로 복구                             |
 | `src/app/globals.css`, `layout.tsx`, `manifest.ts`, `page.tsx`, `search/page.tsx`                                                | CUTLINE semantic tokens, safe area/standalone metadata, route-aware compact shell composition                                           |
 | `src/features/ticket/ticket-screen.tsx`, `public/icons/*`, `public/offline.html`                                                 | canonical CUTLINE light export token과 설치/offline surface의 동일한 shell/brand 갱신                                                   |
 | `src/app/api/og/[slug]/route.tsx`                                                                                                | 1200×630 exact-share OG와 generic unavailable image, no-store/noindex                                                                   |
 | `src/assets/fonts/*`                                                                                                             | OG의 deterministic Korean glyph subset와 OFL license/provenance                                                                         |
-| `public/icons/*`, `scripts/generate-icons.mjs`                                                                                   | code-generated SVG/192/512/apple icons; generated raster reference 재사용 금지                                                          |
+| `public/icons/*`, `scripts/generate-icons.mjs`                                                                                   | Folded Session S SVG master, versioned 180/192/512 raster와 legacy alias의 재현 가능한 생성                                             |
 | `scripts/clean-generated.mjs`, `scripts/verify-built-pwa.mjs`, `scripts/smoke-http.mjs`                                          | reproducible generated cleanup, built PWA contract와 HTTP smoke                                                                         |
 | `scripts/perf-lab.mjs`                                                                                                           | cold/warm navigation, search distribution, calculation/ticket scripted performance runner                                               |
 | `scripts/perf-lab.mjs` mobile-shell update                                                                                       | fixed BottomSlot/nav가 scripted interaction을 가리지 않는 현재 selector와 ticket navigation 측정                                        |
@@ -57,7 +66,7 @@
 | `supabase/migrations/20260722010000_share_snapshot_v1.sql`                                                                       | private hash-only immutable share schema, TTL/rate/allowlist RPC/rollback notes                                                         |
 | `tests/unit/*`                                                                                                                   | calculation oracle, canonical/byte limits, release artifact/env/startup/share-key/PWA contracts                                         |
 | `tests/integration/*`                                                                                                            | Dexie CAS/import/managed capability, calculation UI와 BFF search/share/HTTP/OG behavior                                                 |
-| `tests/static/*`                                                                                                                 | migration ACL, PWA no-cache, secret/HTML static guard                                                                                   |
+| `tests/static/*`                                                                                                                 | migration ACL, PWA no-cache·required brand asset, secret/HTML static guard                                                              |
 | `tests/e2e/*`, `playwright.config.ts`                                                                                            | mobile/desktop organizer→recipient core, 새 플랜/undo, IME, responsive, PNG/revoke recovery flow                                        |
 | `tests/e2e/mobile-shell.spec.ts`와 갱신된 `core-flow.spec.ts`, `resilience.spec.ts`                                              | nav DOM 1개, header/dock/rail, queue→calculator 순서, 25% fixed cap, 200% flow fallback와 새 app-shell selector 회귀                    |
 | `tests/unit/plan-rail.test.tsx`, `primary-nav.test.tsx`, `pwa-install-prompt.test.tsx`                                           | plan summary domain reuse, route navigation semantics, Android/iOS/standalone/install 오류·dismiss 계약                                 |
@@ -102,9 +111,9 @@
 - [x] normal/Codex refs와 reachable/unreachable object count 변화/이유 확인 — HEAD/refs/object counts unchanged
 - [x] 새 source의 static secret/public-env/release-artifact guard와 generated/runtime exclusion 확인
 - [x] Next 16.1.7 audit 15건(High 8건)을 16.2.11/PostCSS 8.5.20으로 수정하고 prod+dev level-low audit 0 및 613-entry supply-chain policy 확인
-- [x] 리뉴얼 전 CUTLINE shell·233-path clean의 37-file/185-test coverage/build/PWA/smoke 증거를 보존하고, 최신 리뉴얼 39-file/190-test·build·responsive Chromium 3/3을 `VERIFICATION_REPORT.md`에 추가
+- [x] 리뉴얼 전 CUTLINE shell·233-path clean의 37-file/185-test coverage/build/PWA/smoke 증거를 보존하고, 최신 리뉴얼 39-file/194-test·build·public Chromium 13/7·PWA 3/3을 `VERIFICATION_REPORT.md`에 추가
 - [x] final evidence 문서 sync 뒤 current↔clean source 233/233, missing/extra/SHA mismatch 0
 - [x] smartphone review용 Quick Tunnel과 app process의 owner/PID/temporary hostname을 기록하고 production deploy와 분리
-- [ ] app PID 29532 재시작과 최신 build 외부 재게시 — `PREVIEW_RESTART_REQUIRED`; 사용자의 명시적 외부 공개 승인 뒤 root owner가 수행
+- [x] Folded Session S build를 app PID 43664로 재시작하고 tunnel PID 43376/port 34173에 재게시; icon·manifest·SW 200과 public PWA 3/3 확인
 
-보존 체크의 재현 세부는 `FINAL_MATERIAL_AUDIT.md`와 `GIT_HISTORY_AUDIT.md`의 리뉴얼 전 snapshot을 따른다. local fixture production artifact는 검증된 candidate이고 actual release build/deploy/DB/device/operations는 외부 gate로 남는다. app PID 29532와 Quick Tunnel PID 32848은 보존됐지만 최신 `.next`와 기존 server manifest가 달라 현재 preview asset 5개가 500이다. 명시적 승인 전에는 최신 build를 외부에 재게시하지 않는다.
+보존 체크의 재현 세부는 `FINAL_MATERIAL_AUDIT.md`와 `GIT_HISTORY_AUDIT.md`의 리뉴얼 전 snapshot을 따른다. 현재 temporary preview는 `ACTIVE_PREVIEW/READY`지만 local fixture production artifact일 뿐이다. actual release build/deploy/DB/device/operations와 Android native install-sheet 최종 확인은 외부 gate로 남는다.

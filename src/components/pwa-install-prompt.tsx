@@ -58,7 +58,11 @@ export function PwaInstallPrompt() {
   const [instructionsOpen, setInstructionsOpen] = useState(false);
   const [isPrompting, setIsPrompting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const eligibleRoute = pathname === "/" || pathname === "/search";
+  const eligibleRoute =
+    pathname === "/" ||
+    pathname === "/library" ||
+    pathname === "/discover" ||
+    pathname === "/settings";
   const pwaEnabled = process.env.NEXT_PUBLIC_PWA_ENABLED !== "false";
 
   useEffect(() => {

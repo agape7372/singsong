@@ -138,7 +138,9 @@ describe("share Open Graph image", () => {
     expect(html.match(/<h1\b/gu)).toHaveLength(1);
     expect(html).toContain('<h1 id="shared-ticket-heading">함께 부를 세션이 도착했어요.</h1>');
     expect(articleHeading).toBeTruthy();
-    expect(html).toContain(`<h2 id="${articleHeading}">오늘의 세션 스트립</h2>`);
+    expect(html).toMatch(
+      new RegExp(`<h2 id="${articleHeading}"[^>]*>오늘의 세션 스트립</h2>`, "u"),
+    );
     expect(html).toContain('<h3 id="shared-ledger-heading">전체 곡 순서</h3>');
     expect(html).toContain('<h3 id="handoff-heading">내 순서로 이어서 편집할까요?</h3>');
     expect(html).toContain(

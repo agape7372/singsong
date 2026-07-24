@@ -84,12 +84,12 @@ describe("TicketCard rendering contract", () => {
 
     expect(html).toContain('class="ticket-card export-capture"');
     expect(html).toContain("TEST DATA · 실제 노래방 곡 목록이 아닙니다");
-    expect(html).toContain("가수 미입력");
-    expect(html).toContain("직접 입력");
-    expect(html).toContain("TJ 12345 · KY 54321");
-    expect(html).toContain("5–15분");
+    // The riso poster front carries only the headline: full song list and the
+    // time/per-person breakdown moved to the flip back. The stub keeps the total.
+    expect(html).not.toContain("TJ 12345 · KY 54321");
+    expect(html).not.toContain("5–15분");
+    expect(html).not.toContain("₩334–₩667");
     expect(html).toContain("₩1,000–₩2,000");
-    expect(html).toContain("₩334–₩667");
     expect(html).toContain("ABCDEF0123");
     expect(motionState.articleProps.at(-1)).toMatchObject({
       initial: false,
@@ -123,7 +123,7 @@ describe("TicketCard rendering contract", () => {
     });
   });
 
-  it("gives every ticket a unique accessible heading and preserves the semantic summary hierarchy", () => {
+  it("gives every ticket a unique accessible heading tied to the poster title", () => {
     const html = renderToStaticMarkup(
       <>
         <TicketCard payload={rangedPayload} headingLevel="h2" />
@@ -141,11 +141,10 @@ describe("TicketCard rendering contract", () => {
       const heading = headingId ? parsed.getElementById(headingId) : null;
       expect(heading?.tagName).toBe(index === 0 ? "H2" : "H3");
       expect(heading?.textContent).toBe("오늘의 세션 스트립");
-      expect(ticket.querySelector("ol")).not.toBeNull();
-      const terms = [...ticket.querySelectorAll("dl.ticket-summary dt")].map(
-        (term) => term.textContent,
-      );
-      expect(terms).toEqual(["예상 시간", "총 비용", "3명 · 1인당"]);
+      // Poster front keeps the song count accessible even though the detailed
+      // ledger lives on the flip back.
+      expect(ticket.querySelector(".ticket-numberplate")).not.toBeNull();
+      expect(ticket.textContent).toContain("2곡");
     });
   });
 

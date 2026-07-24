@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">SingSong Staggered Siot</title>
+  <desc id="desc">A gently turned upper Korean siot hands off to a clearly upright lower siot, creating a staggered capital-S flow without losing the Hangul form.</desc>
+  <rect width="512" height="512" rx="112" fill="#FAF7F0"/>
+  <path d="M196 252 L292 116 L396 232" transform="rotate(18 292 116)" fill="none" stroke="#FF3D6E" stroke-width="52" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M116 396 L220 252 L326 396" fill="none" stroke="#15131A" stroke-width="52" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

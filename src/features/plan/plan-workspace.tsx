@@ -8,11 +8,10 @@ import { DOMAIN_LIMITS, normalizeTrackText } from "@/domain/validation";
 import type { Plan, PricingConfig, Track } from "@/domain/models";
 import type { CatalogTrack } from "@/features/catalog/types";
 import { AppHeaderActions } from "@/components/app-header-actions";
-import { BottomSlot } from "@/components/bottom-slot";
 import { CalculationStrip, type CalculationStripHandle } from "./calculation-strip";
 import { HomeActionDock } from "./home-action-dock";
-import { PlanRail } from "./plan-rail";
-import { SearchLedger, type ManualTrackInput } from "./search-ledger";
+import { SearchSheet } from "./search-sheet";
+import { type ManualTrackInput } from "./search-ledger";
 import { useActivePlan } from "./use-active-plan";
 import { WorkingStrip } from "./working-strip";
 import { trackAnalytics } from "@/analytics/port";
@@ -25,95 +24,61 @@ const NewPlanDialog = dynamic(
   { ssr: false, loading: () => <p role="status">확인 창을 준비하는 중…</p> },
 );
 
-function WorkspaceLoading({ view }: { view: "plan" | "search" }) {
+function WorkspaceLoading() {
   return (
     <section
-      className={`page-shell task-shell task-shell-${view} workspace-loading`}
+      className="page-shell task-shell task-shell-plan workspace-loading"
       aria-busy="true"
       aria-labelledby="workspace-loading-title"
     >
-      {view === "search" ? (
-        <>
-          <header className="workspace-header">
+      <h1 className="sr-only" id="workspace-loading-title">
+        오늘의 플랜
+      </h1>
+      <div className="working-session-strip loading-session-strip">
+        <section
+          className="working-strip working-strip-loading"
+          aria-labelledby="loading-strip-title"
+        >
+          <div className="section-heading">
             <div>
               <p className="step-label">
-                곡 담기{" "}
+                곡 순서{" "}
                 <span className="serial-meta" aria-hidden="true">
-                  LEDGER / 02
+                  QUEUE / 01
                 </span>
               </p>
-              <h1 id="workspace-loading-title">곡 찾기</h1>
-              <p className="workspace-status-line" role="status">
-                저장된 플랜을 확인하는 중…
-              </p>
+              <h2 id="loading-strip-title">오늘의 순서를 여는 중</h2>
             </div>
-          </header>
-          <div className="search-ledger search-ledger-loading" aria-hidden="true">
-            <div className="loading-search-field" />
-            <ul className="result-list search-loading-list">
-              {[1, 2, 3].map((index) => (
-                <li className="search-result-row" key={index}>
-                  <span className="search-result-index">--</span>
-                  <span className="loading-ledger-copy">
-                    <span className="loading-line" />
-                    <span className="loading-line loading-line-short" />
-                  </span>
-                </li>
-              ))}
-            </ul>
+            <span className="count-stamp" aria-hidden="true">
+              -- / 100
+            </span>
           </div>
-        </>
-      ) : (
-        <>
-          <h1 className="sr-only" id="workspace-loading-title">
-            오늘의 플랜
-          </h1>
-          <div className="working-session-strip loading-session-strip">
-            <section
-              className="working-strip working-strip-loading"
-              aria-labelledby="loading-strip-title"
-            >
-              <div className="section-heading">
-                <div>
-                  <p className="step-label">
-                    곡 순서{" "}
-                    <span className="serial-meta" aria-hidden="true">
-                      QUEUE / 01
-                    </span>
-                  </p>
-                  <h2 id="loading-strip-title">오늘의 순서를 여는 중</h2>
-                </div>
-                <span className="count-stamp" aria-hidden="true">
-                  -- / 100
+          <ol className="track-list loading-track-list" aria-hidden="true">
+            {[1, 2, 3].map((index) => (
+              <li key={index}>
+                <span className="track-number">{String(index).padStart(2, "0")}</span>
+                <span className="loading-ledger-copy">
+                  <span className="loading-line" />
+                  <span className="loading-line loading-line-short" />
                 </span>
-              </div>
-              <ol className="track-list loading-track-list" aria-hidden="true">
-                {[1, 2, 3].map((index) => (
-                  <li key={index}>
-                    <span className="track-number">{String(index).padStart(2, "0")}</span>
-                    <span className="loading-ledger-copy">
-                      <span className="loading-line" />
-                      <span className="loading-line loading-line-short" />
-                    </span>
-                  </li>
-                ))}
-              </ol>
-              <p className="loading-status" role="status">
-                이 기기에 저장된 순서를 불러오고 있어요.
-              </p>
-            </section>
-          </div>
-        </>
-      )}
+              </li>
+            ))}
+          </ol>
+          <p className="loading-status" role="status">
+            이 기기에 저장된 순서를 불러오고 있어요.
+          </p>
+        </section>
+      </div>
     </section>
   );
 }
 
-export function PlanWorkspace({ view }: { view: "plan" | "search" }) {
+export function PlanWorkspace() {
   const { plan, error, notice, isSaving, mutate, dismissError, announce } = useActivePlan();
   const [removed, setRemoved] = useState<RemovedTrack | null>(null);
   const [resetBackup, setResetBackup] = useState<ResetBackup | null>(null);
   const [newPlanDialogOpen, setNewPlanDialogOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const issuing = useRef(false);
   const calculationRef = useRef<CalculationStripHandle>(null);
   const overflowRef = useRef<HTMLDetailsElement>(null);
@@ -121,7 +86,7 @@ export function PlanWorkspace({ view }: { view: "plan" | "search" }) {
   if (!plan && error) {
     return (
       <section
-        className={`page-shell task-shell task-shell-${view} workspace-recovery`}
+        className="page-shell task-shell task-shell-plan workspace-recovery"
         role="alert"
         aria-labelledby="workspace-storage-error-title"
       >
@@ -145,7 +110,7 @@ export function PlanWorkspace({ view }: { view: "plan" | "search" }) {
   }
 
   if (!plan) {
-    return <WorkspaceLoading view={view} />;
+    return <WorkspaceLoading />;
   }
 
   async function addCatalogTrack(catalog: CatalogTrack) {
@@ -362,69 +327,50 @@ export function PlanWorkspace({ view }: { view: "plan" | "search" }) {
     plan.pricing !== null;
 
   return (
-    <div className={`page-shell task-shell task-shell-${view}`}>
-      {view === "plan" ? (
-        <>
-          <h1 className="sr-only">오늘의 플랜</h1>
-          <AppHeaderActions>
-            <details ref={overflowRef} className="workspace-overflow">
-              <summary>
-                <span className="sr-only">플랜 메뉴</span>
-                <span aria-hidden="true">•••</span>
-              </summary>
-              <div className="workspace-overflow-panel">
-                <button
-                  className="button-link"
-                  type="button"
-                  aria-haspopup="dialog"
-                  aria-expanded={newPlanDialogOpen}
-                  disabled={isSaving || plan.items.length === 0}
-                  onClick={() => {
-                    if (overflowRef.current) overflowRef.current.open = false;
-                    setNewPlanDialogOpen(true);
-                  }}
-                >
-                  새 플랜 시작
-                </button>
-                {newPlanDialogOpen && (
-                  <NewPlanDialog
-                    count={plan.items.length}
-                    isSaving={isSaving}
-                    onConfirm={() => void startNewPlan()}
-                    onOpenChange={setNewPlanDialogOpen}
-                  />
-                )}
-                <Link className="workspace-menu-link" href="/import#storage-status">
-                  저장소 상태 도움말
-                </Link>
-                <a className="workspace-menu-link" href="/ticket#managed-shares">
-                  내 공유 관리
-                </a>
-                <p>
-                  {plan.items.length === 0
-                    ? "현재 플랜은 이미 비어 있습니다."
-                    : "현재 플랜을 명시적으로 교체합니다."}
-                </p>
-              </div>
-            </details>
-          </AppHeaderActions>
-        </>
-      ) : (
-        <header className="workspace-header">
-          <div>
-            <p className="step-label">
-              곡 담기{" "}
-              <span className="serial-meta" aria-hidden="true">
-                LEDGER / 02
-              </span>
-            </p>
-            <h1>곡 찾기</h1>
-            <p className="workspace-status-line">
-              곡 제목, 가수, 초성이나 TJ·KY 번호로 찾아 담아보세요.
+    <div className="page-shell task-shell task-shell-plan">
+      <h1 className="sr-only">오늘의 플랜</h1>
+      <AppHeaderActions>
+        <details ref={overflowRef} className="workspace-overflow">
+          <summary>
+            <span className="sr-only">플랜 메뉴</span>
+            <span aria-hidden="true">•••</span>
+          </summary>
+          <div className="workspace-overflow-panel">
+            <button
+              className="button-link"
+              type="button"
+              aria-haspopup="dialog"
+              aria-expanded={newPlanDialogOpen}
+              disabled={isSaving || plan.items.length === 0}
+              onClick={() => {
+                if (overflowRef.current) overflowRef.current.open = false;
+                setNewPlanDialogOpen(true);
+              }}
+            >
+              새 플랜 시작
+            </button>
+            {newPlanDialogOpen && (
+              <NewPlanDialog
+                count={plan.items.length}
+                isSaving={isSaving}
+                onConfirm={() => void startNewPlan()}
+                onOpenChange={setNewPlanDialogOpen}
+              />
+            )}
+            <Link className="workspace-menu-link" href="/import#storage-status">
+              저장소 상태 도움말
+            </Link>
+            <Link className="workspace-menu-link" href="/library">
+              보관함 열기
+            </Link>
+            <p>
+              {plan.items.length === 0
+                ? "현재 플랜은 이미 비어 있습니다."
+                : "현재 플랜을 명시적으로 교체합니다."}
             </p>
           </div>
-        </header>
-      )}
+        </details>
+      </AppHeaderActions>
       {error && (
         <div className="global-error" role="alert">
           <p>{error}</p>
@@ -446,55 +392,51 @@ export function PlanWorkspace({ view }: { view: "plan" | "search" }) {
           </button>
         </div>
       )}
-      {view === "search" ? (
-        <SearchLedger
-          onAdd={addCatalogTrack}
-          onManualAdd={addManualTrack}
-          onUndoCatalogAdd={undoCatalogAdd}
-          isManualDuplicate={isManualDuplicate}
-          addedCatalogIds={new Set(plan.items.flatMap((item) => item.catalogSongId ?? []))}
-          isFull={plan.items.length >= 100}
-          autoFocus
+      <div className="working-session-strip">
+        <WorkingStrip
+          items={plan.items}
+          people={plan.people}
+          disabled={isSaving}
+          onAddPerson={() => void addParticipant()}
+          onMove={(index, direction) => void move(index, direction)}
+          onRemove={(index) => void remove(index)}
+          onOpenSearch={() => setSearchOpen(true)}
+          undoLabel={removed?.track.title ?? null}
+          onUndo={() => void undo()}
         />
-      ) : (
-        <div className="working-session-strip">
-          <WorkingStrip
-            items={plan.items}
-            people={plan.people}
-            disabled={isSaving}
-            onAddPerson={() => void addParticipant()}
-            onMove={(index, direction) => void move(index, direction)}
-            onRemove={(index) => void remove(index)}
-            undoLabel={removed?.track.title ?? null}
-            onUndo={() => void undo()}
-          />
-          {plan.items.length > 0 && (
-            <>
-              <CalculationStrip
-                ref={calculationRef}
-                plan={plan}
-                disabled={isSaving}
-                onApply={applyCalculation}
-              />
-              <HomeActionDock
-                songCount={plan.items.length}
-                canIssue={canIssue}
-                disabled={isSaving}
-                onIssue={() => void issueTicket()}
-                onOpenPricing={() => calculationRef.current?.openPricingAndFocusFirstInvalid()}
-              />
-            </>
-          )}
-        </div>
-      )}
+        {plan.items.length > 0 && (
+          <>
+            <CalculationStrip
+              ref={calculationRef}
+              plan={plan}
+              disabled={isSaving}
+              onApply={applyCalculation}
+            />
+            <HomeActionDock
+              songCount={plan.items.length}
+              canIssue={canIssue}
+              disabled={isSaving}
+              onIssue={() => void issueTicket()}
+              onOpenPricing={() => calculationRef.current?.openPricingAndFocusFirstInvalid()}
+              onOpenSearch={() => setSearchOpen(true)}
+            />
+          </>
+        )}
+      </div>
       <p className="save-announcement" aria-live="polite">
         {notice ?? (isSaving ? "이 기기에 저장하는 중…" : "")}
       </p>
-      {view === "search" && (
-        <BottomSlot>
-          <PlanRail plan={plan} />
-        </BottomSlot>
-      )}
+      <SearchSheet
+        open={searchOpen}
+        onOpenChange={setSearchOpen}
+        count={plan.items.length}
+        onAdd={addCatalogTrack}
+        onManualAdd={addManualTrack}
+        onUndoCatalogAdd={undoCatalogAdd}
+        isManualDuplicate={isManualDuplicate}
+        addedCatalogIds={new Set(plan.items.flatMap((item) => item.catalogSongId ?? []))}
+        isFull={plan.items.length >= 100}
+      />
     </div>
   );
 }

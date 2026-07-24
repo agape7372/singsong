@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">SingSong Registration Fold</title>
+  <desc id="desc">Two opposing registration corners imply an S-shaped route around one precise planning mark.</desc>
+  <rect width="512" height="512" rx="112" fill="#FAF7F0"/>
+  <path d="M368 144H216c-40 0-64 24-64 64v36" fill="none" stroke="#15131A" stroke-width="56" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M144 368h152c40 0 64-24 64-64v-36" fill="none" stroke="#FF3D6E" stroke-width="56" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="256" cy="256" r="24" fill="#B76E00"/>
+  <circle cx="256" cy="256" r="8" fill="#FAF7F0"/>
+</svg>

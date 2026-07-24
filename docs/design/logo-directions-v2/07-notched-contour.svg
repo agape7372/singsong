@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">SingSong Notched Contour</title>
+  <desc id="desc">A heavy S-shaped route with ticket-like edge notches and a vivid destination segment.</desc>
+  <rect width="512" height="512" rx="112" fill="#FAF7F0"/>
+  <path d="M156 152h176c28 0 44 16 44 44s-16 44-44 44H180c-28 0-44 16-44 44s16 44 44 44h176" fill="none" stroke="#15131A" stroke-width="64" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M318 328h38" fill="none" stroke="#FF3D6E" stroke-width="64" stroke-linecap="round"/>
+  <circle cx="376" cy="196" r="22" fill="#FAF7F0"/>
+  <circle cx="136" cy="284" r="22" fill="#FAF7F0"/>
+</svg>

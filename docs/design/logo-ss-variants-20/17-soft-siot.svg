@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">SingSong Soft Siot</title>
+  <desc id="desc">A coral upper siot and black lower siot keep clear upward peaks while softly bowed arms trace a friendly S-shaped rhythm.</desc>
+  <rect width="512" height="512" rx="112" fill="#FAF7F0"/>
+  <path d="M178 244 Q232 184 290 120 Q346 182 394 240" fill="none" stroke="#FF3D6E" stroke-width="50" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M116 388 Q170 336 218 278 Q278 336 342 388" fill="none" stroke="#15131A" stroke-width="50" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

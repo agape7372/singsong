@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">SingSong gathering route app icon</title>
+  <desc id="desc">Four bold destination nodes join through two sweeping routes at a coral center, representing a small group gathering around one plan.</desc>
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="#FAF7F0"/>
+  <path d="M144 144C144 208 204 208 256 256C308 304 368 304 368 368" fill="none" stroke="#15131A" stroke-width="42" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M368 144C368 208 308 208 256 256C204 304 144 304 144 368" fill="none" stroke="#15131A" stroke-width="42" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="144" cy="144" r="36" fill="#FF3D6E"/>
+  <circle cx="368" cy="144" r="36" fill="#15131A"/>
+  <circle cx="144" cy="368" r="36" fill="#15131A"/>
+  <circle cx="368" cy="368" r="36" fill="#FF3D6E"/>
+  <rect x="226" y="226" width="60" height="60" rx="18" fill="#FF3D6E" transform="rotate(45 256 256)"/>
+</svg>

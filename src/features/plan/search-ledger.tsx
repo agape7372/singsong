@@ -5,8 +5,10 @@ import type { FormEvent } from "react";
 import Link from "next/link";
 import type { CatalogTrack } from "@/features/catalog/types";
 import { isValidSearchQuery, normalizeSearchText } from "@/domain/catalog";
+import { FIXTURE_CATALOG } from "@/features/catalog/fixture";
 
 const fixtureBuild = process.env.NEXT_PUBLIC_APP_PROFILE !== "production";
+const SUGGESTIONS: readonly CatalogTrack[] = fixtureBuild ? FIXTURE_CATALOG.slice(0, 6) : [];
 
 type SearchState =
   | { kind: "idle" }
@@ -163,20 +165,9 @@ export function SearchLedger({
       <h2 className="sr-only" id="search-ledger-title">
         부를 곡 찾기
       </h2>
-      {fixtureBuild && (
-        <div className="catalog-scope-note" role="note">
-          <div className="catalog-scope-title">
-            <strong>테스트 카탈로그</strong>
-            <span className="test-data-badge" aria-hidden="true">
-              TEST DATA
-            </span>
-          </div>
-          <p>권리 검증용 가상 목록이에요. 실제 TJ·KY 전체 곡 목록은 아니에요.</p>
-        </div>
-      )}
       <div className="search-ledger-head">
-        <label className="field-label" htmlFor={queryId}>
-          제목, 가수 또는 노래방 번호
+        <label className="sr-only" htmlFor={queryId}>
+          제목, 가수 또는 노래방 번호로 곡 찾기
         </label>
         <div className="search-input-wrap">
           <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20">
@@ -213,8 +204,59 @@ export function SearchLedger({
           {statusMessage}
         </p>
       </div>
+      {fixtureBuild && (
+        <p className="search-testdata-note">
+          <span className="test-data-badge" aria-hidden="true">
+            TEST DATA
+          </span>
+          권리 검증용 가상 목록이에요.
+        </p>
+      )}
       <div className="search-results" aria-busy={displayedState.kind === "loading"}>
-        {displayedState.kind === "idle" && (
+        {displayedState.kind === "idle" && SUGGESTIONS.length > 0 && (
+          <div className="search-suggestions">
+            <p className="search-suggestions-title">이런 곡 어때?</p>
+            <ul className="result-list" aria-label="추천 곡">
+              {SUGGESTIONS.map((track, index) => {
+                const isAdded = addedCatalogIds.has(track.id);
+                return (
+                  <li className="search-result-row" key={track.id}>
+                    <span className="search-result-index" aria-hidden="true">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <div className="search-result-copy">
+                      <strong>{track.title}</strong>
+                      <span>{track.artist}</span>
+                    </div>
+                    {isAdded ? (
+                      <span
+                        className="result-added-status"
+                        aria-label={`${track.title}, ${track.artist} 담김`}
+                      >
+                        <span aria-hidden="true">✓</span> 담김
+                      </span>
+                    ) : (
+                      <button
+                        className="icon-button"
+                        type="button"
+                        onClick={() =>
+                          void Promise.resolve(onAdd(track)).then((added) => {
+                            if (added) setLastAdded(track);
+                          })
+                        }
+                        disabled={isFull}
+                        aria-label={`${track.title}, ${track.artist} 담기`}
+                      >
+                        담기
+                      </button>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
+        {displayedState.kind === "idle" && SUGGESTIONS.length === 0 && (
           <div className="quiet-state search-idle-state">
             <p>제목이 바로 안 떠오르면 초성이나 TJ·KY 번호로 찾아봐요.</p>
           </div>

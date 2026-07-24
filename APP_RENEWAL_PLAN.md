@@ -75,6 +75,7 @@ The renewal preserves the current local-first domain, calculation, sharing, impo
 - Replaced the duplicated stylesheet layers with one cohesive CUTLINE system using cream, ink, action rose, and money ochre semantic tokens.
 - Renewed the responsive shell, Korean-first brand, loading states, single Session Strip, calculation disclosure, search ledger, BottomSlot actions, and two-item navigation.
 - Renewed ticket, managed-share, public-share, import, offline, missing, and error states while preserving the local-first and BFF contracts.
+- Replaced the header and install icon with the controlled Folded Session S SVG/180/192/512 asset set while retaining legacy icon aliases for installed clients.
 - Strengthened semantic heading/list/data markup, visible share disclosure, unique ticket heading IDs, focus states, reduced motion, forced colors, and mobile safe-area behavior.
 - Preserved the existing branch, HEAD, modified documents, untracked implementation, preview processes, and Git history; no reset, clean, checkout, stage, commit, push, or deploy was performed.
 
@@ -85,10 +86,11 @@ The renewal preserves the current local-first domain, calculation, sharing, impo
 | Prettier | PASS |
 | ESLint | PASS, zero warnings |
 | TypeScript | PASS |
-| Vitest | PASS, 39 files / 190 tests |
+| Vitest | PASS, 39 files / 194 tests |
 | Next.js fixture production build | PASS |
 | Responsive Chromium regression | PASS, 3 / 3 |
 | Visual review | PASS at 390×844 and 1440×900 for home, plus 390×844 search |
-| Existing Quick Tunnel preview | Authorization required before restarting and republishing the renewed build |
+| Public-origin PWA | PASS, 3 / 3 after Folded Session S service-worker rebuild |
+| Existing Quick Tunnel preview | `ACTIVE_PREVIEW/READY`: app PID 43664, tunnel PID 43376, port 34173 |
 
 The existing external release gates remain unchanged: licensed catalog data, production credentials and infrastructure, a stable production hostname, and real-device/assistive-technology validation are not represented by the fixture build.

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">SingSong Station Seal</title>
+  <desc id="desc">A bold circular seal encloses a compact switchback route with a marked arrival station.</desc>
+  <rect width="512" height="512" rx="112" fill="#FAF7F0"/>
+  <circle cx="256" cy="256" r="152" fill="#15131A"/>
+  <circle cx="256" cy="256" r="104" fill="#FAF7F0"/>
+  <path d="M204 208h88c18 0 28 10 28 28s-10 28-28 28h-72c-18 0-28 10-28 28s10 28 28 28h88" fill="none" stroke="#FF3D6E" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="308" cy="320" r="20" fill="#B76E00"/>
+</svg>

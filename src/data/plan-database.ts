@@ -3,6 +3,7 @@ import type { Plan, SharedSnapshot, TicketSnapshot, Track } from "@/domain/model
 import { assertValidPlan } from "@/domain/validation";
 
 export const ACTIVE_PLAN_ID = "active-plan";
+export const PROFILE_ID = "me";
 const CHANNEL_NAME = "singsong-active-plan-v1";
 
 class SingSongDatabase extends Dexie {
@@ -11,6 +12,7 @@ class SingSongDatabase extends Dexie {
   imports!: EntityTable<ImportedShare, "slug">;
   managedShares!: EntityTable<ManagedShareReceipt, "fingerprint">;
   managedShareSecrets!: EntityTable<ManagedShareSecret, "fingerprint">;
+  profile!: EntityTable<ProfileRecord, "id">;
 
   constructor() {
     super("singsong-session-strip");
@@ -63,10 +65,35 @@ class SingSongDatabase extends Dexie {
           })),
         );
       });
+    // v5 adds the device-local profile. It never leaves the browser: the profile
+    // is intentionally excluded from shared snapshots, ticket PNG, and OG output.
+    this.version(5).stores({
+      plans: "&id,revision,updatedAt",
+      tickets: "&[planId+revision],planId,revision,createdAt",
+      imports: "&slug,importedAt,planRevision",
+      managedShares: "&fingerprint,&slug,expiresAt,createdAt",
+      managedShareSecrets: "&fingerprint,createdAt",
+      profile: "&id",
+    });
   }
 }
 
-type ImportedShare = { slug: string; importedAt: string; planRevision: number };
+export type ImportedShare = { slug: string; importedAt: string; planRevision: number };
+
+/** Device-local identity. Never included in shared snapshots, ticket PNG, or OG. */
+export type ProfileRecord = {
+  id: string;
+  nickname: string;
+  colorId: string;
+  photo?: Blob;
+  updatedAt: string;
+};
+
+export const DEFAULT_PROFILE_COLOR = "rose";
+
+function emptyProfile(now = new Date().toISOString()): ProfileRecord {
+  return { id: PROFILE_ID, nickname: "", colorId: DEFAULT_PROFILE_COLOR, updatedAt: now };
+}
 
 type LegacyManagedShare = {
   fingerprint: string;
@@ -484,6 +511,59 @@ export async function deleteManagedShare(fingerprint: string) {
   await db().transaction("rw", db().managedShares, db().managedShareSecrets, () =>
     deleteManagedShareInTransaction(fingerprint),
   );
+}
+
+export async function listTickets(): Promise<TicketSnapshot[]> {
+  return db().tickets.orderBy("createdAt").reverse().toArray();
+}
+
+export async function listImports(): Promise<ImportedShare[]> {
+  return db().imports.orderBy("importedAt").reverse().toArray();
+}
+
+export async function getProfile(): Promise<ProfileRecord> {
+  return (await db().profile.get(PROFILE_ID)) ?? emptyProfile();
+}
+
+export function observeProfile(
+  onValue: (profile: ProfileRecord) => void,
+  onError: (error: unknown) => void,
+) {
+  const subscription = liveQuery(() => db().profile.get(PROFILE_ID)).subscribe({
+    next: (profile) => onValue(profile ?? emptyProfile()),
+    error: onError,
+  });
+  return () => subscription.unsubscribe();
+}
+
+export async function saveProfile(
+  patch: Partial<Pick<ProfileRecord, "nickname" | "colorId" | "photo">>,
+): Promise<ProfileRecord> {
+  return db().transaction("rw", db().profile, async () => {
+    const current = (await db().profile.get(PROFILE_ID)) ?? emptyProfile();
+    const next: ProfileRecord = {
+      ...current,
+      ...patch,
+      id: PROFILE_ID,
+      updatedAt: new Date().toISOString(),
+    };
+    await db().profile.put(next);
+    return next;
+  });
+}
+
+export async function clearProfilePhoto(): Promise<ProfileRecord> {
+  return db().transaction("rw", db().profile, async () => {
+    const current = (await db().profile.get(PROFILE_ID)) ?? emptyProfile();
+    const next: ProfileRecord = {
+      id: PROFILE_ID,
+      nickname: current.nickname,
+      colorId: current.colorId,
+      updatedAt: new Date().toISOString(),
+    };
+    await db().profile.put(next);
+    return next;
+  });
 }
 
 export async function clearLocalDataForTests() {

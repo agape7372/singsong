@@ -31,6 +31,9 @@
 | D-025 | ACCEPTED                | 알려진 dependency 취약점은 exact stable patch와 최소 transitive override로 닫고 prod+dev level-low audit 0을 출시 기준으로 둔다. | Next 16.1.7 graph의 15건(High 8건)을 Next/ESLint config 16.2.11과 PostCSS 8.5.20으로 수정했다. 신규 patch의 release-age 예외는 exact 12개 package-version만 허용한다. |
 
 | D-026 | ACCEPTED                | 2026-07-22 앱 리뉴얼은 `FINAL_BLUEPRINT` 우선순위와 채택된 CUTLINE 방향을 적용하고 기존 제품·보안 계약은 보존한다. | 중복 CSS를 단일 토큰/레이아웃 체계로 교체하고 Session Strip, 연속 원장, 단일 절취선, 한국어 우선 정보 구조를 전체 화면에 일관되게 적용했다. |
+| D-027 | ACCEPTED (사용자 canonical 승인) | 하단 내비를 **2탭→4탭(플랜·보관함·발견·설정)**으로 재구성하고, 검색을 `/search` 라우트 대신 플랜 흐름 안 bottom sheet로 흡수한다. 계획 단계 화면에는 티켓 물성(절취선·펀칭·시리얼)을 쓰지 않는다. | 검색·발권은 플랜의 수단·마지막 단계이므로 top-level 탭이 아니며, 보관함/설정/발견이 top-level이다. `CONFLICT_REGISTER` C1~C5로 지배 정본과의 충돌을 등록하고 해소했다. 검색 계약(IME/abort/undo/직접추가)과 발권 full-nav CSP 경계는 그대로 보존한다. |
+| D-028 | ACCEPTED (사용자 canonical 승인) | **D-020을 부분 대체**: 발견 탭을 **로컬 fixture 기반 TEST DATA 더미 큐레이션**(가상 테마 플레이리스트)으로 채운다. 서버·공개 색인·동의 발행은 0. account/sync와 실제 Discover 색인·라이선스 큐레이션 데이터는 여전히 P0 이후로 deferred. | 2026-07-23 갱신: 초기 "준비 중" placeholder→더미 데이터 노출로 변경(사용자 요청). 단 D-004 정신(visible synthetic fixture만) 유지 — 가짜 실존 셀럽·실곡 없이 가상 테마/가상 곡(fixture)만, `TEST DATA` 뱃지 명시. 서버·색인 미접촉이라 D-020의 실질 우려(카탈로그 권리·개인정보·허위 로드맵)는 여전히 안 건드림. 실제 Discover는 §5.1 정책으로 별도 설계. |
+| D-029 | ACCEPTED (사용자 canonical 승인) | **로컬 프로필**(닉네임·색상·선택적 사진)을 Dexie v5 `profile` 싱글턴에 둔다. 계정/서버/동기화는 없다. | 참여자 스택의 "나"에 정체성을 부여한다. 프로필은 `SharedSnapshot`·서버·PNG·OG 어디에도 포함되지 않으며(단정 테스트로 검증), 사진은 이 기기 Blob으로만 저장한다. |
 
 ## 되돌림 조건
 
