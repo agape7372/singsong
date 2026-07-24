@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">SingSong Angular Siot</title>
+  <desc id="desc">Two crisp upright Korean siot glyphs use square-cut arms and a diagonal stagger to form a decisive capital S silhouette.</desc>
+  <rect width="512" height="512" rx="112" fill="#FAF7F0"/>
+  <path d="M202 248 L306 118 L394 238" fill="none" stroke="#15131A" stroke-width="52" stroke-linecap="square" stroke-linejoin="miter"/>
+  <path d="M116 388 L214 274 L336 390" fill="none" stroke="#FF3D6E" stroke-width="52" stroke-linecap="square" stroke-linejoin="miter"/>
+</svg>

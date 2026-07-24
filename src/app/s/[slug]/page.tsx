@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 import { headers } from "next/headers";
 import { getShareRepository } from "@/features/share/repository.server";
-import { TicketCard } from "@/features/ticket/ticket-card";
+import { FlippableTicket } from "@/features/ticket/flippable-ticket";
 import { getRuntimeProfile } from "@/server/runtime-profile";
 import { ShareHandoffActions } from "@/features/share/share-handoff-actions";
 
@@ -73,7 +73,7 @@ export default async function SharedTicketPage({ params }: { params: Promise<{ s
         <p>만료 {new Date(share.expiresAt).toLocaleDateString("ko-KR")}</p>
       </header>
       <div className="shared-ticket-body">
-        <TicketCard
+        <FlippableTicket
           payload={share.payload}
           fingerprint={share.fingerprint}
           testData={getRuntimeProfile() === "fixture"}

@@ -36,7 +36,7 @@ afterEach(cleanup);
 
 describe("PlanWorkspace loading shell", () => {
   it("keeps the Korean route heading and a hidden ledger skeleton while the plan opens", () => {
-    const view = render(<PlanWorkspace view="plan" />);
+    render(<PlanWorkspace />);
 
     const shell = screen.getByRole("region", { name: "오늘의 플랜" });
     expect(shell).toHaveAttribute("aria-busy", "true");
@@ -47,14 +47,5 @@ describe("PlanWorkspace loading shell", () => {
     const planSkeleton = shell.querySelector(".loading-track-list");
     expect(planSkeleton).toHaveAttribute("aria-hidden", "true");
     expect(planSkeleton?.querySelectorAll("li")).toHaveLength(3);
-
-    view.rerender(<PlanWorkspace view="search" />);
-
-    const searchShell = screen.getByRole("region", { name: "곡 찾기" });
-    expect(searchShell).toHaveAttribute("aria-busy", "true");
-    expect(screen.getByRole("status")).toHaveTextContent("저장된 플랜을 확인하는 중…");
-    const searchSkeleton = searchShell.querySelector(".search-ledger-loading");
-    expect(searchSkeleton).toHaveAttribute("aria-hidden", "true");
-    expect(searchSkeleton?.querySelectorAll(".search-result-row")).toHaveLength(3);
   });
 });

@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     template: "%s · 싱송",
   },
   description,
-  manifest: "/manifest.webmanifest",
+  manifest: "/manifest.webmanifest?v=folded-session-s",
   formatDetection: { telephone: false, email: false, address: false },
   other: { "apple-mobile-web-app-capable": "yes" },
   appleWebApp: {
@@ -27,10 +27,10 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
-      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+      { url: "/icons/folded-session-s-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/folded-session-s-512.png", sizes: "512x512", type: "image/png" },
     ],
-    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    apple: [{ url: "/icons/folded-session-s-180.png", sizes: "180x180", type: "image/png" }],
   },
   openGraph: {
     type: "website",

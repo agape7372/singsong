@@ -31,3 +31,6 @@ Thumbs.db
 
 # Run lock is operational and removed at a clean handoff
 ACTIVE_RUN.lock/
+
+# Tool scratch (Codex remote attachments)
+.codex-remote-attachments/

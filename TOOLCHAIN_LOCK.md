@@ -108,6 +108,8 @@ pnpm start
 
 정확한 smoke byte 수, performance distribution과 외부 gate는 `VERIFICATION_REPORT.md`가 소유한다.
 
+> **2026-07-23 brand delta**: 위 37/185·precache 45 수치는 리뉴얼 전 clean reproduction의 보존값이다. Folded Session S 반영 뒤 current tree는 full Vitest 39/194, PWA precache 49/forbidden 0/required brand assets 3, 실제 public origin PWA 3/3을 통과했다. 이 delta에서는 coverage·performance를 재측정하지 않았으며 최신 실행 증거는 `VERIFICATION_REPORT.md`가 소유한다.
+
 ## 환경 차이와 unavailable tool
 
 - `.nvmrc`와 package engine의 exact Node `24.18.0`, pnpm `11.9.0`에서 current와 byte-exact 233-path clean의 install/static/test/coverage/build/PWA/smoke를 재현했다.

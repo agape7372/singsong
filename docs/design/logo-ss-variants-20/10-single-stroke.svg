@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">SingSong SS 10 — Single Stroke</title>
+  <desc id="desc">One uninterrupted heavy stroke draws two readable upright Korean siot forms and bends through them as a capital S.</desc>
+  <rect width="512" height="512" rx="112" fill="#FAF7F0"/>
+  <path d="M145 223 270 102 396 225C350 264 288 261 211 278L119 401 211 278 381 402" fill="none" stroke="#15131A" stroke-width="52" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

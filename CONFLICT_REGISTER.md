@@ -33,6 +33,11 @@
 | C-27 | QA matrix의 계획값 vs 최종 실행 결과                                                | root의 실제 명령·exit code·artifact를 기준으로 matrix를 PASS/BLOCKED_EXTERNAL/NOT_RUN+NONE으로 갱신했다. `VERIFICATION_REPORT.md`가 상세 수치의 최종 소유자다.                                      | `VERIFICATION_REPORT.md`, `QA_MATRIX_V3.md`              |
 | C-28 | build-time release preflight 통과 vs runtime secret/key drift                       | 둘을 같은 것으로 보지 않는다. pure env-name 계약을 공유하되 Node startup이 env 강도·host를 다시 확인하고 DB가 요구하는 active/historical HMAC key를 RPC로 검증한 뒤에만 준비 완료된다.              | `release-env-contract.*`, instrumentation/readiness tests |
 | C-29 | 구현 완료 우선 vs 알려진 dependency 취약점을 남긴 채 candidate 판정                 | 보안 제약이 우선이다. Next 16.1.7 audit의 15건(High 8건)을 무시하지 않고 stable 16.2.11과 PostCSS 8.5.20으로 수정했으며, prod+dev level-low audit 0과 clean 회귀 뒤에만 `LOCAL_DEMO_READY`를 유지한다. | package/lock/workspace hashes, audit, clean build/tests   |
+| C-30 | VISUAL_MOTION §5-3·§10-6·FINAL_BLUEPRINT §3.1의 2탭·no-4th-item vs 사용자의 4탭 지시 | **사용자 canonical 승인이 승자**(D-027). 하단 nav=플랜·보관함·발견·설정 4탭. 각 탭은 CUTLINE ledger/paper 문법 유지, 계획 단계 티켓 물성 배제. | `planner-tabs.tsx`, `globals.css`, `primary-nav.test.tsx`; **C-18 라우트 표를 갱신** |
+| C-31 | **C-03/D-020**의 "Discover route/schema placeholder 만들지 않음" vs 발견 탭        | **사용자 승인으로 D-020 부분 대체**(D-028). 실기능·색인·데이터·동의발행 0의 정직 placeholder만 허용. 실제 Discover 색인·큐레이션은 여전히 deferred. | `src/app/discover/page.tsx`, `discover-page.test.tsx` (가짜 목록 0 단정) |
+| C-32 | FINAL_BLUEPRINT §2.1 "히스토리/자동 보관 없다" vs 보관함 탭                          | 보관함=**이미 P0에 영속된 artifact의 읽기 전용 뷰**(ticketSnapshots·imports·managedShares). 멀티 플랜 편집·자동 아카이브 아님. "내 공유 관리"는 §3.2에 이미 존재하던 것을 이전. | `library-screen.tsx`, `listTickets/listImports`, plan-database test |
+| C-33 | FINAL_BLUEPRINT §3.1·§3.3 `/search` 라우트 vs 검색 시트화                           | 검색을 플랜 흐름 안 bottom sheet로 흡수하고 `/search` 라우트 제거. §3.3 계약(IME/abort/sequence/직접추가/undo)은 시트 안에서 보존. | `search-sheet.tsx`, `search-ledger.tsx`(재사용), build route output(/search 없음) |
+| C-34 | D-020 account/sync deferred vs 로컬 프로필                                          | 로컬 프로필은 **계정/서버/동기화 0**(D-029). Dexie v5 `profile` 싱글턴. 공유 스냅샷·서버·PNG·OG 미포함(단정 테스트). account/sync는 계속 deferred. | `profile-avatar.tsx`, `plan-database.ts` v5, privacy 단정 test |
 
 ## 미해결 충돌이 아닌 외부 게이트
 

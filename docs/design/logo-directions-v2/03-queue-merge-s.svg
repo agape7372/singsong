@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">SingSong queue merge S app icon</title>
+  <desc id="desc">Three dark queue entries flow into one vivid coral S route, expressing friends combining their turns into a shared plan.</desc>
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="#FAF7F0"/>
+  <circle cx="132" cy="156" r="28" fill="#15131A"/>
+  <circle cx="132" cy="256" r="28" fill="#15131A"/>
+  <circle cx="132" cy="356" r="28" fill="#15131A"/>
+  <path d="M160 156H208C232 156 248 172 258 196" fill="none" stroke="#15131A" stroke-width="32" stroke-linecap="round"/>
+  <path d="M160 256H286" fill="none" stroke="#15131A" stroke-width="32" stroke-linecap="round"/>
+  <path d="M160 356H286" fill="none" stroke="#15131A" stroke-width="32" stroke-linecap="round"/>
+  <path
+    d="M376 152H316C278 152 256 174 256 204C256 232 278 248 316 248H332C368 248 384 268 384 300C384 332 364 356 328 356H264"
+    fill="none"
+    stroke="#FF3D6E"
+    stroke-width="48"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>

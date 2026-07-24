@@ -1,8 +1,8 @@
 # 싱송 docs — v3 문서 지도
 
-> **현재 상태**: 앱 구현 전. 설계·감사·검증 프롬프트와 시각 레퍼런스가 있다.
+> **현재 상태**: local fixture 앱 구현·검증 완료, production 출시는 외부 gate로 차단. 실행 상태는 [`../RUN_STATE.md`](../RUN_STATE.md), 검증은 [`../VERIFICATION_REPORT.md`](../VERIFICATION_REPORT.md)를 따른다.
 > **최종 설계 버전**: v3.2 · 2026-07-21
-> **구현 시작점**: [`prompts/ONESHOT_MASTER.md`](./prompts/ONESHOT_MASTER.md)
+> **현재 운영 시작점**: [`../README.md`](../README.md)와 [`../HANDOFF.md`](../HANDOFF.md). [`prompts/ONESHOT_MASTER.md`](./prompts/ONESHOT_MASTER.md)는 구현 계약 기록이다.
 
 ---
 
@@ -57,6 +57,8 @@ docs/
   BUILD_PLAN.md               ← 레거시 M0~M6/계산 이력; v3 충돌 조항 구현 금지
   design/
     VISUAL_MOTION_DIRECTION.md ← Session Strip 최종 방향
+    logo-imagegen-50/
+      README.md                ← 최종 후보 8안과 현재 적용한 Folded Session S
     DESIGN_SYSTEM.md           레거시 토큰·대비 근거
     COMPONENTS.md              레거시 컴포넌트 계약
     SCREENS.md                 레거시 6화면 상세
@@ -93,6 +95,7 @@ docs/
 | 공유 공개성·payload·API·rate limit·revoke | `FINAL_BLUEPRINT` §6 | `SECURITY`, `API_CONTRACT` |
 | 기술 스택·상태 소유권·PWA | `FINAL_BLUEPRINT` §7 | `ARCHITECTURE`, `PLATFORM_NOTES` |
 | 디자인·토큰·화면 composition·모션 | `VISUAL_MOTION_DIRECTION` | 기존 design 문서 |
+| 앱 로고 현재 적용안·파생 asset | `design/logo-imagegen-50/README` | 이전 logo 탐색 폴더 |
 | 분석 의미·제품 검증 | `FINAL_BLUEPRINT` §9 + `UNKNOWN_REGISTER` | `ANALYTICS` |
 | 출시 상태·자동/실기기 gate | `FINAL_BLUEPRINT` §10 | `QA_MATRIX`, `TEST_PLAN` |
 | 구현 순서·증거·handoff | `ONESHOT_MASTER` v3 | `BUILD_PLAN` §11, 원샷 v2 폐기 |
@@ -128,6 +131,8 @@ v3는 컴포넌트/백엔드/모션/a11y를 수평으로 끝낸 뒤 조립하지
 - 실제 UI, 로고, 아이콘, 글자, 숫자판을 이미지에서 잘라 출하하지 않는다.
 - 이미지 속 영문·탭 수·컴포넌트는 정본이 아니다. 오직 색·종이 물성·ledger 밀도·strip→ticket 관계만 참고한다. route/tab, 별도 계산 화면, 숫자·가격·시간, copy/CTA, punch, 재생 삼각형, share 버튼은 복사하지 않는다.
 - 프로덕션은 `VISUAL_MOTION_DIRECTION`을 따라 semantic HTML, CSS, 직접 검수한 SVG로 재구성한다.
+
+로고 탐색 PNG 50개도 같은 reference-only 원칙을 따른다. 현재 적용안 Folded Session S는 생성 PNG를 그대로 쓰지 않고 `public/icons/icon.svg`의 제어된 기하와 versioned raster로 재작도했으며, 결정·후보·archive 위치는 [`design/logo-imagegen-50/README.md`](./design/logo-imagegen-50/README.md)가 소유한다.
 
 ---
 

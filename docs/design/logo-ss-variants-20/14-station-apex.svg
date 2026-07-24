@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">SingSong SS 14 — Station Apex</title>
+  <desc id="desc">Colored station-like apex hubs clarify two upright siot glyphs connected by a compact S route.</desc>
+  <rect width="512" height="512" rx="112" fill="#FAF7F0"/>
+  <path d="M151 230 276 111 398 232" fill="none" stroke="#15131A" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M398 232C350 271 292 258 215 281" fill="none" stroke="#15131A" stroke-width="46" stroke-linecap="round"/>
+  <path d="M119 399 215 281 376 399" fill="none" stroke="#FF3D6E" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="276" cy="111" r="30" fill="#FF3D6E"/>
+  <circle cx="276" cy="111" r="10" fill="#FAF7F0"/>
+  <circle cx="215" cy="281" r="30" fill="#B76E00"/>
+  <circle cx="215" cy="281" r="10" fill="#FAF7F0"/>
+</svg>

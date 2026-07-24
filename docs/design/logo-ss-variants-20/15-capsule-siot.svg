@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">SingSong Capsule Siot</title>
+  <desc id="desc">Two upright Korean siot glyphs step from upper right to lower left, joined by a short gold capsule to create an S-shaped flow.</desc>
+  <rect width="512" height="512" rx="112" fill="#FAF7F0"/>
+  <path d="M202 244 C203 255 209 266 218 276" fill="none" stroke="#B76E00" stroke-width="54" stroke-linecap="round"/>
+  <path d="M202 244 L300 118 L394 242" fill="none" stroke="#FF3D6E" stroke-width="54" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M120 386 L218 276 L340 390" fill="none" stroke="#15131A" stroke-width="54" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

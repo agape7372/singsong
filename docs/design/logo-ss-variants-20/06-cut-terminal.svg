@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">SingSong Cut Terminal Siot</title>
+  <desc id="desc">A sharply cut upright upper siot steps into a counter-turned lower siot, forming a crisp capital-S silhouette with clear Hangul structure.</desc>
+  <rect width="512" height="512" rx="112" fill="#FAF7F0"/>
+  <path d="M190 244 L294 116 L396 226" fill="none" stroke="#FF3D6E" stroke-width="56" stroke-linecap="butt" stroke-linejoin="miter"/>
+  <path d="M124 364 L220 258 L334 388" transform="rotate(-18 220 258)" fill="none" stroke="#15131A" stroke-width="56" stroke-linecap="butt" stroke-linejoin="miter"/>
+</svg>

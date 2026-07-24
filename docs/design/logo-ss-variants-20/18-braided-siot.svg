@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">SingSong Braided Siot</title>
+  <desc id="desc">Two upright Korean siot glyphs overlap as flat woven bands, with the coral lower arm crossing the black upper glyph along an S-shaped route.</desc>
+  <rect width="512" height="512" rx="112" fill="#FAF7F0"/>
+  <path d="M180 276 L288 120 L394 258" fill="none" stroke="#15131A" stroke-width="52" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M120 390 L188 238" fill="none" stroke="#FF3D6E" stroke-width="52" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M188 238 L344 390" fill="none" stroke="#FAF7F0" stroke-width="76" stroke-linecap="round"/>
+  <path d="M188 238 L344 390" fill="none" stroke="#FF3D6E" stroke-width="52" stroke-linecap="round"/>
+</svg>

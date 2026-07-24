@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">SingSong SS 12 — Split Color</title>
+  <desc id="desc">Alternating black and coral legs keep both upright siot glyphs explicit while a stepped join creates an S-shaped sequence.</desc>
+  <rect width="512" height="512" rx="112" fill="#FAF7F0"/>
+  <path d="M146 225 271 101" fill="none" stroke="#15131A" stroke-width="54" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M271 101 398 226 344 265 213 277" fill="none" stroke="#FF3D6E" stroke-width="54" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M116 403 213 277" fill="none" stroke="#FF3D6E" stroke-width="54" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M213 277 378 404" fill="none" stroke="#15131A" stroke-width="54" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

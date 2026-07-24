@@ -2,6 +2,7 @@
   color-scheme: light dark;
   --canvas: #faf7f0;
   --paper: #ffffff;
+  --ticket-cream: #f6efdc;
   --surface-muted: #f5efe7;
   --wash: #fff5f8;
   --ink: #15131a;
@@ -26,12 +27,21 @@
   --safe-bottom: max(0.75rem, env(safe-area-inset-bottom));
   --primary-nav-height: calc(3.75rem + var(--safe-bottom));
   --bottom-slot-height: 0px;
+  --motion-fast: 120ms;
+  --motion-state: 160ms;
+  --motion-route: 180ms;
+  --motion-sheet-in: 260ms;
+  --motion-sheet-out: 180ms;
+  --motion-flip: 460ms;
+  --ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in: cubic-bezier(0.64, 0, 0.78, 0);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --canvas: #16111c;
     --paper: #221b29;
+    --ticket-cream: #241c2a;
     --surface-muted: #2a2130;
     --wash: #281d27;
     --ink: #f5eef3;
@@ -211,30 +221,12 @@ h3 {
   text-decoration: none;
 }
 
-.wordmark-cut {
-  position: relative;
-  display: grid;
-  width: 1.75rem;
+.wordmark-mark {
+  display: block;
+  width: 2rem;
   height: 2rem;
   flex: none;
-  place-items: center;
-  overflow: hidden;
-  border: 2px solid var(--ink);
   border-radius: 0.45rem;
-  background: var(--accent-fill);
-  color: var(--on-accent);
-  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-  font-size: 0.82rem;
-  font-weight: 950;
-}
-
-.wordmark-cut::after {
-  position: absolute;
-  right: 0.28rem;
-  bottom: 0.22rem;
-  left: 0.28rem;
-  border-bottom: 1px dashed currentColor;
-  content: "";
 }
 
 .wordmark-copy {
@@ -293,7 +285,7 @@ h3 {
   left: 0;
   display: grid;
   min-height: var(--primary-nav-height);
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   border-top: 1px solid var(--border-control);
   padding: 0 max(0.5rem, env(safe-area-inset-right)) var(--safe-bottom)
     max(0.5rem, env(safe-area-inset-left));
@@ -311,6 +303,11 @@ h3 {
   font-size: 0.72rem;
   font-weight: 800;
   text-decoration: none;
+  transition: color var(--motion-fast) var(--ease-standard);
+}
+
+.primary-nav a:active {
+  background: var(--wash);
 }
 
 .primary-nav a::after {
@@ -321,6 +318,7 @@ h3 {
   height: 3px;
   background: transparent;
   content: "";
+  transition: background var(--motion-state) var(--ease-standard);
 }
 
 .primary-nav a[aria-current="page"] {
@@ -362,6 +360,671 @@ h3 {
 
 .narrow-shell {
   max-width: 560px;
+}
+
+/* 발견 — 조용한 게시판 placeholder */
+.discover-board {
+  display: grid;
+  justify-items: center;
+  gap: 0.85rem;
+  padding: clamp(2rem, 8vw, 3.5rem) 1.5rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-strip);
+  background: var(--wash);
+  text-align: center;
+  animation: route-fade var(--motion-route) var(--ease-standard);
+}
+
+.discover-board-mark {
+  width: clamp(5rem, 22vw, 7rem);
+  height: auto;
+  color: var(--ink-muted);
+}
+
+.discover-board-dot {
+  fill: var(--accent-fill);
+  stroke: none;
+}
+
+.discover-copy {
+  max-width: 32ch;
+  margin: 0;
+  color: var(--ink-muted);
+}
+
+.discover-board .button {
+  margin-top: 0.35rem;
+}
+
+/* 검색 bottom sheet */
+.search-sheet-backdrop {
+  position: fixed;
+  z-index: 70;
+  inset: 0;
+  background: rgb(21 19 26 / 40%);
+  opacity: 1;
+  transition: opacity var(--motion-sheet-out) var(--ease-in);
+}
+
+.search-sheet-backdrop[data-starting-style],
+.search-sheet-backdrop[data-ending-style] {
+  opacity: 0;
+}
+
+.search-sheet-viewport {
+  position: fixed;
+  z-index: 71;
+  inset: 0;
+  display: grid;
+  align-items: end;
+  justify-items: center;
+}
+
+.search-sheet {
+  display: flex;
+  width: min(100%, 640px);
+  max-height: 85dvh;
+  flex-direction: column;
+  overflow: hidden;
+  border-top: 1px solid var(--border-control);
+  border-top-left-radius: var(--radius-strip);
+  border-top-right-radius: var(--radius-strip);
+  padding: 0.5rem max(var(--layout-gutter), env(safe-area-inset-right)) 0
+    max(var(--layout-gutter), env(safe-area-inset-left));
+  background: var(--paper);
+  box-shadow: var(--shadow-strip);
+  transform: translateY(0);
+  transition: transform var(--motion-sheet-in) var(--ease-standard);
+}
+
+.search-sheet[data-starting-style],
+.search-sheet[data-ending-style] {
+  transform: translateY(100%);
+}
+
+.search-sheet[data-ending-style] {
+  transition-duration: var(--motion-sheet-out);
+  transition-timing-function: var(--ease-in);
+}
+
+.search-sheet-grabber {
+  width: 2.5rem;
+  height: 4px;
+  margin: 0.35rem auto 0.6rem;
+  border-radius: var(--radius-full);
+  background: var(--border-control);
+}
+
+.search-sheet-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding-bottom: 0.5rem;
+}
+
+.search-sheet-title {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.search-sheet-count {
+  color: var(--ink-muted);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.search-sheet-close {
+  min-height: 2.75rem;
+  margin-left: auto;
+  padding: 0 0.4rem;
+  border: 0;
+  background: transparent;
+  color: var(--accent-text);
+  font-weight: 700;
+}
+
+.search-sheet-body {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+}
+
+/* 프로필 아바타 */
+.profile-avatar {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+}
+
+.profile-avatar-initial {
+  color: #fff;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.profile-avatar-initial > span {
+  font-size: 0.9em;
+}
+
+.station-avatar-me {
+  padding: 0;
+  background: transparent;
+}
+
+/* 공용 입력 */
+.input {
+  width: 100%;
+  min-height: 2.75rem;
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-control);
+  padding: 0 0.75rem;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.input:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* 설정 · 보관함 공용 시트 */
+.settings-sheet,
+.library-sheet {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: 1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-strip);
+  padding: clamp(1rem, 4vw, 1.5rem);
+  background: var(--paper);
+  box-shadow: var(--shadow-strip);
+  animation: route-fade var(--motion-route) var(--ease-standard);
+}
+
+.settings-group,
+.library-group {
+  display: grid;
+  gap: 0.6rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.settings-group:last-child,
+.library-group:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.settings-group h2,
+.library-group h2 {
+  font-size: 1.05rem;
+}
+
+.settings-note {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.9rem;
+}
+
+.settings-steps {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--ink-muted);
+  font-size: 0.9rem;
+}
+
+.settings-steps li + li {
+  margin-top: 0.4rem;
+}
+
+.settings-row {
+  margin: 0;
+}
+
+.settings-status {
+  margin: 0.75rem 0 0;
+  color: var(--ink-muted);
+  font-size: 0.85rem;
+}
+
+/* 프로필 편집 */
+.profile-editor {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.profile-editor-fields {
+  flex: 1;
+}
+
+.profile-colors {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.profile-color-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.profile-color-swatch {
+  width: 2.4rem;
+  height: 2.4rem;
+  border: 2px solid transparent;
+  border-radius: var(--radius-full);
+  box-shadow: inset 0 0 0 2px var(--paper);
+  transition:
+    border-color var(--motion-state) var(--ease-standard),
+    transform var(--motion-fast) var(--ease-standard);
+}
+
+.profile-color-swatch[data-selected="true"] {
+  border-color: var(--ink);
+}
+
+.profile-color-swatch:active {
+  transform: scale(0.94);
+}
+
+.profile-photo-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.profile-photo-actions .button-secondary {
+  cursor: pointer;
+}
+
+/* 보관함 목록 */
+.library-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.library-row {
+  display: flex;
+  min-height: 4rem;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.library-row:first-child {
+  border-top: 0;
+}
+
+.library-row-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.library-serial {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.library-row-meta {
+  margin: 0.15rem 0 0;
+  color: var(--ink-muted);
+  font-size: 0.85rem;
+}
+
+.library-empty {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--ink-muted);
+  font-size: 0.9rem;
+}
+
+.library-error {
+  margin: 0;
+  color: var(--danger);
+}
+
+/* 검색 시트 — 정리 + 추천 */
+.search-testdata-note {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.35rem 0 0.6rem;
+  color: var(--ink-muted);
+  font-size: 0.78rem;
+}
+
+.search-suggestions-title {
+  margin: 0.25rem 0 0.35rem;
+  color: var(--ink-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+/* 발견 — 더미 큐레이션 */
+.discover-header {
+  margin-bottom: 1rem;
+}
+
+.discover-lede {
+  margin: 0.4rem 0 0;
+  color: var(--ink-muted);
+  font-size: 0.92rem;
+}
+
+.test-data-tag,
+.test-data-badge {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0.05rem 0.35rem;
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-control);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  vertical-align: middle;
+}
+
+.discover-playlists {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.discover-playlist {
+  border: 1px solid var(--border-subtle);
+  border-radius: 1.25rem;
+  padding: clamp(1.15rem, 5vw, 1.5rem);
+  background: var(--paper);
+  box-shadow: var(--shadow-strip);
+  animation: route-fade var(--motion-route) var(--ease-standard);
+}
+
+.discover-playlist-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0.5rem 0.75rem;
+}
+
+.discover-playlist-head h2 {
+  grid-column: 1;
+  font-size: 1.2rem;
+  letter-spacing: -0.01em;
+}
+
+.discover-playlist-blurb {
+  grid-column: 1;
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.88rem;
+}
+
+.discover-playlist-count {
+  grid-column: 2;
+  grid-row: 1;
+  flex: none;
+  color: var(--ink-muted);
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.discover-preview,
+.discover-song-list {
+  margin: 1rem 0 0;
+  padding: 1rem 0 0;
+  border-top: 1px solid var(--border-subtle);
+  list-style: none;
+}
+
+.discover-preview li,
+.discover-song-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.32rem 0;
+}
+
+.discover-preview-index {
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.78rem;
+}
+
+.discover-preview-copy {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.discover-preview-copy strong {
+  font-size: 0.92rem;
+  font-weight: 650;
+}
+
+.discover-preview-copy span {
+  color: var(--ink-muted);
+  font-size: 0.8rem;
+}
+
+.discover-playlist-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.discover-playlist-actions .button {
+  border-radius: var(--radius-full);
+  padding-inline: 1.4rem;
+}
+
+.discover-songs {
+  margin: 0;
+  margin-right: auto;
+}
+
+.discover-songs summary {
+  color: var(--accent-text);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.discover-song-list li {
+  justify-content: space-between;
+}
+
+.discover-footer {
+  margin: 1.25rem 0 0;
+  color: var(--ink-muted);
+  font-size: 0.88rem;
+}
+
+.discover-status {
+  margin: 0.5rem 0 0;
+  color: var(--ink-muted);
+  font-size: 0.85rem;
+  min-height: 1.2em;
+}
+
+/* 보관함 — 세션 콜렉션 */
+.collection-segments {
+  display: inline-flex;
+  gap: 0.25rem;
+  margin: 0.5rem 0 1rem;
+  padding: 0.25rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  background: var(--surface-muted);
+}
+
+.collection-segment {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2.5rem;
+  padding: 0 0.9rem;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--ink-muted);
+  font-weight: 700;
+  transition:
+    background var(--motion-state) var(--ease-standard),
+    color var(--motion-state) var(--ease-standard);
+}
+
+.collection-segment[data-selected="true"] {
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: var(--shadow-strip);
+}
+
+.collection-segment-count {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.82rem;
+  opacity: 0.8;
+}
+
+.collection-carousel {
+  margin: 0 calc(-1 * var(--layout-gutter));
+}
+
+.collection-track {
+  display: flex;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0.5rem var(--layout-gutter) 0.75rem;
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.collection-track::-webkit-scrollbar {
+  display: none;
+}
+
+.collection-card {
+  flex: 0 0 82%;
+  max-width: 26rem;
+  scroll-snap-align: center;
+  transform: scale(0.94);
+  opacity: 0.6;
+  transition:
+    transform var(--motion-state) var(--ease-standard),
+    opacity var(--motion-state) var(--ease-standard);
+}
+
+.collection-card[data-active="true"] {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.collection-card .ticket-card {
+  margin: 0;
+}
+
+.collection-progress {
+  margin: 0.35rem 0 0;
+  text-align: center;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.8rem;
+}
+
+.collection-share,
+.collection-archive {
+  margin-top: 0.6rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-action);
+  background: var(--paper);
+}
+
+.collection-share-meta,
+.collection-archive-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.55rem;
+  color: var(--ink-muted);
+  font-size: 0.82rem;
+}
+
+.collection-live-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--accent-fill);
+}
+
+.collection-share-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.collection-revoke {
+  color: var(--danger);
+}
+
+.collection-share-note {
+  color: var(--ink-muted);
+  font-size: 0.8rem;
+}
+
+.collection-archive-stamp {
+  padding: 0.05rem 0.4rem;
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-control);
+  color: var(--ink-muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.collection-empty {
+  display: grid;
+  gap: 0.4rem;
+  padding: 2rem 0;
+  color: var(--ink-muted);
+}
+
+.collection-status {
+  padding: 1.5rem 0;
+  color: var(--ink-muted);
+}
+
+.collection-hint {
+  margin: 0.75rem 0 0;
+  text-align: center;
+  color: var(--ink-muted);
+  font-size: 0.8rem;
+}
+
+.collection-live-status {
+  margin: 0.35rem 0 0;
+  text-align: center;
+  color: var(--ink-muted);
+  font-size: 0.85rem;
+  min-height: 1.2em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collection-card {
+    transform: none;
+    opacity: 1;
+  }
 }
 
 .eyebrow,
@@ -1776,7 +2439,7 @@ button.home-confirm-action {
 }
 
 .ticket-card {
-  --card-paper: var(--ticket-paper, var(--paper));
+  --card-paper: var(--ticket-paper, var(--ticket-cream, var(--paper)));
   --card-muted: var(--ticket-surface-muted, var(--wash));
   --card-ink: var(--ticket-ink, var(--ink));
   --card-ink-muted: var(--ticket-ink-muted, var(--ink-muted));
@@ -1784,113 +2447,116 @@ button.home-confirm-action {
   --card-accent-text: var(--ticket-accent-text, var(--accent-text));
   --card-money: var(--ticket-money-text, var(--money-text));
   --card-border: var(--ticket-border-control, var(--border-control));
+  --card-hole: var(--ticket-canvas, var(--canvas));
+  --card-pad: clamp(1.25rem, 6vw, 1.85rem);
   position: relative;
   display: grid;
-  width: min(100%, 540px);
-  min-height: 675px;
-  grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+  width: min(100%, 420px);
+  min-height: 700px;
+  grid-template-rows: auto minmax(150px, 1fr) auto;
   margin: 0 auto;
   overflow: hidden;
   border: 1px solid var(--card-border);
-  border-radius: var(--radius-ticket);
+  border-radius: 1.5rem;
   background: var(--card-paper);
   color: var(--card-ink);
   box-shadow: var(--shadow-ticket);
 }
 
+/* Punch-hole columns down both edges (decorative). */
 .ticket-card::before,
 .ticket-card::after {
   position: absolute;
   z-index: 2;
-  top: 66%;
-  width: 1.35rem;
-  height: 1.35rem;
-  border: 0;
-  border-radius: 50%;
-  background: var(--canvas);
+  top: 4.5rem;
+  bottom: 5.5rem;
+  width: 0.5rem;
+  background-image: radial-gradient(circle, var(--card-hole) 42%, transparent 46%);
+  background-repeat: repeat-y;
+  background-position: center;
+  background-size: 0.5rem 1.15rem;
   content: "";
 }
 
 .ticket-card::before {
-  left: -0.75rem;
+  left: 0.45rem;
 }
 
 .ticket-card::after {
-  right: -0.75rem;
+  right: 0.45rem;
 }
 
 .ticket-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.85rem;
-  border-top: 0.45rem solid var(--card-accent);
-  border-bottom: 2px solid var(--card-ink);
-  padding: clamp(1rem, 4vw, 1.4rem);
+  display: grid;
+  justify-items: center;
+  gap: 0.15rem;
+  padding: var(--card-pad) var(--card-pad) 0.75rem;
+  text-align: center;
 }
 
-.ticket-heading {
-  min-width: 0;
-}
-
-.ticket-heading h1,
-.ticket-heading h2,
-.ticket-heading h3 {
+.ticket-title,
+.ticket-header h1,
+.ticket-header h2,
+.ticket-header h3 {
   max-width: none;
+  margin: 0.1rem 0 0.35rem;
   color: var(--card-ink);
-  font-size: clamp(1.45rem, 6vw, 2.2rem);
+  font-size: clamp(1.6rem, 7vw, 2.15rem);
+  letter-spacing: -0.02em;
 }
 
 .ticket-kicker {
-  margin: 0 0 0.35rem;
+  margin: 0;
   color: var(--card-accent-text);
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   font-weight: 900;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.22em;
 }
 
 .ticket-count {
-  flex: none;
   margin: 0;
 }
 
 .ticket-count div {
   display: grid;
-  min-width: 3.4rem;
-  min-height: 3.4rem;
-  place-items: center;
-  border: 2px solid var(--card-ink);
-  padding: 0.25rem;
-}
-
-.ticket-count dt {
-  font-size: 0.68rem;
-  font-weight: 750;
+  justify-items: center;
+  gap: 0.1rem;
 }
 
 .ticket-count dd {
   margin: 0;
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-  font-size: 1.38rem;
+  font-size: clamp(3rem, 16vw, 4.25rem);
   font-weight: 950;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+}
+
+.ticket-count dt {
+  color: var(--card-ink-muted);
+  font-size: 0.78rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
 }
 
 .ticket-test-data {
-  margin: 0;
-  border-bottom: 1px solid var(--card-border);
-  padding: 0.35rem 0.8rem;
-  background: var(--ticket-money-decoration, var(--money-decoration));
-  color: #15131a;
-  font-size: 0.7rem;
-  font-weight: 900;
-  letter-spacing: 0.06em;
+  margin: 0.5rem 0 0;
+  justify-self: center;
+  padding: 0.15rem 0.6rem;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-full);
+  color: var(--card-ink-muted);
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
   text-align: center;
 }
 
 .ticket-track-list {
   min-height: 0;
+  margin: 0.75rem 0 0;
   overflow: auto;
-  padding: 0 clamp(1rem, 4vw, 1.4rem);
+  padding: 0 var(--card-pad);
 }
 
 .ticket-track-list li {
@@ -1898,16 +2564,20 @@ button.home-confirm-action {
   grid-template-columns: 1.75rem minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.55rem;
-  border-bottom: 1px solid var(--ticket-border-subtle, var(--border-subtle));
-  padding: 0.62rem 0;
+  border-top: 1px solid var(--ticket-border-subtle, var(--border-subtle));
+  padding: 0.55rem 0;
+}
+
+.ticket-track-list > li:first-child {
+  border-top: 0;
 }
 
 .ticket-track-list > li > span {
   align-self: start;
-  color: var(--card-accent-text);
+  color: var(--card-ink-muted);
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-  font-size: 0.76rem;
-  font-weight: 900;
+  font-size: 0.74rem;
+  font-weight: 800;
 }
 
 .ticket-track-copy strong,
@@ -1916,14 +2586,14 @@ button.home-confirm-action {
 }
 
 .ticket-track-copy strong {
-  font-size: 1.02rem;
-  line-height: 1.35;
+  font-size: 0.95rem;
+  line-height: 1.3;
 }
 
 .ticket-track-copy small,
 .ticket-code {
   color: var(--card-ink-muted);
-  font-size: 0.75rem;
+  font-size: 0.74rem;
 }
 
 .ticket-code {
@@ -1935,9 +2605,7 @@ button.home-confirm-action {
 }
 
 .ticket-totals {
-  border-top: 2px dashed var(--card-border);
-  padding: 0.8rem clamp(1rem, 4vw, 1.4rem);
-  background: var(--card-muted);
+  padding: 0.85rem var(--card-pad) 1rem;
 }
 
 .ticket-summary {
@@ -1949,53 +2617,410 @@ button.home-confirm-action {
   grid-template-columns: minmax(5rem, 0.6fr) minmax(0, 1fr);
   align-items: baseline;
   gap: 0.7rem;
-  border-bottom: 1px solid var(--ticket-border-subtle, var(--border-subtle));
-  padding: 0.48rem 0;
+  border-top: 1px solid var(--ticket-border-subtle, var(--border-subtle));
+  padding: 0.5rem 0;
 }
 
-.ticket-summary > div:last-child {
-  border-bottom: 0;
+.ticket-summary > div:first-child {
+  border-top: 0;
 }
 
 .ticket-summary dt {
   color: var(--card-ink-muted);
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 760;
 }
 
 .ticket-summary dd {
   margin: 0;
-  color: var(--card-money);
+  color: var(--card-ink);
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-  font-size: clamp(0.94rem, 3.4vw, 1.15rem);
+  font-size: clamp(0.98rem, 3.6vw, 1.2rem);
   font-weight: 900;
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
+/* Money value carries the ochre accent. */
+.ticket-summary > div:nth-child(2) dd {
+  color: var(--card-money);
+}
+
 .ticket-assumption {
-  margin: 0.5rem 0 0;
+  margin: 0.7rem 0 0;
   color: var(--card-ink-muted);
   font-size: 0.7rem;
 }
 
+/* 하단 스텁 — 절취선으로 분리. NO(위) / 바코드 + ₩총액 / 유효기간(아래) */
 .ticket-footer {
-  display: flex;
-  min-height: 2.7rem;
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "serial serial"
+    "barcode price"
+    "validity validity";
   align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding-inline: clamp(1rem, 4vw, 1.4rem);
-  background: var(--card-ink);
-  color: var(--card-paper);
+  gap: 0.35rem 0.7rem;
+  border-top: 2px dashed var(--card-border);
+  padding: 0.8rem var(--card-pad) var(--card-pad);
+  background: var(--card-paper);
+  color: var(--card-ink);
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.05em;
 }
 
 .ticket-serial {
+  grid-area: serial;
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
   font-variant-numeric: tabular-nums;
+}
+
+.ticket-stub-price {
+  grid-area: price;
+  color: var(--card-money);
+  font-size: 1.05rem;
+  font-weight: 900;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.ticket-validity {
+  grid-area: validity;
+  color: var(--card-ink-muted);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.ticket-barcode {
+  grid-area: barcode;
+  width: 100%;
+  max-width: 11rem;
+  height: 2.6rem;
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--card-ink) 0 1px,
+    transparent 1px 3px,
+    var(--card-ink) 3px 5px,
+    transparent 5px 6px,
+    var(--card-ink) 6px 8px,
+    transparent 8px 11px
+  );
+}
+
+/* 앞면 모던 리소 포스터 — 거대 타이틀 + 핑크 하프톤 곡수 블리딩 + 대담 기하 (레퍼런스: 오늘의세션 100) */
+
+/* 카드 전체에 은은한 리소 종이 그레인 (콘텐츠 뒤) */
+.ticket-riso-grain {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.16;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+/* 포스터 헤드: 타이틀이 핑크 하프톤 곡수 위로 겹침 */
+.ticket-poster {
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+  display: grid;
+  justify-items: center;
+  padding: calc(var(--card-pad) - 0.2rem) var(--card-pad) 0.4rem;
+  text-align: center;
+}
+
+.ticket-kicker {
+  margin: 0;
+  color: var(--card-accent-text);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+}
+
+/* 거대 타이틀 — 핑크 미스레지 고스트가 뒤로 어긋나 겹침 */
+.ticket-riso-title {
+  position: relative;
+  z-index: 2;
+  margin: 0.35rem 0 0;
+  max-width: none;
+  color: var(--card-ink);
+  font-size: clamp(2.2rem, 11vw, 3.1rem);
+  font-weight: 900;
+  line-height: 0.96;
+  letter-spacing: -0.035em;
+  word-break: keep-all;
+  text-wrap: balance;
+}
+
+.ticket-riso-title::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  color: var(--card-accent);
+  text-align: center;
+  transform: translate(3px, 3px);
+  content: attr(data-text);
+  pointer-events: none;
+}
+
+/* 핑크 하프톤 곡수 — 타이틀 아래로 파고들어 좌우 블리딩 */
+.ticket-numberplate {
+  z-index: 1;
+  width: auto;
+  height: clamp(104px, 30vw, 140px);
+  margin: -0.28em calc(-1 * var(--card-pad)) 0;
+  align-self: stretch;
+}
+
+.ticket-numberplate svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.ticket-bignum {
+  font-family: "Archivo Black", "Arial Black", ui-sans-serif, system-ui, sans-serif;
+  font-size: 150px;
+  font-weight: 900;
+  letter-spacing: -0.06em;
+}
+
+/* 하프톤 점 잉크 = 크림(종이색)이 핑크를 뚫음 */
+.ticket-ht-ink {
+  flood-color: var(--card-paper);
+}
+
+.ticket-songcount {
+  margin: 0.25rem 0 0;
+  color: var(--card-ink-muted);
+  font-size: 0.7rem;
+  font-weight: 850;
+  letter-spacing: 0.24em;
+}
+
+/* 대담 겹침 기하 컴포지션 — 멀티플로 색 섞임 */
+.ticket-composition {
+  position: relative;
+  z-index: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.ticket-composition svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ticket-composition-shapes {
+  mix-blend-mode: multiply;
+}
+
+.ticket-composition-grain {
+  opacity: 0.14;
+  mix-blend-mode: multiply;
+}
+
+/* 티켓 앞↔뒷 플립 */
+.flip-scene {
+  width: min(100%, 420px);
+  height: min(90dvh, 720px);
+  margin: 0 auto;
+  perspective: 1400px;
+}
+
+.flip-toggle {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.flip-toggle:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 4px;
+  border-radius: var(--radius-strip);
+}
+
+.flip-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform: rotateY(0deg);
+  transform-style: preserve-3d;
+  transition: transform var(--motion-flip) var(--ease-standard);
+}
+
+.flip-inner[data-flipped="true"] {
+  transform: rotateY(180deg);
+}
+
+.flip-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.flip-face .ticket-card {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+.flip-back {
+  transform: rotateY(180deg);
+}
+
+/* 플립 힌트 */
+.flip-toggle::after {
+  position: absolute;
+  right: 0.9rem;
+  bottom: 0.7rem;
+  z-index: 3;
+  padding: 0.1rem 0.5rem;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--ink) 70%, transparent);
+  color: var(--paper);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  content: "탭 · 뒤집기";
+}
+
+/* 뒷면 — 전체 곡 목록 + 계산 상세 */
+.ticket-back {
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow: hidden;
+}
+
+.ticket-back-header {
+  padding: var(--card-pad) var(--card-pad) 0.6rem;
+  text-align: center;
+}
+
+.ticket-back-title {
+  margin: 0.1rem 0 0;
+  font-size: 1.3rem;
+}
+
+.ticket-back-list {
+  min-height: 0;
+  margin: 0.4rem 0 0;
+  padding: 0 var(--card-pad);
+  overflow-y: auto;
+  list-style: none;
+}
+
+.ticket-back-list li {
+  display: grid;
+  grid-template-columns: 1.7rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0;
+  border-top: 1px solid var(--ticket-border-subtle, var(--border-subtle));
+}
+
+.ticket-back-list li:first-child {
+  border-top: 0;
+}
+
+.ticket-back-index {
+  color: var(--card-ink-muted);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.ticket-back-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.ticket-back-copy strong {
+  font-size: 0.92rem;
+}
+
+.ticket-back-copy small,
+.ticket-back-code {
+  color: var(--card-ink-muted);
+  font-size: 0.74rem;
+}
+
+.ticket-back-code {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.ticket-back-detail {
+  border-top: 2px dashed var(--card-border);
+  padding: 0.7rem var(--card-pad) var(--card-pad);
+  background: var(--card-muted);
+}
+
+.ticket-back-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem 0.9rem;
+  margin: 0;
+}
+
+.ticket-back-summary > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.ticket-back-summary dt {
+  color: var(--card-ink-muted);
+  font-size: 0.76rem;
+  font-weight: 760;
+}
+
+.ticket-back-summary dd {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.82rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flip-inner {
+    transform: none !important;
+  }
+
+  .flip-face {
+    backface-visibility: visible;
+    transition: opacity var(--motion-fast) var(--ease-standard);
+  }
+
+  .flip-back {
+    transform: none;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .flip-inner[data-flipped="true"] .flip-front {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .flip-inner[data-flipped="true"] .flip-back {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
 
 .ticket-share-panel,
@@ -2683,6 +3708,25 @@ button.home-confirm-action {
   }
 }
 
+/* Four header tabs plus the wordmark leave no room for the auto-save status
+   until the viewport is wide enough. */
+@media (min-width: 900px) and (max-width: 1099px) {
+  .header-status {
+    display: none;
+  }
+}
+
+@keyframes route-fade {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (forced-colors: active) {
   :root {
     --canvas: Canvas;
@@ -2702,13 +3746,12 @@ button.home-confirm-action {
   }
 
   .button,
-  .wordmark-cut,
+  .wordmark-mark,
   .status-dot {
     forced-color-adjust: none;
   }
 
-  .button,
-  .wordmark-cut {
+  .button {
     border-color: ButtonText;
     background: ButtonFace;
     color: ButtonText;

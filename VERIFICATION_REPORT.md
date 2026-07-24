@@ -2,7 +2,24 @@
 
 이 문서는 실행 증거의 최종 진입점이다. 소스나 테스트 파일의 존재와 실제 명령 PASS를 구분하며 `docs/verification/QA_MATRIX_V3.md`의 최종 행 판정과 함께 읽는다. local fixture production artifact의 성공을 실제 release/production 성공으로 승격하지 않는다.
 
-## Station 재게시 최신 검증 — 2026-07-23
+## Folded Session S 아이콘 반영 최신 검증 — 2026-07-23
+
+| Gate | 상태 | 최신 결과 |
+| --- | --- | --- |
+| Brand decision | `PASS` | 최종 후보 8안 중 Folded Session S를 현재 적용안으로 선택; 생성 PNG를 제어된 `public/icons/icon.svg`로 재작도 |
+| Full Vitest | `PASS` | 39 files / 194 tests |
+| Fixture build | `PASS` | public-origin Next.js 16.2.11 Webpack production build와 Serwist worker 재생성 |
+| Built PWA artifact | `PASS` | precache 49, forbidden 0, `folded-session-s-{180,192,512}.png` 3개 필수 asset 포함 |
+| Public responses | `PASS` | root·manifest·service worker·새 icon 200; manifest 192/512 refs, header/metadata와 Apple 180 ref 확인 |
+| Public icon bytes | `PASS` | 192px 공개 SHA-256 `8C489B93735AEBCF1CFCC5205132DFB2DEB4F6346ACB87DA67CAD4349AD1E4FF`, local master 파생본과 일치 |
+| Public Chromium PWA | `PASS` | Quick Tunnel 실제 origin에서 3/3; generic OG/security, offline shell/cache exclusion, explicit waiting-worker consent |
+| Public visual | `PASS` | Pixel 5 캡처에서 헤더의 이전 hardcoded S가 Folded Session S로 교체됨 |
+| Runtime | `ACTIVE_PREVIEW` | app PID 43664, tunnel PID 43376, `127.0.0.1:34173`; runtime cache `singsong-static-v2` |
+| Native install sheet | `BLOCKED_EXTERNAL` | Android Chrome에서 기존 dialog 취소·재접속 뒤 새 icon 표시를 사용자가 실기기에서 최종 확인해야 함 |
+
+이 변경은 두 원인을 분리해 닫았다. 설치 창은 같은 icon URL을 쓰던 기존 CacheFirst worker가 묵은 bytes를 반환했고, 헤더는 asset과 무관한 `S` 텍스트를 별도 렌더링했다. 새 고유 icon 경로, worker cache v2, 헤더 image 연결, production rebuild/restart를 함께 적용했다. 기존 icon 파일명은 이미 설치된 클라이언트 호환 alias로 남겼으며 사이트 데이터 삭제는 Dexie 플랜 손실 위험 때문에 해결 절차로 사용하지 않는다.
+
+## Station 재게시 기준 검증 — 2026-07-23
 
 이 절은 아래의 보존된 출시 후보 검증 이후 수행한 UI 리뉴얼의 최신 증거다. 제품·보안·release gate 판정은 바꾸지 않으며, 아래 기존 37-file/185-test 기록보다 이 절의 UI 회귀 결과가 최신이다.
 
@@ -11,11 +28,11 @@
 | Format | `PASS` | 전체 Prettier check 통과 |
 | Lint | `PASS` | 전체 ESLint, warning 0 |
 | Typecheck | `PASS` | TypeScript `--noEmit` |
-| Unit/integration/static | `PASS` | Vitest 39 files / 193 tests |
+| Unit/integration/static | `PASS` | Vitest 39 files / 194 tests |
 | Fixture build | `PASS` | `main` public-origin Next.js 16.2.11 Webpack production build, 모든 route 생성 |
 | Public browser | `PASS` | Quick Tunnel 대상 Chromium 20 discovered: 13 pass / 7 intentional project-gated skip |
 | Visual review | `PASS` | 공개 390px Station 화면, count 18.4px/900, 완료 중앙 오차 0px, overflow 0 |
-| Existing public preview | `ACTIVE_PREVIEW` | app PID 35632와 tunnel PID 43376, 전용 34173 포트; 홈·자산 14개 200, public Chromium 13/7 |
+| Existing public preview | `ACTIVE_PREVIEW` | app PID 43664와 tunnel PID 43376, 전용 34173 포트; 기존 public Chromium 13/7, 최신 PWA 3/3 |
 
 첫 Chromium 재실행은 managed sandbox가 browser process spawn을 `EPERM`으로 차단했다. 동일 build/source를 승인된 실행 경계에서 재실행했고 3개 시나리오가 5.2초에 모두 통과했다. 임시 3100 서버와 캡처 스크립트는 검수 직후 정리했다.
 
@@ -45,7 +62,7 @@
 | Profile contract        | `fixture` / `release`; 내부 release runtime은 production 호환값 사용              |
 | Local capability        | `LOCAL_DEMO_READY`: verified fixture production release candidate                 |
 | Production gate         | `BLOCKED_EXTERNAL`; permanent deploy not performed                                |
-| Temporary phone preview | `ACTIVE_PREVIEW/READY`: app PID 35632, tunnel PID 43376, port 34173               |
+| Temporary phone preview | `ACTIVE_PREVIEW/READY`: app PID 43664, tunnel PID 43376, port 34173               |
 
 ## 최종 자동검증
 
@@ -58,7 +75,7 @@
 | Format                                      | `pnpm format:check`                                   | `PASS`           | mobile-shell current와 233-path clean exit 0                                                                                                                                            |
 | Lint                                        | `pnpm lint`                                           | `PASS`           | mobile-shell current와 clean exit 0, warning 0                                                                                                                                          |
 | Typecheck                                   | `pnpm typecheck`                                      | `PASS`           | mobile-shell current와 clean exit 0                                                                                                                                                     |
-| Unit/integration/static                     | full Vitest                                           | `PASS`           | current 39 files/193 tests; retained clean baseline 37 files/185 tests                                                                                                                   |
+| Unit/integration/static                     | full Vitest                                           | `PASS`           | current 39 files/194 tests; retained clean baseline 37 files/185 tests                                                                                                                   |
 | Coverage — retained baseline                | pre-shell Vitest coverage artifact                    | `PASS`           | 30-file/163-test baseline: statements 82.48% (1375/1667), branches 76.12% (934/1227), functions 86.77% (269/310), lines 85.24% (1288/1511)                                              |
 | Coverage — current mobile shell             | current·clean 37-file suite with coverage             | `PASS`           | 둘 다 statements 82.27% (1560/1896), branches 75.47% (1074/1423), functions 86.06% (315/366), lines 84.91% (1464/1724); 기준 하향 없이 threshold 통과                                   |
 | Contract subset — retained                  | `pnpm test:contract`                                  | `PASS`           | shell 이전 4 files/21 tests; canonical/validation 계약은 shell 변경에서 수정되지 않음                                                                                                   |
@@ -66,13 +83,13 @@
 | Fixture build — clean baseline              | 이전 219-path clean source evidence                   | `PASS`           | Next 16.2.11, 18.0s, warning 0; 새 13개 shell 경로의 clean-copy 증거로 사용하지 않음                                                                                                    |
 | Fixture build — current 233-path clean copy | 새 writable clean source archive                      | `PASS`           | Next 16.2.11 Webpack fixture build; compile 5.9s, type 2.8s, all routes 생성                                                                                                            |
 | Dev webpack runtime                         | actual `next dev --webpack`                           | `PASS`           | GET `/` 200, 15,630 bytes, SingSong present                                                                                                                                             |
-| Built PWA artifact                          | `node scripts/verify-built-pwa.mjs`                   | `PASS`           | current와 clean 모두 precache 45, forbidden entries 0                                                                                                                                   |
+| Built PWA artifact                          | `node scripts/verify-built-pwa.mjs`                   | `PASS`           | current precache 49/forbidden 0/required brand assets 3; retained clean baseline precache 45/forbidden 0                                                                                |
 | Main HTTP smoke                             | explicit fixture production profile                   | `PASS`           | home/ticket/OG 200; OG 30,423 bytes; home modern JS gzip 167,035 bytes                                                                                                                  |
 | Clean HTTP smoke                            | 233-path clean fixture production profile             | `PASS`           | home/ticket/OG 200; OG 30,423 bytes; home modern JS gzip 167,056 bytes                                                                                                                  |
 | Core browser E2E                            | public Quick Tunnel Chromium projects                 | `PASS`           | final public-origin run, retries 0: 20 discovered, 13 pass, 7 intentional project-gated skip                                                                                            |
-| Built PWA browser                           | final Chromium production-artifact config             | `PASS`           | 3/3 pass; generic OG/security, offline shell, explicit waiting-worker consent                                                                                                           |
-| Public preview SW control                   | Pixel 7 Chromium profile on Quick Tunnel              | `PASS`           | `/` 200; same-origin `serviceWorker.ready`; reload 후 controller `sw.js`; context worker count 1                                                                                        |
-| Icon metadata                               | sharp + manifest source                               | `PASS`           | 192×192, 512×512, apple 180×180 PNG sRGB alpha; manifest maskable refs exact                                                                                                            |
+| Built PWA browser                           | final Chromium production-artifact config             | `PASS`           | 최신 public origin 3/3 pass; generic OG/security, offline shell, explicit waiting-worker consent                                                                                       |
+| Public preview SW control                   | Pixel 7/5 Chromium profile on Quick Tunnel            | `PASS`           | `/` 200; same-origin controller `sw.js`; new icon precache와 runtime cache `singsong-static-v2` 확인                                                                                   |
+| Icon metadata                               | sharp + manifest/public response                      | `PASS`           | `folded-session-s-{180,192,512}.png`, sRGB·opaque; manifest 192/512 maskable refs와 Apple/header metadata exact                                                                       |
 | Lab navigation                              | 4× CPU, 40ms, 10/5Mbps; cold·warm each 5              | `PASS`           | cold LCP median/worst 324/336ms, TBT 234/240ms, CLS 0.0005; warm LCP 92/144ms, TBT 0                                                                                                    |
 | Home initial JS                             | HTML modern route scripts, gzip level 9               | `PASS`           | current 167,035 bytes < 174,080-byte provisional limit                                                                                                                                  |
 | Search distribution                         | fixed fixture corpus/distribution                     | `PASS`           | overall p95 15.7ms                                                                                                                                                                      |
@@ -80,7 +97,7 @@
 | Field performance                           | same release/region/device-class RUM/CrUX p75         | `NOT_RUN`        | sample `NONE`; result `NOT_RUN + NONE`, never zero/PASS                                                                                                                                 |
 | Aggregate demo gate                         | equivalent `verify:demo` component composition        | `PASS`           | current와 clean의 모든 component exit 0; no fabricated single aggregate-process exit                                                                                                    |
 | Release fail-closed                         | credentials 없는 `pnpm preflight:release`             | `PASS`           | expected exit 1, deterministic `BLOCK_EXTERNAL`, 13 required env names; no values logged                                                                                                |
-| Temporary phone preview                     | dedicated-port fixture app + Cloudflare Quick Tunnel  | `ACTIVE_PREVIEW` | app PID 35632/tunnel PID 43376/port 34173; home and 14 assets 200; public Chromium 13 pass/7 intentional skip |
+| Temporary phone preview                     | dedicated-port fixture app + Cloudflare Quick Tunnel  | `ACTIVE_PREVIEW` | app PID 43664/tunnel PID 43376/port 34173; Folded Session S assets 200; public Chromium 13/7와 최신 PWA 3/3 |
 
 ## 환경 재시도
 
@@ -90,6 +107,7 @@
 - frozen install 재생성 한 번이 sandbox timeout으로 끝났고, 승인된 동일 exact install은 current 10.2s와 clean 5.1s로 PASS했다.
 - shell 이전 Next build가 clean copy의 `next-env.d.ts` import directive만 자동 갱신했다. 그 219-path clean evidence는 보존하되, 현재 source appendix는 새 shell/coverage 경로 14개를 포함해 actual/listed 233/233, missing/extra 0으로 다시 계산했다.
 - Chromium 첫 spawn은 managed sandbox `EPERM`이었다. 승인된 browser 검증과 mobile-shell 추가 회귀의 최신 합계는 E2E 13 pass/7 project-gated skip, PWA 3 pass다.
+- 아이콘 반영 뒤 첫 PWA 재검증은 public hostname용 build를 localhost:3200에서 실행해 origin guard가 search 403을 반환했다. 제품 assertion을 바꾸지 않고 같은 build를 실제 Quick Tunnel origin에 연결해 3/3을 재실행했고 모두 PASS했다.
 - 최초 preview app은 localhost origin으로 build돼 public search가 403이었다. 코드를 우회하지 않고 `NEXT_PUBLIC_SITE_URL`을 Quick Tunnel hostname과 일치시켜 rebuild/start했고 public search/share와 전체 phone-profile flow가 PASS했다.
 - Station hotfix 직후 첫 공개 모바일 skip-link run은 이전 service-worker 전환 중 한 번 실패하고 retry에서 PASS했다. 갱신 뒤 retries 0의 3회 연속 targeted run과 전체 public-origin 13/7 suite가 모두 PASS해 전환을 닫았다.
 - 기존 `bond-athletics-calculations-putting` 터널은 싱송 PID 30596 종료 뒤 Podoal이 공용 3000번 포트를 점유하면서 서버측 응답 자체가 Podoal로 바뀌었다. client cache를 배제하고 tunnel target을 확인한 뒤 PID 32848만 종료했다. 싱송을 전용 34173번 포트에서 public hostname 기준으로 다시 build/start하고 새 origin에서 홈·14개 자산·모바일 identity/overflow 및 전체 Chromium 13/7을 재검증했다.
@@ -140,7 +158,7 @@
 
 ## Build capability 판정
 
-- 현재 최고 확인 상태는 `LOCAL_DEMO_READY`다. Next 16.2.11의 최신 Station source는 정적검사·193 tests·public-origin fixture build·공개 Chromium 전체 회귀를 통과했다. 리뉴얼 전 byte-exact 233-path clean source의 185 tests·coverage·build/smoke/PWA artifact와 browser E2E/PWA/performance는 별도 보존 증거다. 임시 public preview는 `ACTIVE_PREVIEW/READY`이지만 stable production으로 승격하지 않는다.
+- 현재 최고 확인 상태는 `LOCAL_DEMO_READY`다. Next 16.2.11의 최신 Station source는 정적검사·194 tests·public-origin fixture build·공개 Chromium 전체 회귀와 최신 PWA 3/3을 통과했다. 리뉴얼 전 byte-exact 233-path clean source의 185 tests·coverage·build/smoke/PWA artifact와 browser E2E/PWA/performance는 별도 보존 증거다. 임시 public preview는 `ACTIVE_PREVIEW/READY`이지만 stable production으로 승격하지 않는다.
 - production gate: `BLOCKED_EXTERNAL`.
 - HTTP smoke나 home JS gzip 한 항목만 통과해도 전체 성능 gate를 `PASS`로 올리지 않는다. lab·search·field 표본은 각각 독립 판정한다.
 - 에이전트는 `RELEASED`를 선언하지 않는다.
@@ -151,10 +169,10 @@
 - retained pre-shell E2E root: `C:/Users/Public/Documents/ESTsoft/CreatorTemp/singsong-playwright-next16211-final-683054d4ee774d5ea65dedb69d21145c/`
 - retained pre-shell PWA root: `C:/Users/Public/Documents/ESTsoft/CreatorTemp/singsong-playwright-pwa-next16211-final-683054d4ee774d5ea65dedb69d21145c/`
 - current 233-path clean reproduction: `C:/Users/Public/Documents/ESTsoft/CreatorTemp/singsong-clean-shell-20260722-1033/`; final source 233/233, missing 0, SHA mismatch 0 after evidence-doc sync
-- retained pre-renewal coverage: `coverage/coverage-summary.json` (2026-07-22 10:39:17+09:00), full 37/185 command exit 0; latest 39/193 run은 coverage를 재측정하지 않음
+- retained pre-renewal coverage: `coverage/coverage-summary.json` (2026-07-22 10:39:17+09:00), full 37/185 command exit 0; latest 39/194 run은 coverage를 재측정하지 않음
 - current E2E: `C:/Users/agape/AppData/Local/Temp/singsong-playwright/e2e/report/index.html` (2026-07-22 10:12:17+09:00)와 `e2e/playwright/.last-run.json` status `passed`
-- current PWA: `C:/Users/agape/AppData/Local/Temp/singsong-playwright/production-pwa/report/index.html` (2026-07-22 10:12:42+09:00)와 `production-pwa/results/.last-run.json` status `passed`
-- phone preview: `C:/Users/Public/Documents/ESTsoft/CreatorTemp/singsong-phone-preview/`의 `station-dedicated-tunnel-20260723-023109.stderr.log`, `station-dedicated-app-20260723-023230.stdout.log`; running app PID 35632와 Quick Tunnel PID 43376. 최종 공개 화면은 `C:/Users/agape/.codex/visualizations/2026/07/22/019f87a9-4cc1-73c3-9dbd-6825140f85e8/singsong-dedicated-republished.png`에 보존했다.
+- current PWA: `C:/Users/agape/AppData/Local/Temp/singsong-playwright/production-pwa/report/index.html` (2026-07-23 07:53:48+09:00)와 `production-pwa/results/.last-run.json` status `passed`
+- phone preview: `C:/Users/Public/Documents/ESTsoft/CreatorTemp/singsong-phone-preview/`의 tunnel log, `app-folded-session-s.stdout.log`, `folded-session-s-mobile.png` (2026-07-23 07:54:16+09:00); running app PID 43664와 Quick Tunnel PID 43376.
 - repository `test-results/**/.last-run.json`은 이전 실패 run의 generated metadata이므로 이 최종 PASS의 근거로 사용하지 않는다.
 - generated build: `.next/`, `public/sw.js`, `public/swe-worker-*`
 - 초기 자료·Git 보존: `MATERIAL_INVENTORY.md`, `MD_READ_LEDGER.md`, `GIT_HISTORY_AUDIT.md`, `FINAL_MATERIAL_AUDIT.md`

@@ -3,22 +3,26 @@
 import "@testing-library/jest-dom/vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { BottomSlot } from "@/components/bottom-slot";
 import { HomeActionDock } from "@/features/plan/home-action-dock";
 
 afterEach(cleanup);
 
 describe("HomeActionDock", () => {
-  it("renders the empty search action inside the shared bottom slot", () => {
-    const { container } = render(
-      <BottomSlot>
-        <HomeActionDock songCount={0} canIssue={false} onOpenPricing={vi.fn()} onIssue={vi.fn()} />
-      </BottomSlot>,
+  it("opens the search sheet from the empty search action", () => {
+    const onOpenSearch = vi.fn();
+    render(
+      <HomeActionDock
+        songCount={0}
+        canIssue={false}
+        onOpenPricing={vi.fn()}
+        onIssue={vi.fn()}
+        onOpenSearch={onOpenSearch}
+      />,
     );
 
-    expect(container.querySelector("[data-bottom-slot='true']")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "노래 찾기" })).toHaveAttribute("href", "/search");
-    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    const action = screen.getByRole("button", { name: "노래 찾기" });
+    fireEvent.click(action);
+    expect(onOpenSearch).toHaveBeenCalledOnce();
   });
 
   it("routes invalid and valid plans to their single next action", () => {
@@ -30,6 +34,7 @@ describe("HomeActionDock", () => {
         canIssue={false}
         onOpenPricing={onOpenPricing}
         onIssue={onIssue}
+        onOpenSearch={vi.fn()}
       />,
     );
 
@@ -41,7 +46,13 @@ describe("HomeActionDock", () => {
     expect(onIssue).not.toHaveBeenCalled();
 
     view.rerender(
-      <HomeActionDock songCount={3} canIssue onOpenPricing={onOpenPricing} onIssue={onIssue} />,
+      <HomeActionDock
+        songCount={3}
+        canIssue
+        onOpenPricing={onOpenPricing}
+        onIssue={onIssue}
+        onOpenSearch={vi.fn()}
+      />,
     );
     fireEvent.click(screen.getByRole("button", { name: "완료" }));
     expect(onIssue).toHaveBeenCalledOnce();
@@ -56,6 +67,7 @@ describe("HomeActionDock", () => {
         disabled
         onOpenPricing={onOpenPricing}
         onIssue={vi.fn()}
+        onOpenSearch={vi.fn()}
       />,
     );
 

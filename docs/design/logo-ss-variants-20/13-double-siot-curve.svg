@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">SingSong SS 13 — Double Siot Curve</title>
+  <desc id="desc">Two softly bowed yet upright Korean siot glyphs connect through a broad middle turn to form a friendly capital S rhythm.</desc>
+  <rect width="512" height="512" rx="112" fill="#FAF7F0"/>
+  <path d="M144 227C190 193 232 144 273 105 315 148 359 198 402 225" fill="none" stroke="#FF3D6E" stroke-width="50" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M402 225C357 270 303 251 215 277" fill="none" stroke="#15131A" stroke-width="50" stroke-linecap="round"/>
+  <path d="M116 401C153 361 184 315 215 277 253 319 309 370 382 402" fill="none" stroke="#15131A" stroke-width="50" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

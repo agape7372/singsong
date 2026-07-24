@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">SingSong SS 11 — Negative Siot</title>
+  <desc id="desc">Two upright Korean siot counters are carved from a bold S ribbon for a compact, high-contrast app icon.</desc>
+  <rect width="512" height="512" rx="112" fill="#FAF7F0"/>
+  <path d="M149 154C205 94 356 94 378 170 402 254 301 255 222 276 139 298 126 363 185 398 239 430 335 417 382 372" fill="none" stroke="#15131A" stroke-width="132" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M194 223 277 127 366 222" fill="none" stroke="#FAF7F0" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M145 377 214 280 322 393" fill="none" stroke="#FAF7F0" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="149" cy="154" r="24" fill="#FF3D6E"/>
+  <circle cx="382" cy="372" r="24" fill="#FF3D6E"/>
+</svg>

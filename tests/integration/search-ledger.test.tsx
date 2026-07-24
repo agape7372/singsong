@@ -81,7 +81,7 @@ describe("SearchLedger state semantics", () => {
     const { props } = renderLedger({ addedCatalogIds: new Set(["fx-001"]) });
 
     expect(screen.getByRole("status")).toHaveTextContent("검색어는 주소나 로그에 남기지 않습니다.");
-    const input = screen.getByLabelText("제목, 가수 또는 노래방 번호");
+    const input = screen.getByLabelText("제목, 가수 또는 노래방 번호로 곡 찾기");
     fireEvent.change(input, { target: { value: "밤의" } });
     await finishDebounce();
 
@@ -106,7 +106,7 @@ describe("SearchLedger state semantics", () => {
     );
     renderLedger();
 
-    fireEvent.change(screen.getByLabelText("제목, 가수 또는 노래방 번호"), {
+    fireEvent.change(screen.getByLabelText("제목, 가수 또는 노래방 번호로 곡 찾기"), {
       target: { value: "밤의" },
     });
     await finishDebounce();
@@ -124,7 +124,7 @@ describe("SearchLedger state semantics", () => {
     vi.stubGlobal("fetch", fetchMock);
     renderLedger();
 
-    const input = screen.getByLabelText("제목, 가수 또는 노래방 번호");
+    const input = screen.getByLabelText("제목, 가수 또는 노래방 번호로 곡 찾기");
     fireEvent.compositionStart(input);
     fireEvent.change(input, { target: { value: "밤의" } });
     await act(async () => {

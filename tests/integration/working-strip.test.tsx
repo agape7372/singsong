@@ -30,7 +30,8 @@ const tracks: Track[] = [
 ];
 
 describe("WorkingStrip", () => {
-  it("uses the canonical empty copy with exactly one search action", () => {
+  it("opens the search sheet from the single empty action", () => {
+    const onOpenSearch = vi.fn();
     render(
       <WorkingStrip
         items={[]}
@@ -39,6 +40,7 @@ describe("WorkingStrip", () => {
         onAddPerson={vi.fn()}
         onMove={vi.fn()}
         onRemove={vi.fn()}
+        onOpenSearch={onOpenSearch}
         undoLabel={null}
         onUndo={vi.fn()}
       />,
@@ -46,10 +48,10 @@ describe("WorkingStrip", () => {
 
     expect(screen.getByRole("heading", { name: "오늘 뭐 부를래?" })).toBeVisible();
     expect(screen.getByText("노래 찾아서 담아봐, 여기 리스트가 채워질 거야")).toBeVisible();
-    const links = screen.getAllByRole("link");
-    expect(links).toHaveLength(1);
-    expect(links[0]).toHaveAccessibleName("노래 찾으러 가기");
-    expect(links[0]).toHaveAttribute("href", "/search");
+    expect(screen.queryAllByRole("link")).toHaveLength(0);
+    const action = screen.getByRole("button", { name: "노래 찾으러 가기" });
+    fireEvent.click(action);
+    expect(onOpenSearch).toHaveBeenCalledOnce();
   });
 
   it("uses the station ledger hierarchy while preserving add, remove, undo and reorder", () => {
@@ -57,6 +59,7 @@ describe("WorkingStrip", () => {
     const onRemove = vi.fn();
     const onUndo = vi.fn();
     const onAddPerson = vi.fn();
+    const onOpenSearch = vi.fn();
     render(
       <WorkingStrip
         items={tracks}
@@ -65,6 +68,7 @@ describe("WorkingStrip", () => {
         onAddPerson={onAddPerson}
         onMove={onMove}
         onRemove={onRemove}
+        onOpenSearch={onOpenSearch}
         undoLabel="분홍 영수증"
         onUndo={onUndo}
       />,
@@ -88,12 +92,10 @@ describe("WorkingStrip", () => {
     expect(firstTrackRow).not.toBeNull();
     fireEvent.keyDown(firstTrackRow!, { key: "ArrowDown", altKey: true });
     expect(onMove).toHaveBeenCalledWith(0, 1);
-    expect(screen.getByRole("link", { name: "곡 하나 더 넣기" })).toHaveAttribute(
-      "href",
-      "/search",
-    );
+    const addMore = screen.getByRole("button", { name: "곡 하나 더 넣기" });
     expect(screen.getByText("+", { selector: ".strip-add-plus" })).toBeVisible();
-    expect(screen.queryByText("곡 하나 더 넣기")).not.toBeInTheDocument();
+    fireEvent.click(addMore);
+    expect(onOpenSearch).toHaveBeenCalledOnce();
     expect(screen.queryByText("빼기")).not.toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "분홍 영수증 삭제" }).querySelector("[aria-hidden]"),
@@ -114,6 +116,7 @@ describe("WorkingStrip", () => {
         onAddPerson={onAddPerson}
         onMove={vi.fn()}
         onRemove={vi.fn()}
+        onOpenSearch={vi.fn()}
         undoLabel={null}
         onUndo={vi.fn()}
       />,
@@ -136,6 +139,7 @@ describe("WorkingStrip", () => {
         onAddPerson={vi.fn()}
         onMove={vi.fn()}
         onRemove={vi.fn()}
+        onOpenSearch={vi.fn()}
         undoLabel={null}
         onUndo={vi.fn()}
       />,

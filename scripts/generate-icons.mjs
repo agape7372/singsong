@@ -8,6 +8,11 @@ const outputDirectory = path.join(root, "public", "icons");
 
 await mkdir(outputDirectory, { recursive: true });
 for (const [filename, size] of [
+  ["folded-session-s-192.png", 192],
+  ["folded-session-s-512.png", 512],
+  ["folded-session-s-180.png", 180],
+  // Keep the legacy aliases for already-installed clients while new manifests
+  // use the branded filenames above to bypass stale browser icon caches.
   ["icon-192.png", 192],
   ["icon-512.png", 512],
   ["apple-touch-icon.png", 180],

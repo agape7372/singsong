@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import type { TicketSnapshot } from "@/domain/models";
 import { useActivePlan } from "@/features/plan/use-active-plan";
-import { TicketCard } from "./ticket-card";
+import { FlippableTicket } from "./flippable-ticket";
 import { trackAnalytics } from "@/analytics/port";
 import {
   TurnstileChallenge,
@@ -74,7 +74,8 @@ const lightTicketExportStyle: Partial<CSSStyleDeclaration> & Record<`--${string}
   "--ticket-focus-ring": "#1c1622",
 };
 
-export function TicketScreen() {
+export function TicketScreen({ revision }: { revision?: number | undefined }) {
+  const archived = revision !== undefined;
   const { plan, error: planError } = useActivePlan();
   const [ticket, setTicket] = useState<TicketSnapshot | null>(null);
   const [animate, setAnimate] = useState(false);
@@ -108,7 +109,7 @@ export function TicketScreen() {
         setTurnstileToken(null);
         setStatus(null);
         const { getTicket, claimTicketMotion, getManagedShareReceipt } = await loadPlanDatabase();
-        const snapshot = await getTicket(plan.id, plan.revision);
+        const snapshot = await getTicket(plan.id, revision ?? plan.revision);
         if (cancelled || sequence !== ticketLoadSequence.current) return;
         if (!snapshot) return;
         setTicket(snapshot);
@@ -140,7 +141,7 @@ export function TicketScreen() {
     return () => {
       cancelled = true;
     };
-  }, [plan]);
+  }, [plan, revision]);
 
   if (!plan) {
     if (planError) {
@@ -187,11 +188,15 @@ export function TicketScreen() {
       <div className="page-shell narrow-shell">
         <section className="state-strip" aria-labelledby="ticket-empty-title">
           <header className="state-strip-header">
-            <p className="eyebrow">발권 전</p>
-            <h1 id="ticket-empty-title">현재 순서의 티켓이 아직 없어요.</h1>
+            <p className="eyebrow">{archived ? "보관된 티켓" : "발권 전"}</p>
+            <h1 id="ticket-empty-title">
+              {archived ? "이 티켓을 찾을 수 없어요." : "현재 순서의 티켓이 아직 없어요."}
+            </h1>
           </header>
           <p className="lede state-strip-copy">
-            곡·가격·인원을 확인하고 세션 티켓을 발급해 주세요.
+            {archived
+              ? "보관된 티켓이 이 기기에서 지워졌거나 주소가 올바르지 않습니다."
+              : "곡·가격·인원을 확인하고 세션 티켓을 발급해 주세요."}
           </p>
           <p
             className="ticket-status"
@@ -201,8 +206,8 @@ export function TicketScreen() {
             {status}
           </p>
           <div className="state-strip-actions">
-            <a className="button" href="/">
-              세션으로 돌아가기
+            <a className="button" href={archived ? "/library" : "/"}>
+              {archived ? "보관함으로" : "세션으로 돌아가기"}
             </a>
           </div>
         </section>
@@ -224,13 +229,17 @@ export function TicketScreen() {
     try {
       const { getActivePlan, prepareManagedShare, rotateManagedShare, completeManagedShare } =
         await loadPlanDatabase();
-      const latestPlan = await getActivePlan();
-      if (latestPlan.id !== ticket.planId || latestPlan.revision !== ticket.revision) {
-        setShareConfirmed(false);
-        setStatus(
-          "곡 순서나 계산 설정이 바뀌어 이 티켓은 더 이상 최신 상태가 아닙니다. 최신 티켓을 다시 발급해 주세요.",
-        );
-        return;
+      // Archived tickets are immutable snapshots opened deliberately from 보관함,
+      // so the "plan changed since issue" guard only applies to the live ticket.
+      if (!archived) {
+        const latestPlan = await getActivePlan();
+        if (latestPlan.id !== ticket.planId || latestPlan.revision !== ticket.revision) {
+          setShareConfirmed(false);
+          setStatus(
+            "곡 순서나 계산 설정이 바뀌어 이 티켓은 더 이상 최신 상태가 아닙니다. 최신 티켓을 다시 발급해 주세요.",
+          );
+          return;
+        }
       }
       const pending = await prepareManagedShare(ticket.fingerprint);
       const response = await fetch("/api/shares", {
@@ -383,14 +392,16 @@ export function TicketScreen() {
     <section className="page-shell ticket-screen" aria-labelledby="ticket-screen-heading">
       <header className="ticket-screen-heading">
         <div>
-          <p className="eyebrow">04 · 발권 티켓</p>
-          <h1 id="ticket-screen-heading">한 장으로 건넬 준비가 됐어요.</h1>
+          <p className="eyebrow">{archived ? "보관된 티켓" : "04 · 발권 티켓"}</p>
+          <h1 id="ticket-screen-heading">
+            {archived ? "보관함에서 다시 열었어요." : "한 장으로 건넬 준비가 됐어요."}
+          </h1>
         </div>
-        <a href="/">순서 다시 편집</a>
+        <a href={archived ? "/library" : "/"}>{archived ? "보관함으로" : "순서 다시 편집"}</a>
       </header>
       <div className="ticket-stage">
-        <TicketCard
-          ref={ticketRef}
+        <FlippableTicket
+          frontRef={ticketRef}
           payload={ticket.payload}
           fingerprint={ticket.fingerprint}
           animate={animate}

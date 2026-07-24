@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SingSong — ㅅ × S Logo Study / 20 Directions</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --canvas: #faf7f0;
+        --paper: #fff;
+        --ink: #15131a;
+        --muted: #665f68;
+        --rose: #ff3d6e;
+        --ochre: #b76e00;
+        --line: #d9d1c5;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        background: var(--canvas);
+        color: var(--ink);
+        font-family: Inter, Pretendard, "Noto Sans KR", system-ui, sans-serif;
+      }
+
+      main {
+        width: min(1760px, calc(100% - 48px));
+        margin: 0 auto;
+        padding: 44px 0 60px;
+      }
+
+      header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 28px;
+        align-items: end;
+        padding-bottom: 24px;
+        border-bottom: 3px solid var(--ink);
+      }
+
+      .eyebrow,
+      .serial,
+      .meta,
+      .palette span,
+      .pick {
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+      }
+
+      .eyebrow {
+        margin: 0 0 10px;
+        color: var(--rose);
+        font-size: 12px;
+        font-weight: 950;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(40px, 5vw, 72px);
+        line-height: .94;
+        letter-spacing: -.06em;
+      }
+
+      .subtitle {
+        max-width: 940px;
+        margin: 16px 0 0;
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1.6;
+      }
+
+      .palette {
+        display: grid;
+        grid-template-columns: repeat(2, auto);
+        gap: 8px 14px;
+        padding: 14px;
+        border: 2px solid var(--ink);
+        background: var(--paper);
+      }
+
+      .palette span {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 10px;
+        font-weight: 850;
+      }
+
+      .swatch {
+        width: 13px;
+        height: 13px;
+        border: 1px solid var(--ink);
+      }
+
+      .rubric {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 18px 0 28px;
+      }
+
+      .rubric span {
+        padding: 7px 10px;
+        border: 1px solid var(--ink);
+        background: var(--paper);
+        font-size: 11px;
+        font-weight: 850;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      article {
+        min-width: 0;
+        overflow: hidden;
+        border: 2px solid var(--ink);
+        background: var(--paper);
+      }
+
+      .visual {
+        position: relative;
+        display: grid;
+        min-height: 216px;
+        place-items: center;
+        padding: 18px;
+        border-bottom: 1px solid var(--line);
+        background:
+          linear-gradient(var(--line) 1px, transparent 1px),
+          linear-gradient(90deg, var(--line) 1px, transparent 1px),
+          #f4efe7;
+        background-size: 24px 24px;
+      }
+
+      .hero {
+        display: block;
+        width: min(100%, 176px);
+        aspect-ratio: 1;
+      }
+
+      .pick {
+        position: absolute;
+        top: 11px;
+        left: 11px;
+        display: none;
+        padding: 6px 8px;
+        border: 2px solid var(--ink);
+        background: var(--rose);
+        font-size: 9px;
+        font-weight: 950;
+      }
+
+      article[data-pick] .pick { display: block; }
+
+      .copy { padding: 14px; }
+
+      .title-row {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 10px;
+        align-items: start;
+      }
+
+      .serial {
+        display: grid;
+        width: 32px;
+        height: 32px;
+        place-items: center;
+        background: var(--ink);
+        color: var(--paper);
+        font-size: 10px;
+        font-weight: 950;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 16px;
+        line-height: 1.1;
+        letter-spacing: -.025em;
+      }
+
+      .ko {
+        display: block;
+        margin-top: 3px;
+        color: var(--rose);
+        font-size: 11px;
+        font-weight: 850;
+      }
+
+      article p {
+        min-height: 48px;
+        margin: 11px 0 13px;
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.48;
+      }
+
+      .tests {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding-top: 11px;
+        border-top: 1px dashed var(--line);
+      }
+
+      .sizes { display: flex; align-items: center; gap: 9px; }
+      .sizes img { display: block; flex: none; }
+      .mono { filter: grayscale(1) contrast(1.4); }
+
+      .download {
+        color: var(--ink);
+        font-size: 10px;
+        font-weight: 900;
+        text-decoration-thickness: 2px;
+        text-underline-offset: 3px;
+      }
+
+      footer {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 24px;
+        margin-top: 26px;
+        padding-top: 18px;
+        border-top: 2px solid var(--ink);
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .meta { color: var(--ink); font-size: 10px; font-weight: 850; }
+
+      @media (max-width: 1280px) {
+        .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      }
+
+      @media (max-width: 860px) {
+        main { width: min(100% - 28px, 760px); padding-top: 28px; }
+        header, footer { grid-template-columns: 1fr; }
+        .palette { width: max-content; }
+        .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+
+      @media (max-width: 520px) {
+        .grid { grid-template-columns: 1fr; }
+        .visual { min-height: 280px; }
+        .hero { width: 220px; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <p class="eyebrow">SingSong / ㅅ × S Monogram Study / 20 Directions</p>
+          <h1>한글 ㅅ이<br />S로 흐르는 20안</h1>
+          <p class="subtitle">
+            참고 스케치처럼 위·아래 자소가 서로 반대 방향으로 이동해 전체 S 리듬을 만들되,
+            최소 하나의 `ㅅ`은 정자세 실루엣을 유지해 한글 인지성을 잃지 않도록 설계했다.
+          </p>
+        </div>
+        <div class="palette" aria-label="Production palette">
+          <span><i class="swatch" style="background:#faf7f0"></i>#FAF7F0</span>
+          <span><i class="swatch" style="background:#15131a"></i>#15131A</span>
+          <span><i class="swatch" style="background:#ff3d6e"></i>#FF3D6E</span>
+          <span><i class="swatch" style="background:#b76e00"></i>#B76E00</span>
+        </div>
+      </header>
+
+      <div class="rubric">
+        <span>한글 ㅅ 즉시 인지</span><span>전체 S 리듬</span><span>24px 판독</span>
+        <span>회전 ≤ 25°</span><span>단색 유지</span><span>Figma import 가능</span>
+      </div>
+
+      <section class="grid" id="grid" aria-label="Twenty siot logo variants"></section>
+
+      <footer>
+        <span>모든 안은 독립 512×512 SVG다. 최종 후보는 16/20/24/32px와 단색 반전에서 다시 정제한다.</span>
+        <span class="meta">SINGSONG / SIOT-S STUDY</span>
+      </footer>
+    </main>
+
+    <script>
+      const concepts = [
+        ["01-staggered-siot.svg", "Staggered Siot", "엇갈린 두 ㅅ", "정자세 두 자소를 좌우로 어긋나게 배치해 S의 상·하 곡선을 만든 안."],
+        ["02-counter-tilt.svg", "Counter Tilt", "반대 기울기", "두 ㅅ을 작은 각도로 반대 회전해 손그림의 방향감을 살린 안."],
+        ["03-ribbon-siot.svg", "Ribbon Siot", "이어진 띠", "한 장의 굵은 띠가 두 꼭짓점을 지나며 자소와 S 경로를 함께 만든 안."],
+        ["04-nested-siot.svg", "Nested Siot", "포개진 자소", "큰 ㅅ의 내부와 반대편에 작은 ㅅ을 포개 깊이와 이동을 표현."],
+        ["05-offset-pair.svg", "Offset Pair", "두 자소 이동", "완전한 ㅅ 두 개를 상우·하좌에 두어 가장 문자 중심으로 접근."],
+        ["06-cut-terminal.svg", "Cut Terminal", "절단 단말", "잘린 끝단과 두 자소의 간격으로 접힘과 발권 문법을 최소화."],
+        ["07-shared-spine.svg", "Shared Spine", "공유 대각선", "두 ㅅ이 중앙 대각선을 공유해 하나의 모노그램으로 결속."],
+        ["08-ledger-base.svg", "Ledger Base", "순서 기준선", "두 ㅅ의 하단 획을 ledger bar처럼 연장해 곡 순서를 암시."],
+        ["09-punch-apex.svg", "Punch Apex", "꼭짓점 타공", "정자세 ㅅ 꼭짓점에 제한된 원형 기준점을 넣은 안."],
+        ["10-single-stroke.svg", "Single Stroke", "한 획 연결", "한 번의 연속 경로가 두 ㅅ과 전체 S를 모두 완성."],
+        ["11-negative-siot.svg", "Negative Siot", "음각 자소", "단단한 실루엣 속 두 ㅅ 음각이 S 방향으로 이어지는 고대비 안."],
+        ["12-split-color.svg", "Split Color", "색 분할", "한글 자소는 유지하고 중앙 전환점에서 잉크와 로즈가 교대."],
+        ["13-double-siot-curve.svg", "Double Siot Curve", "쌍시옷 곡선", "ㅆ의 반복 리듬을 완만한 S 축 위에 배치한 한국어 우선안."],
+        ["14-station-apex.svg", "Station Apex", "거점 꼭짓점", "자소의 꼭짓점을 만남·출발의 Station 노드로 강조."],
+        ["15-capsule-siot.svg", "Capsule Siot", "둥근 획", "캡슐형 굵은 획으로 모바일 앱 아이콘의 친근함을 높인 안."],
+        ["16-angular-siot.svg", "Angular Siot", "각진 구조", "직선과 절단면으로 ㅅ과 S를 가장 기하학적으로 정리."],
+        ["17-soft-siot.svg", "Soft Siot", "완만한 곡선", "손그림의 부드러운 궤적을 살리면서 꼭짓점 인지는 유지."],
+        ["18-braided-siot.svg", "Braided Siot", "교차 결속", "로즈와 잉크 두 자소가 중앙에서 한 번 교차하는 결속형."],
+        ["19-siot-seal.svg", "Siot Seal", "자소 인장", "두 ㅅ과 S 흐름을 하나의 Station 인장 안에 압축."],
+        ["20-minimal-siot-s.svg", "Minimal Siot S", "최소 모노그램", "불필요한 단서를 모두 덜어낸 ㅅ×S 최소 실루엣."],
+      ];
+
+      const grid = document.querySelector("#grid");
+      concepts.forEach(([file, name, ko, description], index) => {
+        const number = String(index + 1).padStart(2, "0");
+        const card = document.createElement("article");
+        card.innerHTML = `
+          <div class="visual"><span class="pick"></span><img class="hero" src="${file}" alt="${name}" /></div>
+          <div class="copy">
+            <div class="title-row"><span class="serial">${number}</span><h2>${name}<span class="ko">${ko}</span></h2></div>
+            <p>${description}</p>
+            <div class="tests"><div class="sizes"><img src="${file}" width="36" height="36" alt="36px" /><img class="mono" src="${file}" width="22" height="22" alt="22px monochrome test" /></div><a class="download" href="${file}">SVG 열기</a></div>
+          </div>`;
+        grid.appendChild(card);
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,766 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SingSong — 42 Reference Logo Directions</title>
+    <style>
+  :root { color-scheme: light; --cream:#FAF7F0; --paper:#fff; --ink:#15131A; --muted:#665F68; --rose:#FF3D6E; --ochre:#B76E00; --line:#D9D1C5; }
+  * { box-sizing: border-box; }
+  html { background: var(--cream); }
+  body { margin: 0; background: var(--cream); color: var(--ink); font-family: Inter, Pretendard, "Noto Sans KR", system-ui, sans-serif; }
+  main { width: min(2040px, calc(100% - 56px)); margin: 0 auto; padding: 64px 0 80px; }
+  header { display:grid; grid-template-columns:1fr auto; gap:36px; align-items:end; padding-bottom:30px; border-bottom:4px solid var(--ink); }
+  .eyebrow,.serial,.pick,.meta,.palette span,.family-head>span { font-family:ui-monospace,SFMono-Regular,Consolas,monospace; letter-spacing:.08em; text-transform:uppercase; }
+  .eyebrow { margin:0 0 12px; color:var(--rose); font-size:13px; font-weight:900; }
+  h1 { max-width:1200px; margin:0; font-size:clamp(52px,5vw,90px); line-height:.92; letter-spacing:-.06em; }
+  .subtitle { max-width:940px; margin:20px 0 0; color:var(--muted); font-size:18px; line-height:1.65; }
+  .header-actions { display:grid; gap:12px; justify-items:end; }
+  .board-link { display:inline-flex; padding:12px 15px; border:2px solid var(--ink); background:var(--paper); color:var(--ink); font-size:13px; font-weight:900; text-decoration:none; }
+  .board-link:hover { background:var(--rose); }
+  .palette { display:grid; grid-template-columns:repeat(2,auto); gap:10px 18px; padding:18px; border:2px solid var(--ink); background:var(--paper); }
+  .palette span { display:flex; align-items:center; gap:8px; font-size:11px; font-weight:850; }
+  .swatch { width:15px; height:15px; border:1px solid var(--ink); }
+  .rubric { display:flex; flex-wrap:wrap; gap:8px; margin:24px 0 46px; }
+  .rubric span { padding:8px 11px; border:1px solid var(--ink); background:var(--paper); font-size:12px; font-weight:850; }
+  .family { margin-top:56px; }
+  .family-head { display:grid; grid-template-columns:120px 1fr auto; gap:18px; align-items:baseline; margin-bottom:18px; padding-bottom:12px; border-bottom:2px solid var(--ink); }
+  .family-head>span { color:var(--rose); font-size:12px; font-weight:900; }
+  .family-head h2 { margin:0; font-size:30px; letter-spacing:-.035em; }
+  .family-head p { margin:0; color:var(--muted); font-size:14px; }
+  .grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:16px; }
+  .grid.final-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }
+  .card { min-width:0; overflow:hidden; border:2px solid var(--ink); background:var(--paper); }
+  .visual { position:relative; display:grid; place-items:center; aspect-ratio:1.08; padding:16px; overflow:hidden; border-bottom:1px solid var(--line); background:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px),#F4EFE7; background-size:22px 22px; }
+  .visual>img { display:block; width:min(100%,270px); aspect-ratio:1; object-fit:cover; border-radius:18%; }
+  .serial { position:absolute; top:12px; left:12px; display:grid; min-width:38px; height:30px; padding:0 8px; place-items:center; border:2px solid var(--ink); background:var(--rose); font-size:11px; font-weight:950; }
+  .pick { position:absolute; top:12px; right:12px; padding:8px 10px; border:2px solid var(--ink); background:var(--ink); color:var(--paper); font-size:10px; font-weight:900; }
+  .copy { padding:16px; }
+  h3 { margin:0; font-size:18px; line-height:1.12; letter-spacing:-.025em; }
+  .copy>p { min-height:62px; margin:12px 0 15px; color:var(--muted); font-size:12px; line-height:1.5; }
+  .tests { display:flex; align-items:center; gap:8px; padding-top:13px; border-top:1px dashed var(--line); }
+  .mini,.micro { display:grid; place-items:center; overflow:hidden; background:var(--cream); }
+  .mini,.mini img { width:32px; height:32px; }
+  .micro,.micro img { width:24px; height:24px; }
+  .mini img,.micro img { object-fit:cover; }
+  .meta { margin-left:auto; font-size:9px; font-weight:800; }
+  footer { display:flex; justify-content:space-between; gap:24px; margin-top:42px; padding-top:18px; border-top:3px solid var(--ink); color:var(--muted); font-size:12px; }
+  footer strong { color:var(--ink); }
+  @media (max-width:1200px) { .grid,.grid.final-grid { grid-template-columns:repeat(3,1fr); } header { grid-template-columns:1fr; } .header-actions { justify-items:start; } }
+  @media (max-width:760px) { main { width:min(100% - 24px,640px); padding-top:32px; } .grid,.grid.final-grid { grid-template-columns:1fr 1fr; } .family-head { grid-template-columns:1fr; gap:6px; } .family-head p { display:none; } h1 { font-size:48px; } }
+</style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <p class="eyebrow">SINGSONG / REFERENCE ARCHIVE / 2026</p>
+          <h1>참고용 로고<br />42가지 아카이브</h1>
+          <p class="subtitle">최종 후보 8안을 제외한 탐색 결과다. 삭제하지 않고 비교·회고용으로 보존하며, 신규 최종 후보에는 포함하지 않는다.</p>
+        </div>
+        <div class="header-actions">
+  <div class="palette" aria-label="palette">
+    <span><i class="swatch" style="background:#FAF7F0"></i>#FAF7F0</span>
+    <span><i class="swatch" style="background:#15131A"></i>#15131A</span>
+    <span><i class="swatch" style="background:#FF3D6E"></i>#FF3D6E</span>
+    <span><i class="swatch" style="background:#B76E00"></i>#B76E00</span>
+  </div><a class="board-link" href="../index.html">← 최종 8안으로 돌아가기</a></div>
+      </header>
+      <div class="rubric"><span>42 REFERENCES</span><span>NOT FINAL</span><span>ORIGINAL IDS</span><span>24PX CHECK</span><span>ARCHIVE ONLY</span></div>
+      
+      <section class="family">
+        <div class="family-head"><span>A / REF</span><h2>SESSION S</h2><p>이름과 세션 스트립</p></div>
+        <div class="grid">
+    <article class="card">
+      <div class="visual">
+        <img src="02-negative-passage-s.png" alt="Negative Passage S logo concept" />
+        <span class="serial">02</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Negative Passage S</h3>
+        <p>One chunky near-black rounded block is cut by a single broad cream S-shaped passage. A compact rose terminal square closes only the lower exit; no ticket outline.</p>
+        <div class="tests">
+          <span class="mini"><img src="02-negative-passage-s.png" alt="" /></span>
+          <span class="micro"><img src="02-negative-passage-s.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="03-ledger-step-s.png" alt="Ledger Step S logo concept" />
+        <span class="serial">03</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Ledger Step S</h3>
+        <p>Three thick horizontal queue bars alternate their left/right connection to create a stair-step S silhouette. The middle bar is rose; all corners are strongly rounded.</p>
+        <div class="tests">
+          <span class="mini"><img src="03-ledger-step-s.png" alt="" /></span>
+          <span class="micro"><img src="03-ledger-step-s.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="05-punched-solid-s.png" alt="Punched Solid S logo concept" />
+        <span class="serial">05</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Punched Solid S</h3>
+        <p>A single heavy black S mass with one large circular cutout near the upper bowl and one square registration cut near the lower terminal. A short rose insert bridges the waist.</p>
+        <div class="tests">
+          <span class="mini"><img src="05-punched-solid-s.png" alt="" /></span>
+          <span class="micro"><img src="05-punched-solid-s.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="06-hinge-strip-s.png" alt="Hinge Strip S logo concept" />
+        <span class="serial">06</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Hinge Strip S</h3>
+        <p>Two broad horizontal slabs face opposite directions and are joined by one short vertical hinge at the waist, making a mechanical S. The hinge is rose and the slabs are black.</p>
+        <div class="tests">
+          <span class="mini"><img src="06-hinge-strip-s.png" alt="" /></span>
+          <span class="micro"><img src="06-hinge-strip-s.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="07-open-frame-s.png" alt="Open Frame S logo concept" />
+        <span class="serial">07</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Open Frame S</h3>
+        <p>A thick open square frame breaks at two opposite corners; the remaining frame turns into an S route through the center. One end is rose, with no separate badge or enclosure.</p>
+        <div class="tests">
+          <span class="mini"><img src="07-open-frame-s.png" alt="" /></span>
+          <span class="micro"><img src="07-open-frame-s.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="09-orbit-punch-s.png" alt="Orbit Punch S logo concept" />
+        <span class="serial">09</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Orbit Punch S</h3>
+        <p>Two thick opposing arcs orbit one oversized circular cream punch; their combined silhouette reads as S rather than a ring. Top arc black, lower arc rose.</p>
+        <div class="tests">
+          <span class="mini"><img src="09-orbit-punch-s.png" alt="" /></span>
+          <span class="micro"><img src="09-orbit-punch-s.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article></div>
+      </section>
+      <section class="family">
+        <div class="family-head"><span>B / REF</span><h2>TICKET</h2><p>계획의 발권과 확정</p></div>
+        <div class="grid">
+    <article class="card">
+      <div class="visual">
+        <img src="11-single-pass.png" alt="Single Pass logo concept" />
+        <span class="serial">11</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Single Pass</h3>
+        <p>A compact vertical pass shape with one large semicircle notch on each side and exactly two broad black ledger slots inside. Add one rose registration bar at the bottom.</p>
+        <div class="tests">
+          <span class="mini"><img src="11-single-pass.png" alt="" /></span>
+          <span class="micro"><img src="11-single-pass.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="12-two-tone-stub.png" alt="Two-Tone Stub logo concept" />
+        <span class="serial">12</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Two-Tone Stub</h3>
+        <p>One horizontal pass is divided 70:30 into a black main body and rose detachable stub. Their shared cutline uses exactly three large cream rectangular cuts, not tiny dots.</p>
+        <div class="tests">
+          <span class="mini"><img src="12-two-tone-stub.png" alt="" /></span>
+          <span class="micro"><img src="12-two-tone-stub.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="14-corner-cut-ticket.png" alt="Corner Cut Ticket logo concept" />
+        <span class="serial">14</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Corner Cut Ticket</h3>
+        <p>A tall compact ticket mass has two opposing diagonal corner cuts and one wide horizontal cream slot. A restrained ochre baseline marks confirmation.</p>
+        <div class="tests">
+          <span class="mini"><img src="14-corner-cut-ticket.png" alt="" /></span>
+          <span class="micro"><img src="14-corner-cut-ticket.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="15-ticket-window.png" alt="Ticket Window logo concept" />
+        <span class="serial">15</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Ticket Window</h3>
+        <p>One black ticket slab is dominated by a large rose rectangular window through its center, plus one oversized cream corner punch. Keep the silhouette simple and asymmetrical.</p>
+        <div class="tests">
+          <span class="mini"><img src="15-ticket-window.png" alt="" /></span>
+          <span class="micro"><img src="15-ticket-window.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="16-offset-pass-pair.png" alt="Offset Pass Pair logo concept" />
+        <span class="serial">16</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Offset Pass Pair</h3>
+        <p>Two complete compact passes overlap diagonally with a generous offset. The rear is black, the front is rose, and one shared cream notch makes the pair feel coordinated rather than stacked cards.</p>
+        <div class="tests">
+          <span class="mini"><img src="16-offset-pass-pair.png" alt="" /></span>
+          <span class="micro"><img src="16-offset-pass-pair.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="18-bracket-ticket.png" alt="Bracket Ticket logo concept" />
+        <span class="serial">18</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Bracket Ticket</h3>
+        <p>Two thick opposing C-shaped ticket halves create one strong straight cream channel in the center. The left half is black, right half rose, each with one large side notch.</p>
+        <div class="tests">
+          <span class="mini"><img src="18-bracket-ticket.png" alt="" /></span>
+          <span class="micro"><img src="18-bracket-ticket.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="19-cross-stub.png" alt="Cross Stub logo concept" />
+        <span class="serial">19</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Cross Stub</h3>
+        <p>Four unequal chunky ticket fragments sit around an offset, asymmetrical cream registration gap. A single rose circle is slightly off-center where two fragments nearly meet. Use visibly different fragment lengths, offset centers, and one open side; no equal arms, medical plus, Red Cross, hospital symbol, target, or crosshair.</p>
+        <div class="tests">
+          <span class="mini"><img src="19-cross-stub.png" alt="" /></span>
+          <span class="micro"><img src="19-cross-stub.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="20-issuance-seal.png" alt="Issuance Seal logo concept" />
+        <span class="serial">20</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Issuance Seal</h3>
+        <p>A bold circular badge has two opposing ticket notches and is split by one broad cream cutline. Place two short ledger bars inside; one rose and one black.</p>
+        <div class="tests">
+          <span class="mini"><img src="20-issuance-seal.png" alt="" /></span>
+          <span class="micro"><img src="20-issuance-seal.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article></div>
+      </section>
+      <section class="family">
+        <div class="family-head"><span>C / REF</span><h2>QUEUE</h2><p>선곡 순서와 레저</p></div>
+        <div class="grid">
+    <article class="card">
+      <div class="visual">
+        <img src="21-dual-index.png" alt="Dual Index logo concept" />
+        <span class="serial">21</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Dual Index</h3>
+        <p>Two thick horizontal black ledger bars each carry a large square index block on alternating ends. The lower index block and a short segment of its row are rose.</p>
+        <div class="tests">
+          <span class="mini"><img src="21-dual-index.png" alt="" /></span>
+          <span class="micro"><img src="21-dual-index.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="22-descending-queue.png" alt="Descending Queue logo concept" />
+        <span class="serial">22</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Descending Queue</h3>
+        <p>Three bold horizontal bars decrease in length as they descend and shift side-to-side like a controlled staircase. The final shortest bar is rose and ends in a square stop.</p>
+        <div class="tests">
+          <span class="mini"><img src="22-descending-queue.png" alt="" /></span>
+          <span class="micro"><img src="22-descending-queue.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="23-ledger-spine.png" alt="Ledger Spine logo concept" />
+        <span class="serial">23</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Ledger Spine</h3>
+        <p>One thick vertical black spine supports three short horizontal rows. The top row projects in rose on the opposite side, creating a compact editorial ledger glyph. Stagger row starts and lengths so the result cannot be read as a Latin E, F, or any other letter.</p>
+        <div class="tests">
+          <span class="mini"><img src="23-ledger-spine.png" alt="" /></span>
+          <span class="micro"><img src="23-ledger-spine.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="24-lane-swap.png" alt="Lane Swap logo concept" />
+        <span class="serial">24</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Lane Swap</h3>
+        <p>Two thick horizontal lanes exchange vertical positions through one clean diagonal bridge, with no arrows. One lane black, one rose; preserve a generous cream channel between them.</p>
+        <div class="tests">
+          <span class="mini"><img src="24-lane-swap.png" alt="" /></span>
+          <span class="micro"><img src="24-lane-swap.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="25-open-add-slot.png" alt="Open Add Slot logo concept" />
+        <span class="serial">25</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Open Add Slot</h3>
+        <p>Two finished black queue rows sit above one open U-shaped rose slot. The open slot feels ready to receive a new item but must not resemble a plus sign.</p>
+        <div class="tests">
+          <span class="mini"><img src="25-open-add-slot.png" alt="" /></span>
+          <span class="micro"><img src="25-open-add-slot.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="26-ticket-list.png" alt="Ticket List logo concept" />
+        <span class="serial">26</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Ticket List</h3>
+        <p>A single narrow vertical strip uses one oversized circular punch at top and exactly two broad ledger bars below. One row exits the strip in rose as the active selection.</p>
+        <div class="tests">
+          <span class="mini"><img src="26-ticket-list.png" alt="" /></span>
+          <span class="micro"><img src="26-ticket-list.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="27-focus-row.png" alt="Focus Row logo concept" />
+        <span class="serial">27</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Focus Row</h3>
+        <p>Three equal black rows form a compact stack, while the middle row expands beyond both sides as a rose ticket tab. Use no frame and no dots.</p>
+        <div class="tests">
+          <span class="mini"><img src="27-focus-row.png" alt="" /></span>
+          <span class="micro"><img src="27-focus-row.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="28-alternating-tabs.png" alt="Alternating Tabs logo concept" />
+        <span class="serial">28</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Alternating Tabs</h3>
+        <p>Four thick horizontal rows alternate large rectangular tabs left and right, making a strong toothed outer contour. Highlight exactly one tab in rose.</p>
+        <div class="tests">
+          <span class="mini"><img src="28-alternating-tabs.png" alt="" /></span>
+          <span class="micro"><img src="28-alternating-tabs.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="29-queue-frame.png" alt="Queue Frame logo concept" />
+        <span class="serial">29</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Queue Frame</h3>
+        <p>A thick open black bracket frames three broad rules; one rose active row deliberately projects through the opening. Keep all shapes bold and tightly integrated.</p>
+        <div class="tests">
+          <span class="mini"><img src="29-queue-frame.png" alt="" /></span>
+          <span class="micro"><img src="29-queue-frame.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="30-compact-four.png" alt="Compact Four logo concept" />
+        <span class="serial">30</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Compact Four</h3>
+        <p>Four chunky offset tiles form a 2-by-2 reading sequence with one continuous cream path between them. The final lower-right tile is rose; the other three are black.</p>
+        <div class="tests">
+          <span class="mini"><img src="30-compact-four.png" alt="" /></span>
+          <span class="micro"><img src="30-compact-four.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article></div>
+      </section>
+      <section class="family">
+        <div class="family-head"><span>D / REF</span><h2>GATHER</h2><p>2–4인의 합류와 공유</p></div>
+        <div class="grid">
+    <article class="card">
+      <div class="visual">
+        <img src="31-join-stub.png" alt="Join Stub logo concept" />
+        <span class="serial">31</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Join Stub</h3>
+        <p>Two complementary ticket halves, black and rose, meet at one shared oversized punch. Their join is shown by exactly two broad cream cuts, not a dotted line.</p>
+        <div class="tests">
+          <span class="mini"><img src="31-join-stub.png" alt="" /></span>
+          <span class="micro"><img src="31-join-stub.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="32-four-tab-session.png" alt="Four-Tab Session logo concept" />
+        <span class="serial">32</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Four-Tab Session</h3>
+        <p>Four rounded rectangular tabs gather as two offset card-like pairs around one large cream circular center. One host tab is rose and the other three are black. Use unequal lengths and no radial rotation; it must not resemble a flower, petal, propeller, fan, or generic people icon.</p>
+        <div class="tests">
+          <span class="mini"><img src="32-four-tab-session.png" alt="" /></span>
+          <span class="micro"><img src="32-four-tab-session.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="34-interlock-ticket-rings.png" alt="Interlock Ticket Rings logo concept" />
+        <span class="serial">34</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Interlock Ticket Rings</h3>
+        <p>Two thick squared rings with one ticket notch each interlock once. One ring black and one rose; use a single clear over-under crossing and avoid chain-link ornament.</p>
+        <div class="tests">
+          <span class="mini"><img src="34-interlock-ticket-rings.png" alt="" /></span>
+          <span class="micro"><img src="34-interlock-ticket-rings.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="35-relay-stub.png" alt="Relay Stub logo concept" />
+        <span class="serial">35</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Relay Stub</h3>
+        <p>A large black pass and a proportionally smaller rose stub align across one deliberate narrow cream gap, capturing a handoff. Their matching corner cut proves they belong together.</p>
+        <div class="tests">
+          <span class="mini"><img src="35-relay-stub.png" alt="" /></span>
+          <span class="micro"><img src="35-relay-stub.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="36-duet-bracket.png" alt="Duet Bracket logo concept" />
+        <span class="serial">36</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Duet Bracket</h3>
+        <p>Two facing ticket brackets, black and rose, create a bold S-shaped cream negative space between them. Keep the brackets complete and avoid the appearance of quotation marks.</p>
+        <div class="tests">
+          <span class="mini"><img src="36-duet-bracket.png" alt="" /></span>
+          <span class="micro"><img src="36-duet-bracket.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="37-trio-ledger.png" alt="Trio Ledger logo concept" />
+        <span class="serial">37</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Trio Ledger</h3>
+        <p>Three oversized circular participant nodes connect directly to one shared thick horizontal black ledger bar. The central junction and a short exit segment are rose; no network web.</p>
+        <div class="tests">
+          <span class="mini"><img src="37-trio-ledger.png" alt="" /></span>
+          <span class="micro"><img src="37-trio-ledger.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="38-fork-to-plan.png" alt="Fork-to-Plan logo concept" />
+        <span class="serial">38</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Fork-to-Plan</h3>
+        <p>Three short black strips enter from different heights and merge without arrowheads into one broad rose plan slab. Use only straight or gently rounded geometry.</p>
+        <div class="tests">
+          <span class="mini"><img src="38-fork-to-plan.png" alt="" /></span>
+          <span class="micro"><img src="38-fork-to-plan.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="40-shared-window.png" alt="Shared Window logo concept" />
+        <span class="serial">40</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Shared Window</h3>
+        <p>Two offset solid cards overlap, and one large rose window occupies only their shared region. The rear card is black and the front card is cream-outlined by negative space; no device mockup.</p>
+        <div class="tests">
+          <span class="mini"><img src="40-shared-window.png" alt="" /></span>
+          <span class="micro"><img src="40-shared-window.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article></div>
+      </section>
+      <section class="family">
+        <div class="family-head"><span>E / REF</span><h2>REGISTER</h2><p>계산과 등록 지점</p></div>
+        <div class="grid">
+    <article class="card">
+      <div class="visual">
+        <img src="41-punch-rail.png" alt="Punch Rail logo concept" />
+        <span class="serial">41</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Punch Rail</h3>
+        <p>One oversized cream circular punch sits between two thick parallel rails that bend once into a compact abstract glyph. Upper rail black, lower rail rose.</p>
+        <div class="tests">
+          <span class="mini"><img src="41-punch-rail.png" alt="" /></span>
+          <span class="micro"><img src="41-punch-rail.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="42-tangent-hole.png" alt="Tangent Hole logo concept" />
+        <span class="serial">42</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Tangent Hole</h3>
+        <p>One large cream circle is tangent to a thick black L-shaped strip and a shorter rose bar. The three elements lock into one asymmetrical registration mark.</p>
+        <div class="tests">
+          <span class="mini"><img src="42-tangent-hole.png" alt="" /></span>
+          <span class="micro"><img src="42-tangent-hole.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="43-double-punch-bridge.png" alt="Double Punch Bridge logo concept" />
+        <span class="serial">43</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Double Punch Bridge</h3>
+        <p>One hollow cream circle and one solid rose circle are connected by a single thick black bridge, with a small restrained ochre square stop at the far end. Keep all three aligned as one mark.</p>
+        <div class="tests">
+          <span class="mini"><img src="43-double-punch-bridge.png" alt="" /></span>
+          <span class="micro"><img src="43-double-punch-bridge.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="44-register-corners.png" alt="Register Corners logo concept" />
+        <span class="serial">44</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Register Corners</h3>
+        <p>Four chunky black corner brackets enclose two offset horizontal bars. The upper-left corner alone is rose, suggesting a registration target without crosshairs.</p>
+        <div class="tests">
+          <span class="mini"><img src="44-register-corners.png" alt="" /></span>
+          <span class="micro"><img src="44-register-corners.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="45-aperture-s.png" alt="Aperture S logo concept" />
+        <span class="serial">45</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Aperture S</h3>
+        <p>A solid black ticket-like block contains two oversized circular cream apertures connected by one broad S-shaped cream channel. A single rose edge notch marks activation.</p>
+        <div class="tests">
+          <span class="mini"><img src="45-aperture-s.png" alt="" /></span>
+          <span class="micro"><img src="45-aperture-s.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="46-pinned-fold.png" alt="Pinned Fold logo concept" />
+        <span class="serial">46</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Pinned Fold</h3>
+        <p>One oversized circular black punch visually pins a broad strip folded at 90 degrees. The fold face is rose and a small restrained ochre square indicates confirmed settlement.</p>
+        <div class="tests">
+          <span class="mini"><img src="46-pinned-fold.png" alt="" /></span>
+          <span class="micro"><img src="46-pinned-fold.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="47-hole-and-stub.png" alt="Hole and Stub logo concept" />
+        <span class="serial">47</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Hole and Stub</h3>
+        <p>A large circular cream void bites deeply into one side of a black slab, balanced by a separated rose stub on the opposite side. Align them as a compact single emblem.</p>
+        <div class="tests">
+          <span class="mini"><img src="47-hole-and-stub.png" alt="" /></span>
+          <span class="micro"><img src="47-hole-and-stub.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="48-balance-meter.png" alt="Balance Meter logo concept" />
+        <span class="serial">48</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Balance Meter</h3>
+        <p>A thick black horizontal band carries a large circle at one end and a small restrained ochre square at the other, with one rose registration cut at the exact center. Avoid scale or slider UI appearance.</p>
+        <div class="tests">
+          <span class="mini"><img src="48-balance-meter.png" alt="" /></span>
+          <span class="micro"><img src="48-balance-meter.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="49-dual-slot-disc.png" alt="Dual Slot Disc logo concept" />
+        <span class="serial">49</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Dual Slot Disc</h3>
+        <p>A solid rose disc is cut by exactly two wide parallel cream slots and one large side ticket notch. Add one small black block that bridges the lower slot.</p>
+        <div class="tests">
+          <span class="mini"><img src="49-dual-slot-disc.png" alt="" /></span>
+          <span class="micro"><img src="49-dual-slot-disc.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="visual">
+        <img src="50-settlement-cross.png" alt="Settlement Cross logo concept" />
+        <span class="serial">50</span>
+        
+      </div>
+      <div class="copy">
+        <h3>Settlement Cross</h3>
+        <p>Four unequal black corner blocks gather around one cream circular punch while two offset rose ledger bars traverse the composition. Add one restrained ochre square at the terminal to signify confirmed cost; avoid medical cross and crosshair readings.</p>
+        <div class="tests">
+          <span class="mini"><img src="50-settlement-cross.png" alt="" /></span>
+          <span class="micro"><img src="50-settlement-cross.png" alt="" /></span>
+          <span class="meta">PNG · 1:1</span>
+        </div>
+      </div>
+    </article></div>
+      </section>
+      <footer><span>이 보드는 참고용 아카이브다. 최종 후보는 상위 경로의 비교 보드를 기준으로 한다.</span><strong>SINGSONG / REFERENCE 42</strong></footer>
+    </main>
+  </body>
+</html>

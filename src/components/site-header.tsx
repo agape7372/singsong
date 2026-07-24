@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-html-link-for-pages -- The wordmark must not retain the broader ticket document CSP. */
+import Image from "next/image";
 import { PrimaryNav } from "./planner-tabs";
 
 export function SiteHeader() {
@@ -6,9 +7,16 @@ export function SiteHeader() {
     <header className="site-header">
       <div className="site-header-inner">
         <a className="wordmark" href="/" aria-label="싱송 플랜 홈">
-          <span aria-hidden="true" className="wordmark-cut">
-            S
-          </span>
+          <Image
+            aria-hidden="true"
+            className="wordmark-mark"
+            src="/icons/folded-session-s-192.png"
+            alt=""
+            width={32}
+            height={32}
+            priority
+            unoptimized
+          />
           <span className="wordmark-copy">
             <strong>싱송</strong>
             <small aria-hidden="true">SingSong</small>

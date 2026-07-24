@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">SingSong Nested Siot</title>
+  <desc id="desc">A coral siot nests above and to the right of a larger black siot, preserving both Korean letters while their offset silhouette bends like an S.</desc>
+  <rect width="512" height="512" rx="112" fill="#FAF7F0"/>
+  <path d="M116 396 L244 176 L366 396" fill="none" stroke="#15131A" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M206 252 L300 116 L396 250" fill="none" stroke="#FF3D6E" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

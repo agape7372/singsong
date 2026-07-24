@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">SingSong Queue Stack</title>
+  <desc id="desc">A single continuous line turns through three orderly lanes, expressing a shared queue and plan sequence.</desc>
+  <rect width="512" height="512" rx="112" fill="#FAF7F0"/>
+  <path d="M136 148h208c20 0 32 12 32 32v36c0 20-12 32-32 32H168c-20 0-32 12-32 32v36c0 20 12 32 32 32h208" fill="none" stroke="#15131A" stroke-width="56" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M168 248h176" fill="none" stroke="#FF3D6E" stroke-width="56" stroke-linecap="round"/>
+  <rect x="348" y="320" width="56" height="56" rx="20" fill="#B76E00"/>
+</svg>

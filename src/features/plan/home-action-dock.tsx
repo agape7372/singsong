@@ -1,13 +1,12 @@
 "use client";
 
-import Link from "next/link";
-
 export type HomeActionDockProps = {
   songCount: number;
   canIssue: boolean;
   disabled?: boolean;
   onOpenPricing: () => void;
   onIssue: () => void | Promise<void>;
+  onOpenSearch: () => void;
 };
 
 export function HomeActionDock({
@@ -16,6 +15,7 @@ export function HomeActionDock({
   disabled = false,
   onOpenPricing,
   onIssue,
+  onOpenSearch,
 }: HomeActionDockProps) {
   if (songCount === 0) {
     return (
@@ -24,9 +24,9 @@ export function HomeActionDock({
           <strong>첫 곡을 담아 순서를 시작해요.</strong>
           <span>제목, 가수나 노래방 번호로 바로 찾을 수 있어요.</span>
         </div>
-        <Link className="button" href="/search">
+        <button className="button" type="button" onClick={onOpenSearch}>
           노래 찾기
-        </Link>
+        </button>
       </div>
     );
   }

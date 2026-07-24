@@ -58,7 +58,9 @@ describe("release security contracts", () => {
     expect(proxy).not.toContain("SUPABASE_URL");
     expect(workspace).toContain('window.location.assign("/ticket")');
     expect(workspace).not.toContain('router.push("/ticket")');
-    expect(workspace).toContain('href="/ticket#managed-shares"');
+    // Managed shares now live on the client-navigable /library route; the
+    // Turnstile CSP boundary still only opens on the full /ticket navigation.
+    expect(workspace).toContain('href="/library"');
     expect(read("src/features/ticket/ticket-screen.tsx")).not.toContain("<Link");
     expect(read("src/components/site-header.tsx")).not.toContain('from "next/link"');
   });

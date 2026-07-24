@@ -92,7 +92,7 @@ describe("PwaInstallPrompt", () => {
   });
 
   it("shows honest iOS Safari steps and remembers an explicit dismissal", async () => {
-    navigation.pathname = "/search";
+    navigation.pathname = "/library";
     setNavigator({
       userAgent:
         "Mozilla/5.0 (iPhone; CPU iPhone OS 19_0 like Mac OS X) AppleWebKit/605.1.15 Version/19.0 Mobile/15E148 Safari/604.1",

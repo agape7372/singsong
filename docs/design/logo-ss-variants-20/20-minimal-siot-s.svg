@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">SingSong Minimal Siot S</title>
+  <desc id="desc">Two minimal upright Korean siot glyphs share one central joint so their inner arms read as a single capital S gesture.</desc>
+  <rect width="512" height="512" rx="112" fill="#FAF7F0"/>
+  <path d="M210 258 L304 122 L394 250" fill="none" stroke="#FF3D6E" stroke-width="54" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M120 388 L210 258 L336 390" fill="none" stroke="#15131A" stroke-width="54" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,9 +1,10 @@
 "use client";
 
 import type { KeyboardEvent } from "react";
-import Link from "next/link";
 import type { Track } from "@/domain/models";
 import { DOMAIN_LIMITS } from "@/domain/validation";
+import { ProfileAvatar } from "@/features/profile/profile-avatar";
+import { useProfile } from "@/features/profile/use-profile";
 
 const VISIBLE_PARTICIPANTS = 5;
 
@@ -16,20 +17,29 @@ function ParticipantStack({
   disabled: boolean;
   onAddPerson: () => void;
 }) {
+  const profile = useProfile();
   const participantCount = Math.min(Math.max(people ?? 1, 1), DOMAIN_LIMITS.maxPeople);
   const visibleCount = Math.min(participantCount, VISIBLE_PARTICIPANTS);
   const overflowCount = participantCount - visibleCount;
   const isAtMaximum = participantCount >= DOMAIN_LIMITS.maxPeople;
+  const myName = profile.nickname.trim() || "나";
 
   return (
     <div className="station-participants">
       <ul className="station-avatar-list" aria-label={`참여자 ${participantCount}명`}>
-        {Array.from({ length: visibleCount }, (_, index) => (
-          <li className="station-avatar" key={index}>
-            <span aria-hidden="true">{index === 0 ? "나" : index + 1}</span>
-            <span className="sr-only">{index === 0 ? "나" : `로컬 참여자 ${index + 1}`}</span>
-          </li>
-        ))}
+        {Array.from({ length: visibleCount }, (_, index) =>
+          index === 0 ? (
+            <li className="station-avatar station-avatar-me" key={index}>
+              <ProfileAvatar profile={profile} size={40} />
+              <span className="sr-only">{myName}</span>
+            </li>
+          ) : (
+            <li className="station-avatar" key={index}>
+              <span aria-hidden="true">{index + 1}</span>
+              <span className="sr-only">{`로컬 참여자 ${index + 1}`}</span>
+            </li>
+          ),
+        )}
         {overflowCount > 0 && (
           <li className="station-avatar station-avatar-overflow">
             <span aria-hidden="true">+{overflowCount}</span>
@@ -59,6 +69,7 @@ export function WorkingStrip({
   onAddPerson,
   onMove,
   onRemove,
+  onOpenSearch,
   undoLabel,
   onUndo,
 }: {
@@ -68,6 +79,7 @@ export function WorkingStrip({
   onAddPerson: () => void;
   onMove: (index: number, direction: -1 | 1) => void;
   onRemove: (index: number) => void;
+  onOpenSearch: () => void;
   undoLabel: string | null;
   onUndo: () => void;
 }) {
@@ -105,9 +117,9 @@ export function WorkingStrip({
             <div>
               <h3>오늘 뭐 부를래?</h3>
               <p>노래 찾아서 담아봐, 여기 리스트가 채워질 거야</p>
-              <Link className="button empty-strip-action" href="/search">
+              <button className="button empty-strip-action" type="button" onClick={onOpenSearch}>
                 노래 찾으러 가기
-              </Link>
+              </button>
             </div>
           </div>
         </>
@@ -177,11 +189,16 @@ export function WorkingStrip({
               ))}
             </ol>
             <div className="strip-add-row">
-              <Link className="button-link" href="/search" aria-label="곡 하나 더 넣기">
+              <button
+                className="button-link"
+                type="button"
+                onClick={onOpenSearch}
+                aria-label="곡 하나 더 넣기"
+              >
                 <span className="strip-add-plus" aria-hidden="true">
                   +
                 </span>
-              </Link>
+              </button>
             </div>
           </div>
         </>

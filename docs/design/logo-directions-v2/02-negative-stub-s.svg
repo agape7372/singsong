@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">SingSong negative stub S app icon</title>
+  <desc id="desc">A dark rounded ticket with a coral tear-off stub and a large S route carved through it in negative space.</desc>
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="#FAF7F0"/>
+  <rect x="112" y="120" width="288" height="272" rx="48" fill="#15131A"/>
+  <path d="M332 120H352C378.51 120 400 141.49 400 168V344C400 370.51 378.51 392 352 392H332Z" fill="#FF3D6E"/>
+  <circle cx="112" cy="256" r="22" fill="#FAF7F0"/>
+  <circle cx="400" cy="256" r="22" fill="#FAF7F0"/>
+  <path
+    d="M318 166H234C195 166 172 183 172 209C172 235 193 246 232 250L281 256C320 261 340 278 340 305C340 333 316 350 276 350H194"
+    fill="none"
+    stroke="#FAF7F0"
+    stroke-width="42"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>

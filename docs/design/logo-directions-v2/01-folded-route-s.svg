@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">SingSong folded route S app icon</title>
+  <desc id="desc">A bold S-shaped route built from one folded dark ribbon with a coral registration band on a warm cream rounded-square field.</desc>
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="#FAF7F0"/>
+  <path
+    d="M376 132H220C164 132 132 158 132 196C132 234 162 253 214 260L300 272C354 280 380 306 380 344C380 382 348 380 300 380H136"
+    fill="none"
+    stroke="#15131A"
+    stroke-width="56"
+    stroke-linecap="butt"
+    stroke-linejoin="round"
+  />
+  <path d="M214 232L301 244L294 300L207 288Z" fill="#FF3D6E"/>
+</svg>

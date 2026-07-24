@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SingSong Logo Directions — 10 Concepts</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --canvas: #faf7f0;
+        --paper: #ffffff;
+        --ink: #15131a;
+        --muted: #665f68;
+        --rose: #ff3d6e;
+        --ochre: #b76e00;
+        --line: #d9d1c5;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--canvas);
+        color: var(--ink);
+        font-family:
+          Inter, Pretendard, "Noto Sans KR", system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+      }
+
+      main {
+        width: min(1760px, calc(100% - 48px));
+        margin: 0 auto;
+        padding: 56px 0 72px;
+      }
+
+      header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 32px;
+        align-items: end;
+        padding-bottom: 28px;
+        border-bottom: 3px solid var(--ink);
+      }
+
+      .eyebrow,
+      .serial,
+      .meta,
+      .palette span {
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .eyebrow {
+        margin: 0 0 12px;
+        color: var(--rose);
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      h1 {
+        max-width: 980px;
+        margin: 0;
+        font-size: clamp(38px, 5vw, 74px);
+        line-height: 0.96;
+        letter-spacing: -0.055em;
+      }
+
+      .subtitle {
+        max-width: 760px;
+        margin: 18px 0 0;
+        color: var(--muted);
+        font-size: 17px;
+        line-height: 1.65;
+      }
+
+      .palette {
+        display: grid;
+        grid-template-columns: repeat(2, auto);
+        gap: 8px 16px;
+        padding: 16px;
+        border: 2px solid var(--ink);
+        background: var(--paper);
+      }
+
+      .palette span {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 11px;
+        font-weight: 800;
+      }
+
+      .swatch {
+        width: 14px;
+        height: 14px;
+        border: 1px solid var(--ink);
+      }
+
+      .rubric {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 22px 0 34px;
+      }
+
+      .rubric span {
+        padding: 8px 11px;
+        border: 1px solid var(--ink);
+        background: var(--paper);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 18px;
+      }
+
+      article {
+        min-width: 0;
+        overflow: hidden;
+        border: 2px solid var(--ink);
+        background: var(--paper);
+      }
+
+      .visual {
+        position: relative;
+        display: grid;
+        min-height: 268px;
+        place-items: center;
+        padding: 22px;
+        border-bottom: 1px solid var(--line);
+        background:
+          linear-gradient(var(--line) 1px, transparent 1px),
+          linear-gradient(90deg, var(--line) 1px, transparent 1px),
+          #f4efe7;
+        background-size: 24px 24px;
+      }
+
+      .visual > img {
+        display: block;
+        width: min(100%, 226px);
+        aspect-ratio: 1;
+      }
+
+      .rank {
+        position: absolute;
+        top: 14px;
+        left: 14px;
+        padding: 7px 9px;
+        border: 2px solid var(--ink);
+        background: var(--rose);
+        color: var(--ink);
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+        font-size: 10px;
+        font-weight: 950;
+        letter-spacing: 0.06em;
+      }
+
+      .copy {
+        padding: 18px;
+      }
+
+      .title-row {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 12px;
+        align-items: start;
+      }
+
+      .serial {
+        display: grid;
+        width: 36px;
+        height: 36px;
+        place-items: center;
+        background: var(--ink);
+        color: var(--paper);
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 19px;
+        line-height: 1.1;
+        letter-spacing: -0.025em;
+      }
+
+      .ko {
+        display: block;
+        margin-top: 4px;
+        color: var(--rose);
+        font-size: 12px;
+        font-weight: 850;
+      }
+
+      article p {
+        min-height: 58px;
+        margin: 14px 0 18px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .tests {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding-top: 14px;
+        border-top: 1px dashed var(--line);
+      }
+
+      .sizes {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .sizes img {
+        display: block;
+        flex: none;
+      }
+
+      .sizes .mono {
+        filter: grayscale(1) contrast(1.4);
+      }
+
+      .download {
+        color: var(--ink);
+        font-size: 11px;
+        font-weight: 900;
+        text-decoration-thickness: 2px;
+        text-underline-offset: 3px;
+      }
+
+      footer {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 24px;
+        margin-top: 30px;
+        padding-top: 22px;
+        border-top: 2px solid var(--ink);
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+
+      .meta {
+        color: var(--ink);
+        font-size: 11px;
+        font-weight: 800;
+      }
+
+      @media (max-width: 1280px) {
+        .grid {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 820px) {
+        main {
+          width: min(100% - 28px, 720px);
+          padding-top: 30px;
+        }
+
+        header,
+        footer {
+          grid-template-columns: 1fr;
+        }
+
+        .palette {
+          width: max-content;
+        }
+
+        .grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 520px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+
+        .visual {
+          min-height: 300px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <p class="eyebrow">SingSong / Brand Exploration / 2026</p>
+          <h1>앱 로고 방향<br />10가지 비교 보드</h1>
+          <p class="subtitle">
+            노래를 재생하는 앱이 아니라, 친구가 모여 곡을 담고 시간·비용을 정리한 뒤 하나의
+            약속으로 확정하는 노래방 세션 플래너. 모든 안은 같은 색·안전영역·소형 판독 기준으로
+            제작했다.
+          </p>
+        </div>
+        <div class="palette" aria-label="Production palette">
+          <span><i class="swatch" style="background:#faf7f0"></i>#FAF7F0</span>
+          <span><i class="swatch" style="background:#15131a"></i>#15131A</span>
+          <span><i class="swatch" style="background:#ff3d6e"></i>#FF3D6E</span>
+          <span><i class="swatch" style="background:#b76e00"></i>#B76E00</span>
+        </div>
+      </header>
+
+      <div class="rubric" aria-label="Evaluation criteria">
+        <span>24px 판독</span><span>단색 유지</span><span>중앙 66% 안전영역</span>
+        <span>음표·마이크 없음</span><span>Flat vector</span><span>Figma import 가능</span>
+      </div>
+
+      <section class="grid" aria-label="Logo concepts">
+        <article>
+          <div class="visual"><span class="rank">PICK 01</span><img src="01-folded-route-s.svg" alt="Folded Route S" /></div>
+          <div class="copy"><div class="title-row"><span class="serial">01</span><h2>Folded Route S<span class="ko">접힌 경로</span></h2></div><p>하나의 굵은 스트립이 두 번 꺾이며 S와 출발 경로를 동시에 만든 기본안.</p><div class="tests"><div class="sizes"><img src="01-folded-route-s.svg" width="32" height="32" alt="32px" /><img class="mono" src="01-folded-route-s.svg" width="20" height="20" alt="20px monochrome test" /></div><a class="download" href="01-folded-route-s.svg">SVG 열기</a></div></div>
+        </article>
+        <article>
+          <div class="visual"><img src="02-negative-stub-s.svg" alt="Negative Stub S" /></div>
+          <div class="copy"><div class="title-row"><span class="serial">02</span><h2>Negative Stub S<span class="ko">음각 티켓</span></h2></div><p>단단한 티켓 덩어리 안의 음각 S로 발권과 브랜드 이니셜을 가장 직접적으로 결합.</p><div class="tests"><div class="sizes"><img src="02-negative-stub-s.svg" width="32" height="32" alt="32px" /><img class="mono" src="02-negative-stub-s.svg" width="20" height="20" alt="20px monochrome test" /></div><a class="download" href="02-negative-stub-s.svg">SVG 열기</a></div></div>
+        </article>
+        <article>
+          <div class="visual"><span class="rank">PICK 03</span><img src="03-queue-merge-s.svg" alt="Queue Merge S" /></div>
+          <div class="copy"><div class="title-row"><span class="serial">03</span><h2>Queue Merge S<span class="ko">대기열 합류</span></h2></div><p>세 개의 곡 대기열이 하나의 흐름으로 합쳐지는 제품 기능 중심 심볼.</p><div class="tests"><div class="sizes"><img src="03-queue-merge-s.svg" width="32" height="32" alt="32px" /><img class="mono" src="03-queue-merge-s.svg" width="20" height="20" alt="20px monochrome test" /></div><a class="download" href="03-queue-merge-s.svg">SVG 열기</a></div></div>
+        </article>
+        <article>
+          <div class="visual"><img src="04-gathering-route.svg" alt="Gathering Route" /></div>
+          <div class="copy"><div class="title-row"><span class="serial">04</span><h2>Gathering Route<span class="ko">모임과 출발</span></h2></div><p>2–4명의 점과 경로를 묶어 최신 Station 맥락과 친구 모으기를 전면에 둔 안.</p><div class="tests"><div class="sizes"><img src="04-gathering-route.svg" width="32" height="32" alt="32px" /><img class="mono" src="04-gathering-route.svg" width="20" height="20" alt="20px monochrome test" /></div><a class="download" href="04-gathering-route.svg">SVG 열기</a></div></div>
+        </article>
+        <article>
+          <div class="visual"><img src="05-interlock-ss.svg" alt="Interlock SS" /></div>
+          <div class="copy"><div class="title-row"><span class="serial">05</span><h2>Interlock SS<span class="ko">Sing + Song</span></h2></div><p>서로 반대인 두 티켓 탭이 맞물리며 Sing과 Song, 초대와 합류를 표현.</p><div class="tests"><div class="sizes"><img src="05-interlock-ss.svg" width="32" height="32" alt="32px" /><img class="mono" src="05-interlock-ss.svg" width="20" height="20" alt="20px monochrome test" /></div><a class="download" href="05-interlock-ss.svg">SVG 열기</a></div></div>
+        </article>
+        <article>
+          <div class="visual"><img src="06-korean-ss-tabs.svg" alt="Korean ss Tabs" /></div>
+          <div class="copy"><div class="title-row"><span class="serial">06</span><h2>Korean ㅆ Tabs<span class="ko">한글 우선</span></h2></div><p>두 개의 스트립 탭으로 ‘싱송’의 첫소리 ㅆ을 만들어 한국어 인지성을 강화.</p><div class="tests"><div class="sizes"><img src="06-korean-ss-tabs.svg" width="32" height="32" alt="32px" /><img class="mono" src="06-korean-ss-tabs.svg" width="20" height="20" alt="20px monochrome test" /></div><a class="download" href="06-korean-ss-tabs.svg">SVG 열기</a></div></div>
+        </article>
+        <article>
+          <div class="visual"><img src="07-notched-contour.svg" alt="Notched Contour" /></div>
+          <div class="copy"><div class="title-row"><span class="serial">07</span><h2>Notched Contour<span class="ko">엇갈린 타공</span></h2></div><p>글자 대신 외곽의 두 타공과 방향 전환만으로 S 리듬을 만드는 축약형.</p><div class="tests"><div class="sizes"><img src="07-notched-contour.svg" width="32" height="32" alt="32px" /><img class="mono" src="07-notched-contour.svg" width="20" height="20" alt="20px monochrome test" /></div><a class="download" href="07-notched-contour.svg">SVG 열기</a></div></div>
+        </article>
+        <article>
+          <div class="visual"><span class="rank">PICK 02</span><img src="08-queue-stack.svg" alt="Queue Stack" /></div>
+          <div class="copy"><div class="title-row"><span class="serial">08</span><h2>Queue Stack<span class="ko">세 줄의 순서</span></h2></div><p>길이가 다른 세 ledger bar가 좌우로 교차하며 곡 순서와 S 실루엣을 형성.</p><div class="tests"><div class="sizes"><img src="08-queue-stack.svg" width="32" height="32" alt="32px" /><img class="mono" src="08-queue-stack.svg" width="20" height="20" alt="20px monochrome test" /></div><a class="download" href="08-queue-stack.svg">SVG 열기</a></div></div>
+        </article>
+        <article>
+          <div class="visual"><img src="09-registration-fold.svg" alt="Registration Fold" /></div>
+          <div class="copy"><div class="title-row"><span class="serial">09</span><h2>Registration Fold<span class="ko">인쇄 기준점</span></h2></div><p>두 등록 코너와 중앙 기준점이 계획을 맞추고 확정하는 인쇄 문법을 전달.</p><div class="tests"><div class="sizes"><img src="09-registration-fold.svg" width="32" height="32" alt="32px" /><img class="mono" src="09-registration-fold.svg" width="20" height="20" alt="20px monochrome test" /></div><a class="download" href="09-registration-fold.svg">SVG 열기</a></div></div>
+        </article>
+        <article>
+          <div class="visual"><img src="10-station-seal.svg" alt="Station Seal" /></div>
+          <div class="copy"><div class="title-row"><span class="serial">10</span><h2>Station Seal<span class="ko">약속의 거점</span></h2></div><p>모임의 거점, 순환 경로, 한 번의 절취를 압축한 가장 상징적인 Station 안.</p><div class="tests"><div class="sizes"><img src="10-station-seal.svg" width="32" height="32" alt="32px" /><img class="mono" src="10-station-seal.svg" width="20" height="20" alt="20px monochrome test" /></div><a class="download" href="10-station-seal.svg">SVG 열기</a></div></div>
+        </article>
+      </section>
+
+      <footer>
+        <span>생성형 이미지가 아니라 편집 가능한 SVG 원본이다. 최종 선택 후 한 개의 master geometry에서 헤더, favicon, PWA any/maskable, Apple 아이콘을 파생한다.</span>
+        <span class="meta">SINGSONG / LOGO DIRECTIONS V2</span>
+      </footer>
+    </main>
+  </body>
+</html>
