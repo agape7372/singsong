@@ -15,12 +15,30 @@ async function readCss() {
   return readFile(cssPath, "utf8");
 }
 
+/** 첫 선언 = `:root`의 라이트 값. 다크 오버라이드는 그 뒤 미디어쿼리에 온다. */
 function declaredValue(css: string, name: string) {
   const match = new RegExp(`${name}:\\s*([^;]+);`, "u").exec(css);
   return match?.[1]?.trim();
 }
 
+function darkValue(css: string, name: string) {
+  const all = [...css.matchAll(new RegExp(`${name}:\\s*([^;]+);`, "gu"))];
+  return all[1]?.[1]?.trim();
+}
+
 describe("ticket artwork contract", () => {
+  it("keeps the in-app ticket on the user theme while PNG/OG stay light", async () => {
+    const css = await readCss();
+    // 인앱 티켓은 사용자 테마를 따른다(정본 §9-2). 다크 오버라이드가 사라지면
+    // 어두운 화면에 흰 종이만 떠 있게 된다.
+    for (const token of ["--ticket-paper", "--ticket-ink", "--ticket-canvas"]) {
+      const light = declaredValue(css, token);
+      const dark = darkValue(css, token);
+      expect(dark, `${token} 다크 오버라이드`).toBeTruthy();
+      expect(dark, `${token} 는 라이트와 달라야 한다`).not.toBe(light);
+    }
+  });
+
   it("mirrors the artwork palette into the CSS ticket scope", async () => {
     const css = await readCss();
     const expected: Record<string, string> = {
