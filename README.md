@@ -101,7 +101,7 @@ pnpm start
 - `src/domain`: 계산, 정규화, canonical snapshot, 공유 validation의 순수 계약
 - `src/data`: Dexie 단일 활성 플랜·티켓·import 트랜잭션
 - `src/features`: 검색, 계획, 티켓, 공유, 가져오기 수직 슬라이스
-- `src/components`와 `src/features/plan`: compact app header, 플랜·검색 2-item nav, continuous Working Strip, BottomSlot/ActionDock/PlanRail, PWA install affordance
+- `src/components`와 `src/features/plan`: compact app header, 플랜·보관함·발견·설정 4탭 nav, continuous Working Strip, 곡 담기 bottom sheet, ActionDock, PWA install affordance
 - `src/app`: Next App Router 화면, BFF API, manifest, service worker
 - `src/instrumentation*`, `src/server/runtime-release-environment.ts`: release startup fail-closed와 share-key readiness
 - `scripts/release-env-contract.*`: build/runtime이 공유하는 value-free 필수 env 이름 계약

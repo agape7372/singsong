@@ -31,26 +31,27 @@ async function expectNoHorizontalOverflow(page: import("@playwright/test").Page)
   expect(report.overflow, JSON.stringify(report.offenders, null, 2)).toBeLessThanOrEqual(1);
 }
 
-async function expectTwoItemPrimaryNav(
+const NAV_ITEMS = ["플랜", "보관함", "발견", "설정"] as const;
+
+async function expectPrimaryNav(
   page: import("@playwright/test").Page,
-  current: "플랜" | "검색",
+  current: (typeof NAV_ITEMS)[number],
 ) {
   const nav = page.getByRole("navigation", { name: "주요 화면" });
   await expect(nav).toHaveCount(1);
-  await expect(nav.getByRole("link")).toHaveCount(2);
-  const planLink = nav.getByRole("link", { name: "플랜" });
-  const searchLink = nav.getByRole("link", { name: "검색" });
-  if (current === "플랜") {
-    await expect(planLink).toHaveAttribute("aria-current", "page");
-    await expect(searchLink).not.toHaveAttribute("aria-current");
-  } else {
-    await expect(searchLink).toHaveAttribute("aria-current", "page");
-    await expect(planLink).not.toHaveAttribute("aria-current");
+  await expect(nav.getByRole("link")).toHaveCount(NAV_ITEMS.length);
+  for (const item of NAV_ITEMS) {
+    const link = nav.getByRole("link", { name: item });
+    if (item === current) {
+      await expect(link).toHaveAttribute("aria-current", "page");
+    } else {
+      await expect(link).not.toHaveAttribute("aria-current");
+    }
   }
   return nav;
 }
 
-test("one two-item nav changes from the mobile bottom to the wide header without duplication", async ({
+test("one four-tab nav changes from the mobile bottom to the wide header without duplication", async ({
   page,
 }, testInfo) => {
   desktopOnly(testInfo.project.name);
@@ -68,7 +69,7 @@ test("one two-item nav changes from the mobile bottom to the wide header without
     await expect(page.locator(".workspace-header")).toHaveCount(0);
     await expect(page.getByText("오늘 부를 곡을, 한 장의 흐름으로.")).not.toBeAttached();
 
-    const nav = await expectTwoItemPrimaryNav(page, "플랜");
+    const nav = await expectPrimaryNav(page, "플랜");
     const layout = await nav.evaluate((element) => {
       const bounds = element.getBoundingClientRect();
       return {
@@ -92,7 +93,7 @@ test("one two-item nav changes from the mobile bottom to the wide header without
     const empty = page.locator(".empty-strip");
     await expect(empty).toBeVisible();
     await expect(empty.locator("a, button")).toHaveCount(1);
-    await expect(empty.getByRole("link", { name: "노래 찾으러 가기" })).toBeVisible();
+    await expect(empty.getByRole("button", { name: "노래 찾으러 가기" })).toBeVisible();
     await expect(page.locator("[data-bottom-slot='true']")).toHaveCount(0);
     await expect
       .poll(() =>
@@ -107,28 +108,40 @@ test("one two-item nav changes from the mobile bottom to the wide header without
   }
 });
 
-test("search keeps a sticky input, continuous ledger and current-plan rail", async ({
+test("the 곡 담기 sheet sticks its search bar to the sheet top, not the site header", async ({
   page,
 }, testInfo) => {
   desktopOnly(testInfo.project.name);
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/search");
+  await page.goto("/");
+  await page.getByRole("button", { name: "노래 찾으러 가기" }).click();
 
-  await expect(page.getByRole("heading", { name: "곡 찾기", exact: true })).toBeVisible();
-  await expectTwoItemPrimaryNav(page, "검색");
+  const sheet = page.getByRole("dialog", { name: "곡 담기" });
+  await expect(sheet).toBeVisible();
   const stickyHead = page.locator(".search-ledger-head");
   await expect(stickyHead).toBeVisible();
-  expect(await stickyHead.evaluate((element) => getComputedStyle(element).position)).toBe("sticky");
 
-  const planRail = page.getByRole("complementary", { name: "현재 플랜 요약" });
-  await expect(planRail).toContainText("0곡");
-  await expect(planRail.getByRole("link", { name: "플랜 보기" })).toHaveAttribute("href", "/");
-  const bottomSlot = page.locator("[data-bottom-slot='true']");
-  await expect(bottomSlot).toContainText("현재 플랜");
+  // 회귀 가드: top이 사이트 헤더 높이(3.65rem)로 남아 있으면 sticky 요소가 아래로
+  // 밀리면서 검색창 위에 유령 띠가 생기고 바로 다음 요소를 덮는다.
+  const stickyTop = await stickyHead.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { position: style.position, top: style.top };
+  });
+  expect(stickyTop.position).toBe("sticky");
+  expect(stickyTop.top).toBe("0px");
+
+  const suggestionsTitle = page.getByText("이런 곡 어때?");
+  await expect(suggestionsTitle).toBeVisible();
+  const overlap = await suggestionsTitle.evaluate((element, headSelector) => {
+    const head = document.querySelector(headSelector);
+    if (!head) return null;
+    return head.getBoundingClientRect().bottom - element.getBoundingClientRect().top;
+  }, ".search-ledger-head");
+  expect(overlap).not.toBeNull();
+  expect(overlap!).toBeLessThanOrEqual(1);
 
   const search = page.getByLabel("제목, 가수 또는 노래방 번호");
   await expect(search).toBeFocused();
-  expect(await bottomSlot.evaluate((element) => getComputedStyle(element).position)).toBe("static");
   await search.fill("밤의 체크인");
   await expect(page.locator(".search-status-line")).toHaveText("검색 결과 1곡");
 
@@ -138,13 +151,11 @@ test("search keeps a sticky input, continuous ledger and current-plan rail", asy
   await result.getByRole("button", { name: /밤의 체크인.*담기/u }).click();
   await expect(result.getByLabel(/밤의 체크인.*담김/u)).toHaveText("✓ 담김");
   await expect(result.getByRole("button", { name: /담김/u })).not.toBeAttached();
-  await expect(planRail).toContainText("1곡");
-  await expect(planRail).toContainText(/약 \d+–\d+분/u);
+  await expect(page.locator(".search-sheet-count")).toContainText("1곡 담김");
 
-  await search.evaluate((element) => (element as HTMLElement).blur());
-  await expect
-    .poll(() => bottomSlot.evaluate((element) => getComputedStyle(element).position))
-    .toBe("fixed");
+  await page.getByRole("button", { name: "검색 닫기" }).click();
+  await expect(sheet).toBeHidden();
+  await expect(page.locator(".station-ledger-count")).toHaveText("1");
   await expectNoHorizontalOverflow(page);
 });
 
@@ -153,15 +164,14 @@ test("home matches the station demo ledger, estimate and inline confirmation flo
 }, testInfo) => {
   desktopOnly(testInfo.project.name);
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/search");
+  await page.goto("/");
+  await page.getByRole("button", { name: "노래 찾으러 가기" }).click();
   await page.getByLabel("제목, 가수 또는 노래방 번호").fill("밤의 체크인");
   const result = page.locator(".search-result-row").filter({ hasText: "밤의 체크인" });
   await expect(result).toBeVisible();
   await result.getByRole("button", { name: /밤의 체크인.*담기/u }).click();
   await expect(result.getByLabel(/밤의 체크인.*담김/u)).toHaveText("✓ 담김");
-  const planRail = page.getByRole("complementary", { name: "현재 플랜 요약" });
-  await expect(planRail).toContainText("1곡");
-  await planRail.getByRole("link", { name: "플랜 보기" }).click();
+  await page.getByRole("button", { name: "검색 닫기" }).click();
 
   await expect(page.getByRole("heading", { name: "오늘의 플랜" })).toBeAttached();
   await expect(page.getByRole("heading", { name: "SINGSONG" })).toBeVisible();
@@ -182,7 +192,7 @@ test("home matches the station demo ledger, estimate and inline confirmation flo
   expect(participantButtonShape.borderRadius).toBe("50%");
   await addParticipant.click();
   await expect(page.getByRole("list", { name: "참여자 2명" })).toBeVisible();
-  await expectTwoItemPrimaryNav(page, "플랜");
+  await expectPrimaryNav(page, "플랜");
   await expect(page.locator(".working-session-strip")).toHaveCount(1);
   await expect(page.locator(".working-strip")).toHaveCount(1);
   await expect(page.locator(".calculation-strip")).toHaveCount(1);

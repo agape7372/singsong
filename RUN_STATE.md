@@ -14,7 +14,7 @@
 | Temporary preview          | `https://interactions-suffered-participate-empire.trycloudflare.com`                |
 | Preview owner              | app PID 43664 (`127.0.0.1:34173`), Cloudflare Quick Tunnel PID 43376                |
 | Current architecture       | `ARCHITECTURE.md`                                                                   |
-| Final verification         | `VERIFICATION_REPORT.md`; 최신 39/194·public Chromium 13/7·PWA 3/3 결과             |
+| Final verification         | `VERIFICATION_REPORT.md`; 최신 41/208·E2E 13 pass/7 skip·PWA 3/3 (2026-07-25 재검증) |
 | Final material audit       | `FINAL_MATERIAL_AUDIT.md` — 리뉴얼 전 233-path 보존 snapshot                        |
 | Clean reproduction         | `C:/Users/Public/Documents/ESTsoft/CreatorTemp/singsong-clean-shell-20260722-1033/` |
 

@@ -79,31 +79,8 @@ export default async function SharedTicketPage({ params }: { params: Promise<{ s
           testData={getRuntimeProfile() === "fixture"}
           headingLevel="h2"
         />
+        {/* 곡 목록은 티켓 뒷면(플립)에만 둔다. 아래에 같은 목록을 또 깔면 같은 제목이 두 번 나온다. */}
         <div className="shared-detail-column">
-          <section className="shared-ledger" aria-labelledby="shared-ledger-heading">
-            <p className="step-label">
-              전체 순서{" "}
-              <span className="serial-meta" aria-hidden="true">
-                FULL LEDGER · {share.payload.items.length} TRACKS
-              </span>
-            </p>
-            <h3 id="shared-ledger-heading">전체 곡 순서</h3>
-            <ol>
-              {share.payload.items.map((item, index) => (
-                <li key={`${item.order}-${item.title}-${item.artist}`}>
-                  <span>{String(index + 1).padStart(2, "0")}</span>
-                  <div>
-                    <strong>{item.title}</strong>
-                    <small>{item.artist || "가수 미입력"}</small>
-                  </div>
-                  <small>
-                    {item.karaokeCodes.map(({ vendor, code }) => `${vendor} ${code}`).join(" · ") ||
-                      "직접 입력"}
-                  </small>
-                </li>
-              ))}
-            </ol>
-          </section>
           <aside className="handoff-panel" aria-labelledby="handoff-heading">
             <div>
               <h3 id="handoff-heading">내 순서로 이어서 편집할까요?</h3>

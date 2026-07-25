@@ -23,11 +23,21 @@ function formatWonRange(lowWon: number, highWon: number) {
   return lowWon === highWon ? low : `${low}–${won.format(highWon)}`;
 }
 
-function positiveInteger(form: FormData, name: string) {
+// 빈 값과 잘못된 값을 구분한다. 둘 다 null로 뭉개면 묶음 곡 수 0이 "비어 있음"으로
+// 취급돼 묶음 요금이 말없이 사라진다.
+type NumberField = { kind: "empty" } | { kind: "invalid" } | { kind: "value"; value: number };
+
+function readPositiveInteger(form: FormData, name: string): NumberField {
   const raw = String(form.get(name) ?? "").trim();
-  if (!raw) return null;
+  if (!raw) return { kind: "empty" };
   const value = Number(raw);
-  return Number.isSafeInteger(value) && value > 0 ? value : null;
+  if (!Number.isSafeInteger(value) || value <= 0) return { kind: "invalid" };
+  return { kind: "value", value };
+}
+
+function positiveInteger(form: FormData, name: string) {
+  const field = readPositiveInteger(form, name);
+  return field.kind === "value" ? field.value : null;
 }
 
 export type CalculationStripHandle = {
@@ -71,6 +81,13 @@ export const CalculationStrip = forwardRef<CalculationStripHandle, CalculationSt
         mode: current.pricingFormKey === pricingFormKey ? current.mode : authoritativeMode,
         error,
       }));
+    }
+
+    // 문제가 난 칸으로 포커스까지 옮긴다. 메시지만 띄우면 어떤 칸이 문제인지 알 수 없다.
+    function failField(name: string, error: string) {
+      setFormError(error);
+      const field = pricingFormRef.current?.elements.namedItem(name);
+      if (field instanceof HTMLElement) field.focus({ preventScroll: true });
     }
 
     const calculation = useMemo(() => {
@@ -126,25 +143,38 @@ export const CalculationStrip = forwardRef<CalculationStripHandle, CalculationSt
       let pricing: PricingConfig;
       if (mode === "song") {
         const singlePriceWon = positiveInteger(form, "singlePriceWon");
-        const bundleSongs = positiveInteger(form, "bundleSongs");
-        const bundlePriceWon = positiveInteger(form, "bundlePriceWon");
+        const bundleSongs = readPositiveInteger(form, "bundleSongs");
+        const bundlePriceWon = readPositiveInteger(form, "bundlePriceWon");
         if (!singlePriceWon || singlePriceWon > 10_000_000) {
-          setFormError("낱곡 가격을 1원부터 1천만 원 사이로 입력해 주세요.");
+          failField("singlePriceWon", "낱곡 가격을 1원부터 1천만 원 사이로 입력해 주세요.");
           return;
         }
-        if ((bundleSongs === null) !== (bundlePriceWon === null)) {
-          setFormError("묶음 곡 수와 묶음 가격은 함께 입력하거나 둘 다 비워 주세요.");
+        if (
+          bundleSongs.kind === "invalid" ||
+          (bundleSongs.kind === "value" && bundleSongs.value > 100)
+        ) {
+          failField("bundleSongs", "묶음 곡 수는 1곡부터 100곡 사이 정수로 입력해 주세요.");
           return;
         }
-        if ((bundleSongs ?? 1) > 100 || (bundlePriceWon ?? 1) > 10_000_000) {
-          setFormError("묶음 값의 범위를 확인해 주세요.");
+        if (
+          bundlePriceWon.kind === "invalid" ||
+          (bundlePriceWon.kind === "value" && bundlePriceWon.value > 10_000_000)
+        ) {
+          failField("bundlePriceWon", "묶음 가격은 1원부터 1천만 원 사이로 입력해 주세요.");
+          return;
+        }
+        if ((bundleSongs.kind === "empty") !== (bundlePriceWon.kind === "empty")) {
+          failField(
+            bundleSongs.kind === "empty" ? "bundleSongs" : "bundlePriceWon",
+            "묶음 곡 수와 묶음 가격은 함께 입력하거나 둘 다 비워 주세요.",
+          );
           return;
         }
         pricing = {
           kind: "song",
           singlePriceWon,
-          ...(bundleSongs && bundlePriceWon
-            ? { bundle: { songs: bundleSongs, priceWon: bundlePriceWon } }
+          ...(bundleSongs.kind === "value" && bundlePriceWon.kind === "value"
+            ? { bundle: { songs: bundleSongs.value, priceWon: bundlePriceWon.value } }
             : {}),
         };
       } else {
@@ -289,6 +319,7 @@ export const CalculationStrip = forwardRef<CalculationStripHandle, CalculationSt
                         defaultValue={
                           plan.pricing?.kind === "song" ? plan.pricing.bundle?.songs : ""
                         }
+                        aria-describedby={formError ? "pricing-form-error" : undefined}
                       />
                     </label>
                     <label>
@@ -302,6 +333,7 @@ export const CalculationStrip = forwardRef<CalculationStripHandle, CalculationSt
                         defaultValue={
                           plan.pricing?.kind === "song" ? plan.pricing.bundle?.priceWon : ""
                         }
+                        aria-describedby={formError ? "pricing-form-error" : undefined}
                       />
                     </label>
                   </div>
@@ -339,7 +371,7 @@ export const CalculationStrip = forwardRef<CalculationStripHandle, CalculationSt
                   </div>
                 )}
                 {formError && (
-                  <p className="field-error" role="alert">
+                  <p className="field-error" id="pricing-form-error" role="alert">
                     {formError}
                   </p>
                 )}

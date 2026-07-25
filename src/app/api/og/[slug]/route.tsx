@@ -1,9 +1,21 @@
+/* eslint-disable @next/next/no-img-element -- Satori는 next/image를 해석하지 못한다. 데이터 URI만 그린다. */
+
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { ImageResponse } from "next/og";
 import { getShareRepository } from "@/features/share/repository.server";
 import type { ShareRecord } from "@/features/share/types";
+import {
+  TICKET_COPY,
+  TICKET_PALETTE,
+  TICKET_RADIUS_PX,
+  compositionSvg,
+  formatMinuteRange,
+  formatWonRange,
+  halftoneTextureSvg,
+  svgDataUri,
+} from "@/features/ticket/ticket-art";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -40,44 +52,41 @@ const responseHeaders = {
   "X-Robots-Tag": "noindex, nofollow, noarchive",
 };
 
-const palettes = [
-  { accent: "#FF3D6E", accentSoft: "#F2EDE3" },
-  { accent: "#F5A623", accentSoft: "#FFF4D7" },
-  { accent: "#3B64D8", accentSoft: "#EDF1FF" },
-] as const;
+// 컴포지션은 티켓마다 같은 그림이라 요청 시점에 다시 만들 이유가 없다.
+const compositionUri = svgDataUri(
+  compositionSvg({ width: 430, height: 250, idPrefix: "og", background: "paper" }),
+);
 
-function choosePalette(share: ShareRecord | null) {
-  if (!share) return palettes[0];
-  const seed = share.payload.artworkSeed;
-  return palettes[seed.charCodeAt(0) % palettes.length] ?? palettes[0];
-}
+const COUNT_FONT_PX = 186;
 
-function displayMinutes(seconds: number, direction: "down" | "up") {
-  const round = direction === "down" ? Math.floor : Math.ceil;
-  return round(seconds / 300) * 5;
-}
+// 타일 한 장이 글자 높이와 같다. 늘이지 않으므로 망점 굵기가 화면·PNG와 같은 비율로 유지된다.
+const halftoneTextureUri = svgDataUri(
+  halftoneTextureSvg({ sizePx: COUNT_FONT_PX, idPrefix: "og" }),
+);
 
-function displayRange(low: number, high: number, format: (value: number) => string) {
-  const start = format(low);
-  const end = format(high);
-  return start === end ? start : `${start}—${end}`;
+/**
+ * 카톡·X는 이 1200×630 이미지를 폭 500px 안팎으로 줄여 띄운다. 그 크기에서 읽히지 않는
+ * 장식(시리얼·바코드)은 넣지 않고, 정본 §9-5가 요구하는 제목·곡수·시간·비용만 크게 싣는다.
+ */
+function Metric({ label, value, tone }: { label: string; value: string; tone?: "money" }) {
+  // 3열로 늘어놓으면 500px로 줄었을 때 값끼리 붙는다. 라벨 왼쪽·값 오른쪽 한 줄로 쌓는다.
+  return (
+    <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
+      <span style={{ color: TICKET_PALETTE.inkMuted, fontSize: 26 }}>{label}</span>
+      <span
+        style={{
+          fontSize: 42,
+          color: tone === "money" ? TICKET_PALETTE.money : TICKET_PALETTE.ink,
+        }}
+      >
+        {value}
+      </span>
+    </div>
+  );
 }
 
 function OgArtwork({ share }: { share: ShareRecord | null }) {
-  const palette = choosePalette(share);
   const calculation = share?.payload.calculation;
-  const duration = calculation
-    ? displayRange(
-        displayMinutes(calculation.duration.lowSec, "down"),
-        displayMinutes(calculation.duration.highSec, "up"),
-        String,
-      )
-    : null;
-  const price = calculation
-    ? displayRange(calculation.derived.totalLowWon, calculation.derived.totalHighWon, (value) =>
-        value.toLocaleString("en-US"),
-      )
-    : null;
 
   return (
     <div
@@ -85,9 +94,9 @@ function OgArtwork({ share }: { share: ShareRecord | null }) {
         width: "100%",
         height: "100%",
         display: "flex",
-        padding: 50,
-        background: "#FAF7F0",
-        color: "#15131A",
+        padding: 44,
+        background: TICKET_PALETTE.hole,
+        color: TICKET_PALETTE.ink,
         fontFamily: "Noto Sans KR",
         fontWeight: 700,
       }}
@@ -98,76 +107,132 @@ function OgArtwork({ share }: { share: ShareRecord | null }) {
           width: "100%",
           height: "100%",
           display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
           overflow: "hidden",
-          border: "4px solid #15131A",
-          background: "#FFFFFF",
+          border: `1px solid ${TICKET_PALETTE.border}`,
+          borderRadius: TICKET_RADIUS_PX,
+          background: TICKET_PALETTE.paper,
         }}
       >
-        <div
-          style={{
-            height: 18,
-            width: "100%",
-            display: "flex",
-            background: palette.accent,
-            borderBottom: "4px solid #15131A",
-          }}
-        />
         {share && calculation ? (
-          <div
-            style={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-              padding: "34px 42px 32px",
-            }}
-          >
-            <div
-              style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}
-            >
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <div style={{ color: palette.accent, fontSize: 22, letterSpacing: "0.14em" }}>
-                  SINGSONG · SESSION
-                </div>
-                <div style={{ marginTop: 10, fontSize: 52, letterSpacing: "-0.045em" }}>
-                  함께 부를 세션 티켓
-                </div>
-              </div>
-              <div
-                style={{
-                  minWidth: 176,
-                  display: "flex",
-                  alignItems: "baseline",
-                  justifyContent: "center",
-                  border: "4px solid #15131A",
-                  padding: "10px 18px 12px",
-                  background: palette.accentSoft,
-                }}
-              >
-                <span style={{ fontSize: 66, lineHeight: 1 }}>
-                  {String(calculation.songCount).padStart(2, "0")}
-                </span>
-                <span style={{ marginLeft: 8, fontSize: 24 }}>곡</span>
-              </div>
-            </div>
-
+          <div style={{ display: "flex", width: "100%", height: "100%" }}>
+            {/* 왼쪽: 포스터 헤더 — 화면 티켓 앞면과 같은 정보 위계 */}
             <div
               style={{
                 display: "flex",
-                borderTop: "3px dashed #9B7F8A",
-                borderBottom: "3px dashed #9B7F8A",
+                flexDirection: "column",
+                justifyContent: "center",
+                // 화면 티켓 포스터 헤드와 같은 중앙 정렬.
+                alignItems: "center",
+                textAlign: "center",
+                flex: 1,
+                padding: "44px 36px",
               }}
             >
-              <Metric label="예상 시간" value={`${duration} MIN`} />
-              <Metric label="예상 비용" value={`KRW ${price}`} bordered />
-              <Metric label="명 기준" value={String(calculation.people)} bordered />
+              <span
+                style={{
+                  color: TICKET_PALETTE.accentText,
+                  fontSize: 25,
+                  letterSpacing: "0.14em",
+                }}
+              >
+                {TICKET_COPY.kicker}
+              </span>
+              <span
+                style={{
+                  marginTop: 14,
+                  fontSize: 64,
+                  letterSpacing: "-0.045em",
+                  lineHeight: 1.02,
+                }}
+              >
+                {TICKET_COPY.title}
+              </span>
+              {/* 로즈 숫자 위에 하프톤 무늬를 글자 모양으로 입힌다(화면·PNG와 같은 인상). */}
+              <div style={{ display: "flex", position: "relative", marginTop: 6 }}>
+                <span
+                  style={{
+                    color: TICKET_PALETTE.accent,
+                    fontSize: COUNT_FONT_PX,
+                    lineHeight: 1,
+                    letterSpacing: "-0.05em",
+                  }}
+                >
+                  {calculation.songCount}
+                </span>
+                <span
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    fontSize: COUNT_FONT_PX,
+                    lineHeight: 1,
+                    letterSpacing: "-0.05em",
+                    color: "transparent",
+                    backgroundImage: `url(${halftoneTextureUri})`,
+                    backgroundSize: `${COUNT_FONT_PX}px ${COUNT_FONT_PX}px`,
+                    backgroundRepeat: "repeat-x",
+                    backgroundClip: "text",
+                  }}
+                >
+                  {calculation.songCount}
+                </span>
+              </div>
+              <span style={{ marginTop: 4, fontSize: 24, letterSpacing: "0.36em" }}>
+                {TICKET_COPY.countLabel}
+              </span>
             </div>
 
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 20 }}>
-              <span>UNLISTED · 30 DAYS</span>
-              <span>#{share.fingerprint.slice(0, 10).toUpperCase()}</span>
+            {/* 절취선 */}
+            <div
+              style={{
+                display: "flex",
+                width: 0,
+                height: "100%",
+                borderLeft: `2px dashed ${TICKET_PALETTE.border}`,
+              }}
+            />
+
+            {/* 오른쪽: 컴포지션 + 스텁 */}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                width: 470,
+                height: "100%",
+              }}
+            >
+              <img src={compositionUri} width={470} height={250} alt="" />
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  flex: 1,
+                  padding: "34px 40px 32px",
+                }}
+              >
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  <Metric
+                    label="예상 시간"
+                    value={formatMinuteRange(
+                      calculation.duration.lowSec,
+                      calculation.duration.highSec,
+                    )}
+                  />
+                  <Metric
+                    label="예상 비용"
+                    value={formatWonRange(
+                      calculation.derived.totalLowWon,
+                      calculation.derived.totalHighWon,
+                    )}
+                    tone="money"
+                  />
+                  <Metric label="인원" value={`${calculation.people}명`} />
+                </div>
+                <span style={{ color: TICKET_PALETTE.inkMuted, fontSize: 22 }}>
+                  {TICKET_COPY.validity}
+                </span>
+              </div>
             </div>
           </div>
         ) : (
@@ -180,72 +245,49 @@ function OgArtwork({ share }: { share: ShareRecord | null }) {
               padding: "42px 54px",
             }}
           >
-            <div style={{ color: palette.accent, fontSize: 23, letterSpacing: "0.14em" }}>
-              SINGSONG · UNAVAILABLE
-            </div>
-            <div style={{ marginTop: 18, fontSize: 58, letterSpacing: "-0.045em" }}>
+            <span
+              style={{ color: TICKET_PALETTE.accentText, fontSize: 23, letterSpacing: "0.14em" }}
+            >
+              SINGSONG · 열 수 없는 링크
+            </span>
+            <span style={{ marginTop: 18, fontSize: 58, letterSpacing: "-0.045em" }}>
               링크를 열 수 없습니다
-            </div>
-            <div style={{ marginTop: 26, color: "#6B5D6E", fontSize: 28 }}>
+            </span>
+            <span style={{ marginTop: 26, color: TICKET_PALETTE.inkMuted, fontSize: 28 }}>
               만료되었거나 잘못된 주소입니다
-            </div>
-            <div style={{ marginTop: 10, color: "#6B5D6E", fontSize: 28 }}>
+            </span>
+            <span style={{ marginTop: 10, color: TICKET_PALETTE.inkMuted, fontSize: 28 }}>
               주소를 다시 확인해 주세요
-            </div>
+            </span>
           </div>
         )}
+
+        {/* 절취선 양끝 타공 — 화면 티켓의 타공 열과 같은 종이색 반원 */}
         <div
           style={{
             position: "absolute",
-            top: 270,
-            left: -18,
+            top: -18,
+            left: 730,
             width: 36,
             height: 36,
             display: "flex",
-            border: "4px solid #15131A",
-            borderRadius: "50%",
-            background: "#FAF7F0",
+            borderRadius: 18,
+            background: TICKET_PALETTE.hole,
           }}
         />
         <div
           style={{
             position: "absolute",
-            top: 270,
-            right: -18,
+            bottom: -18,
+            left: 730,
             width: 36,
             height: 36,
             display: "flex",
-            border: "4px solid #15131A",
-            borderRadius: "50%",
-            background: "#FAF7F0",
+            borderRadius: 18,
+            background: TICKET_PALETTE.hole,
           }}
         />
       </div>
-    </div>
-  );
-}
-
-function Metric({
-  label,
-  value,
-  bordered = false,
-}: {
-  label: string;
-  value: string;
-  bordered?: boolean;
-}) {
-  return (
-    <div
-      style={{
-        flex: 1,
-        display: "flex",
-        flexDirection: "column",
-        padding: "20px 24px",
-        borderLeft: bordered ? "2px solid #F0DCE4" : "0 solid transparent",
-      }}
-    >
-      <span style={{ color: "#6B5D6E", fontSize: 20 }}>{label}</span>
-      <span style={{ marginTop: 4, fontSize: 32 }}>{value}</span>
     </div>
   );
 }

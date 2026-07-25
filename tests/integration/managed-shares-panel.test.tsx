@@ -75,8 +75,9 @@ describe("managed shares panel", () => {
     await waitFor(() => expect(database.deleteManagedShare).toHaveBeenCalledWith(fingerprint));
     expect(onRevoked).toHaveBeenCalledWith(fingerprint);
     expect(
-      await screen.findByText("이 브라우저에서 관리 중인 공유 링크가 없습니다."),
+      await screen.findByText("공유 링크를 폐기하고 이 기기의 기록과 철회 키도 지웠어요."),
     ).toBeVisible();
+    expect(screen.queryByRole("listitem")).not.toBeInTheDocument();
     expect(document.body.textContent).not.toContain(revokeToken);
   });
 });

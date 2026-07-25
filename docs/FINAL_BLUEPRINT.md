@@ -484,7 +484,8 @@ flowchart LR
 
 ### 6.4 BFF 보호
 
-- production 및 인터넷 공개 preview/staging의 share 생성은 Turnstile을 요구한다. bypass는 `NODE_ENV=test` 또는 loopback-only local development에서만 server-side로 허용하며 `NEXT_PUBLIC_*`로 제어하지 않는다. 공식 testing key도 test/loopback profile에서만 허용하고 production key 검사에서는 거부한다. 공개 staging이 Turnstile을 쓰지 않으면 deployment auth/IP allowlist로 닫는다.
+- production의 share 생성은 Turnstile을 요구한다. bypass는 `NODE_ENV=test` 또는 **fixture(데모) 빌드**에서만 server-side로 허용하며 `NEXT_PUBLIC_*`로 제어하지 않는다. 공식 testing key도 test/fixture profile에서만 허용하고 production key 검사에서는 거부한다. 공개 staging이 Turnstile을 쓰지 않으면 deployment auth/IP allowlist로 닫는다.
+  - 2026-07-25 개정: bypass 조건을 loopback-only에서 fixture profile 전체로 넓혔다. fixture는 가상 카탈로그 + 로컬 공유 저장소만 쓰는 데모이고 위젯 자체를 렌더하지 않으므로, loopback 제한은 터널/LAN 프리뷰에서 공유 플로우를 영구 실패시키기만 했다(실기기 녹화 2026-07-25에서 확인). 실데이터가 걸린 profile은 여전히 실제 Turnstile 검증을 통과해야 한다.
 - share POST는 `application/json`만 받고 platform/body reader에서 decoded raw body를 128KiB(131,072 bytes)로 먼저 제한한 뒤 payload canonical UTF-8 96KiB(98,304 bytes)를 검사한다. `Content-Length`가 없거나 거짓이어도 bounded reader/WAF 한도가 작동하며 unsupported content encoding을 거부한다.
 - 서버는 raw IP를 저장하지 않는다. secret HMAC으로 hour/day bucket을 만들어 private rate table에 48시간 이내 보관한다.
 - 잠정 상한: 10회/시간, 30회/일/IP bucket. 초과는 `429`와 재시도 시간을 반환한다.

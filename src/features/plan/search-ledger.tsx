@@ -61,7 +61,8 @@ export function SearchLedger({
   const statusMessage = (() => {
     switch (displayedState.kind) {
       case "idle":
-        return "검색어는 주소나 로그에 남기지 않습니다.";
+        // 상시 고지는 시트에서 결과 행을 밀어낸다. 개인정보 안내는 설정으로 옮겼다.
+        return "";
       case "loading":
         return fixtureBuild ? "가상 목록을 찾는 중…" : "곡 목록을 찾는 중…";
       case "hint":

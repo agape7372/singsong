@@ -18,7 +18,7 @@ const state = vi.hoisted(() => ({
   completeManagedShare: vi.fn(),
   rotateManagedShare: vi.fn(),
   deleteManagedShare: vi.fn(),
-  toPng: vi.fn(),
+  toBlob: vi.fn(),
 }));
 
 vi.mock("@/features/plan/use-active-plan", () => ({
@@ -92,7 +92,7 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-vi.mock("html-to-image", () => ({ toPng: state.toPng }));
+vi.mock("html-to-image", () => ({ toBlob: state.toBlob }));
 vi.mock("@/analytics/port", () => ({ trackAnalytics: vi.fn() }));
 
 import { TicketScreen } from "@/features/ticket/ticket-screen";
@@ -179,13 +179,13 @@ beforeEach(() => {
     state.completeManagedShare,
     state.rotateManagedShare,
     state.deleteManagedShare,
-    state.toPng,
+    state.toBlob,
   ].forEach((mock) => mock.mockReset());
   state.claimTicketMotion.mockResolvedValue(false);
   state.getManagedShareReceipt.mockResolvedValue(null);
   state.getManagedShare.mockResolvedValue(null);
   state.deleteManagedShare.mockResolvedValue(undefined);
-  state.toPng.mockResolvedValue("data:image/png;base64,iVBORw0KGgo=");
+  state.toBlob.mockResolvedValue(new Blob(["png"], { type: "image/png" }));
 });
 
 afterEach(() => {
@@ -229,7 +229,7 @@ describe("ticket share lifecycle", () => {
     expect(create).toBeEnabled();
     fireEvent.click(create);
 
-    expect(await screen.findByText(/이 티켓은 더 이상 최신 상태가 아닙니다/u)).toBeVisible();
+    expect(await screen.findByText(/곡 순서나 요금이 바뀌었어요/u)).toBeVisible();
     expect(fetchMock).not.toHaveBeenCalled();
     expect(state.prepareManagedShare).not.toHaveBeenCalled();
     expect(screen.getByRole("checkbox")).not.toBeChecked();
@@ -244,24 +244,24 @@ describe("ticket share lifecycle", () => {
     ).toBeVisible();
     expect(screen.getByRole("heading", { level: 2, name: "오늘의 세션 스트립" })).toBeVisible();
     const disclosure = screen.getByRole("group", { name: "공유 전 꼭 확인하세요" });
-    expect(within(disclosure).getByText(/서버에 고정된 사본으로 저장합니다/u)).toBeVisible();
-    expect(within(disclosure).getByText(/로그인 없이 누구나 볼 수 있습니다/u)).toBeVisible();
-    expect(within(disclosure).getByText(/곡 제목·가수·노래방 번호와 곡 순서/u)).toBeVisible();
-    expect(within(disclosure).getByText(/링크는 30일 후 만료/u)).toBeVisible();
-    expect(within(disclosure).getByText(/철회 키는 이 브라우저에만 저장/u)).toBeVisible();
+    // 행동 지점에는 한 줄 요약만 보이고, 상세 4가지는 접힌 채 DOM에 남는다.
+    expect(
+      within(disclosure).getByText(/주소를 아는 사람은 누구나 볼 수 있고, 30일/u),
+    ).toBeVisible();
+    expect(within(disclosure).getByText(/서버에 사본으로 저장돼요/u)).toBeInTheDocument();
+    expect(within(disclosure).getByText(/곡 제목·가수·노래방 번호와 순서/u)).toBeInTheDocument();
+    expect(within(disclosure).getByText(/이후 플랜을 바꿔도 그대로/u)).toBeInTheDocument();
+    expect(within(disclosure).getByText(/철회 키는 이 브라우저에만 있어요/u)).toBeInTheDocument();
+    expect(within(disclosure).getAllByRole("listitem", { hidden: true })).toHaveLength(4);
 
     const consent = within(disclosure).getByRole("checkbox", {
-      name: /위 공개 범위, 포함 정보, 30일 만료, 고정 사본과 철회 키 보관 방식/u,
+      name: /공개 범위와 30일 만료, 철회 키 보관 방식을 확인했어요/u,
     });
-    expect(consent).toHaveAttribute("aria-describedby", "share-disclosure");
-    const describedDisclosure = document.getElementById(
-      consent.getAttribute("aria-describedby") ?? "",
-    );
-    expect(describedDisclosure).toBeInstanceOf(HTMLUListElement);
-    expect(within(describedDisclosure!).getAllByRole("listitem")).toHaveLength(4);
-    expect(consent).toHaveAccessibleDescription(/로그인 없이 누구나 볼 수 있습니다/u);
+    // 접힌 상세는 보조기기가 못 읽으므로, 동의 설명은 항상 보이는 요약이어야 한다.
+    expect(consent).toHaveAttribute("aria-describedby", "share-disclosure-summary");
+    expect(consent).toHaveAccessibleDescription(/주소를 아는 사람은 누구나 볼 수 있고/u);
     expect(screen.getByRole("group", { name: "티켓 공유 작업" })).toHaveAccessibleDescription(
-      "PNG 저장은 공유 링크를 만들거나 전송하지 않습니다.",
+      "PNG 저장은 링크를 만들지 않아요.",
     );
   });
 
@@ -292,7 +292,7 @@ describe("ticket share lifecycle", () => {
     await waitFor(() =>
       expect(state.rotateManagedShare).toHaveBeenCalledWith(snapshot.fingerprint),
     );
-    expect(await screen.findByText(/안전하게 교체했습니다/u)).toBeVisible();
+    expect(await screen.findByText(/안전하게 취소했어요/u)).toBeVisible();
     expect(screen.getByRole("checkbox")).not.toBeChecked();
     expect(create).toBeDisabled();
     expect(state.completeManagedShare).not.toHaveBeenCalled();
@@ -325,35 +325,35 @@ describe("ticket share lifecycle", () => {
     Reflect.deleteProperty(navigator, "share");
   });
 
-  it("pins every exported PNG to the light palette even when the page is dark", async () => {
+  it("captures the fixed-geometry export card instead of resizing the on-screen ticket", async () => {
     state.getTicket.mockResolvedValue(ticket(1));
     const click = vi
       .spyOn(HTMLAnchorElement.prototype, "click")
       .mockImplementation(() => undefined);
+    const createObjectURL = vi.fn(() => "blob:singsong-ticket");
+    const revokeObjectURL = vi.fn();
+    vi.stubGlobal("URL", Object.assign(globalThis.URL, { createObjectURL, revokeObjectURL }));
     render(<TicketScreen />);
 
     fireEvent.click(await screen.findByRole("button", { name: "PNG 저장" }));
 
-    await waitFor(() => expect(state.toPng).toHaveBeenCalledOnce());
-    expect(state.toPng.mock.calls[0]?.[1]).toEqual(
-      expect.objectContaining({
-        width: 540,
-        height: 675,
-        pixelRatio: 2,
-        backgroundColor: "#FFF",
-        style: expect.objectContaining({
-          colorScheme: "light",
-          opacity: "1",
-          transform: "none",
-          "--paper": "#ffffff",
-          "--ink": "#15131a",
-          "--canvas": "#faf7f0",
-          "--accent-fill": "#ff3d6e",
-          "--money": "#b76e00",
-          "--money-text": "#8a5200",
-        }),
-      }),
-    );
+    await waitFor(() => expect(state.toBlob).toHaveBeenCalledOnce());
+    const [node, options] = state.toBlob.mock.calls[0] ?? [];
+    // 화면 카드가 아니라 고정 540×675 전용 카드를 캡처해야 한다.
+    expect((node as HTMLElement).style.width).toBe("540px");
+    expect((node as HTMLElement).style.height).toBe("675px");
+    // width/height/style 오버라이드는 클론 루트만 늘려 캔버스를 반쪽으로 만든다.
+    expect(options).not.toHaveProperty("width");
+    expect(options).not.toHaveProperty("height");
+    expect(options).not.toHaveProperty("style");
+    expect(options).toEqual({
+      cacheBust: true,
+      pixelRatio: 2,
+      // 라운드 모서리 밖은 앱 배경색(canvas)으로 채운다.
+      backgroundColor: "#faf7f0",
+    });
+    // 대용량 data: URL은 안드로이드 크롬에서 다운로드가 실패한다.
+    expect(createObjectURL).toHaveBeenCalledOnce();
     expect(click).toHaveBeenCalledOnce();
   });
 
