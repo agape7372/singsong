@@ -3038,12 +3038,16 @@ button.home-confirm-action {
   }
 }
 
+/* 티켓 그림자(--shadow-ticket)가 24px 내려앉아 70px 번진다. 1rem만 띄우면 바로 아래
+   패널의 첫 줄이 그림자에 잠겨 잘린 것처럼 보인다. 그림자 밖으로 내리고 자체 배경으로 덮는다. */
 .ticket-share-panel,
 .ticket-share-result,
 .managed-shares,
 .share-receipt {
+  position: relative;
+  z-index: 1;
   width: min(100%, 540px);
-  margin: 1rem auto 0;
+  margin: 1.9rem auto 0;
   border: 1px solid var(--border-control);
   border-radius: var(--radius-control);
   padding: 1rem;
@@ -3127,6 +3131,8 @@ button.home-confirm-action {
 }
 
 .ticket-actions {
+  position: relative;
+  z-index: 1;
   display: grid;
   width: min(100%, 540px);
   gap: 0.6rem;
