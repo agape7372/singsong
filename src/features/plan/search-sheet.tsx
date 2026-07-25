@@ -3,6 +3,7 @@
 import { Dialog } from "@base-ui/react/dialog";
 import type { CatalogTrack } from "@/features/catalog/types";
 import { SearchLedger, type ManualTrackInput } from "./search-ledger";
+import { useVisualViewportInset } from "./use-visual-viewport-inset";
 
 type SearchSheetProps = {
   open: boolean;
@@ -27,12 +28,23 @@ export function SearchSheet({
   addedCatalogIds,
   isFull,
 }: SearchSheetProps) {
+  const keyboardInset = useVisualViewportInset(open);
+
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Backdrop className="search-sheet-backdrop" />
-        <Dialog.Viewport className="search-sheet-viewport">
-          <Dialog.Popup className="search-sheet" aria-describedby={undefined}>
+        <Dialog.Viewport
+          className="search-sheet-viewport"
+          style={keyboardInset > 0 ? { paddingBottom: `${keyboardInset}px` } : undefined}
+        >
+          <Dialog.Popup
+            className="search-sheet"
+            aria-describedby={undefined}
+            style={
+              keyboardInset > 0 ? { maxHeight: `calc(85dvh - ${keyboardInset}px)` } : undefined
+            }
+          >
             <div className="search-sheet-grabber" aria-hidden="true" />
             <header className="search-sheet-header">
               <Dialog.Title className="search-sheet-title">곡 담기</Dialog.Title>

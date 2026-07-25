@@ -178,3 +178,86 @@
 - 초기 자료·Git 보존: `MATERIAL_INVENTORY.md`, `MD_READ_LEDGER.md`, `GIT_HISTORY_AUDIT.md`, `FINAL_MATERIAL_AUDIT.md`
 
 Generated/runtime artifact는 source manifest에 섞지 않는다. 최종 보고는 명령, exit code, 실행 시각, environment subject와 artifact 경로가 모두 있을 때만 `PASS`로 바꾼다.
+
+## 실기기 녹화 회귀 수리 검증 — 2026-07-25
+
+2026-07-25 02:14 Android Chrome(터널 프리뷰) 녹화에서 드러난 결함을 수리한 뒤의 재검증이다.
+
+| Gate | 상태 | 결과 |
+| --- | --- | --- |
+| Prettier (`src`, `tests`) | `PASS` | 전 파일 통과. 저장소 전체 `--check .`는 `design-lab/`·`docs/`·`scripts/` 13파일에서 실패하나 HEAD에서 이미 실패하던 선행 상태이며 이번 변경 범위 밖이다 |
+| ESLint / TypeScript | `PASS` | `--max-warnings=0`, `tsc --noEmit` 무출력 |
+| Vitest | `PASS` | 41 files / 208 tests (신규: `josa`, PNG 내보내기 계약, 묶음 요금 경계) |
+| Playwright E2E | `PASS` | `--retries=0`으로 13 passed / 7 project-gated skip |
+| Playwright PWA | `PASS` | 3/3 (fixture production artifact) |
+
+주의 — 이번 수리 전 E2E는 **8 failed / 2 passed**였다. 4탭 IA 재설계에서 사라진 `/search` 라우트와
+`PlanRail`을 스펙이 계속 참조하고 있었기 때문이며, 이 문서의 이전 "public Chromium 13/7" 기록은
+그 머지 이전 상태를 가리킨다. 스펙을 bottom sheet 기준으로 이관했다.
+
+E2E가 새로 잠근 계약:
+- 내보낸 PNG에서 장미색 픽셀 20,000개 이상 + 우측 밴드 비백지(이전 `dominant > 230` 단언은 캔버스
+  우측 45%가 백지로 남던 버그 덕분에 통과했다). dark colorScheme 케이스에서도 동일 확인.
+- `.search-ledger-head`의 sticky `top`이 `0px`이고 다음 헤딩과 겹치지 않을 것.
+- 400% 글자 확대에서 헤더 가로 오버플로 0 — 이 단언이 4탭 헤더의 실제 reflow 결함(오버플로 675px)을
+  잡아냈고 `.site-header-inner`/`.primary-nav` 줄바꿈 허용으로 수리했다.
+
+### 2차 — 07:42 실기기 재현 결과 반영
+
+1차 수리 후 재배포한 프리뷰에서 사용자가 전체 플로우를 다시 돌렸다. **1차 P0 2건은 현장에서 해결 확인**:
+저장된 PNG의 장미·황토·크림 색이 화면과 일치하고 캔버스를 가득 채웠으며, 카카오톡으로 공유한
+`/s/…` 링크와 OG 카드가 정상 렌더됐다.
+
+2차에서 잡은 결함과 수리:
+
+| 결함 | 근거 | 수리 |
+| --- | --- | --- |
+| 내보낸 PNG의 컴포지션 밴드 하단 잘림 | 저장 PNG에서 도형 아래가 스텁 점선에 잘리고 황토 사각형이 조각만 남음 | 세 블록 높이 합 716px > 675px라 컴포지션만 눌렸다. 헤더를 `flex:1`로, 컴포지션·스텁을 `flex:none`으로 뒤집고 헤더 치수 축소. TEST DATA 배지는 스텁으로 이동 |
+| 앞면 `탭 · 뒤집기` 배지가 총액을 가림 | 녹화 | `.flip-toggle::after`를 카드 상단 우측으로 이동 |
+| PWA 설치 배너가 첫 화면을 크게 먹음 | 녹화 | 한 줄로 축약, 임시 주소 경고만 조건부 유지 |
+| 공유받은 페이지에 곡 목록이 두 번 | 사용자 지적 | `/s/[slug]` 하단 `.shared-ledger` 섹션 삭제(제목까지 뒷면과 동일했다). 뒷면 플립은 `role=button`+`aria-pressed` disclosure라 접근성 손실 없음 |
+
+E2E가 새로 잠근 계약: 내보낸 PNG에서 장미색이 처음/마지막으로 나타나는 행(`roseTop < 300`,
+`roseBottom > 1000`) — 컴포지션이 눌리면 마지막 행이 올라와 실패한다.
+
+재검증: Prettier(저장소 전체)·ESLint·TypeScript PASS, Vitest 41 files / 208 tests,
+Playwright E2E 13 pass / 7 skip(`--retries=0`), PWA 3/3.
+
+### 3-렌더러 디자인 일관성 통일 — 2026-07-26
+
+티켓이 화면 DOM·PNG 내보내기·공유 OG 세 벌로 따로 그려지면서 색·형태·표기가 모두 어긋나 있었다
+(`VISUAL_MOTION_DIRECTION.md:36,695` 위반). 그림을 데이터 한 벌로 빼고 세 렌더러가 해석만 하게 바꿨다.
+
+| 항목 | 전 | 후 |
+| --- | --- | --- |
+| 정본 | 세 파일에 좌표·색·문구 각각 하드코딩 | `src/features/ticket/ticket-artwork.json` 한 곳 (zod 검증) + `ticket-art.ts` 해석기 |
+| 종이/로즈/금액 | `#f6efdc`·`#F4EFE3`·`#FFFFFF` / `#ff3d6e`·`#FF2E74`·seed 3색 / `#8a5200`·`#B76E00`·없음 | 세 면 모두 `#f6efdc` / `#ff3d6e` / `#8a5200` |
+| OG seed 팔레트 | 로즈·황토·**파랑 `#3B64D8`** 로테이션 | 삭제. 파랑은 앱에 없는 색이고 `--focus`와 충돌했다 |
+| 형태 | 라운드 24/0/0 · 타공 열/없음/원 · 그레인 O/약함/없음 · 하프톤 화면만 | 라운드 24px 공통, 좌우 타공 열, 카드 전체 그레인, 곡수 하프톤 모두 |
+| 표기 | `₩8,000`↔`KRW 8,000`, `6`↔`06 곡`, `공유 시 30일`↔`UNLISTED · 30 DAYS`, `NO.`↔`#` | 한국어 표기로 통일 |
+| 정렬 | 화면만 중앙 정렬 | 셋 다 좌측 (`VISUAL_MOTION_DIRECTION.md:79-82`) |
+
+**렌더러별 제약을 넘긴 방법**: 그림을 자립 SVG 문자열로 만들어 PNG는 `<img>`로, OG는 base64 데이터
+URI `<img>`로 넣는다. Satori는 CSS 필터를 못 그리지만 그 뒤의 resvg가 SVG 안의 `feTurbulence`·
+`pattern`·`clipPath`를 처리하므로 그레인이 OG에도 실린다. 하프톤은 `feImage`(문서 참조)를 걷어내고
+`background-clip: text` + 도트 패턴으로 바꿔 세 경로 모두에서 그려지게 했다.
+
+**함께 고친 실제 버그**
+- `--radius-full`이 8곳에서 쓰이는데 정의부가 없어 그 8곳의 라운드가 무효였다(프로필 아바타가
+  네모로 보이던 원인). 정의 추가.
+- `--ticket-*` 스코프 토큰 10종이 참조만 되고 정의가 없었다(`VISUAL_MOTION_DIRECTION.md:650`이
+  요구한 export 토큰 스코프가 비어 있었다). 정의 추가 + JSON과 일치하는지 테스트로 고정.
+- `--radius-ticket: 20px`은 사용처가 0이고 실제 라운드는 `1.5rem` 하드코딩이었다. 24px로 정정 후 사용.
+- OG 폰트 서브셋에 새 한국어 문구의 글리프가 없었다(`오늘의스트립공유일검색노출는`). 한글 시스템
+  폰트가 없는 서버에서는 깨진다. 고정 문구만으로 재서브셋(148 코드포인트, `src/assets/fonts/README.md`).
+
+**새 회귀 가드**
+- `tests/static/ticket-art-contract.test.ts` — CSS `--ticket-*`가 JSON 팔레트와 일치할 것, 폴백 없이
+  참조되는 미정의 CSS 변수가 0개일 것, 도형 fill이 전부 팔레트 키일 것.
+- `tests/unit/ticket-art.test.ts` — 팔레트 키가 hex로 치환될 것, idPrefix로 ID가 분리될 것, 금액·시간 표기.
+- `tests/integration/og-image.test.tsx` — 라우트 소스에 `#3B64D8`·`KRW `·`UNLISTED`·`padStart`가 없을 것,
+  렌더된 PNG에 로즈·황토 픽셀이 존재할 것, 종이 영역에 그레인이 실렸을 것.
+- `tests/e2e/core-flow.spec.ts` — 저장된 PNG 좌상단 모서리가 종이색이 아니라 캔버스색일 것(라운드 증거).
+
+재검증: Prettier(저장소 전체)·ESLint·TypeScript PASS, Vitest 43 files / 219 tests,
+Playwright E2E 13 pass / 7 skip(`--retries=0`), PWA 3/3.

@@ -42,7 +42,11 @@ if (expectedReferenceIds.some((serial, index) => serial !== actualReferenceIds[i
 
 const assets = [
   ...finalFiles.map((file) => ({ group: "final", file, absolute: path.join(finalDir, file) })),
-  ...referenceFiles.map((file) => ({ group: "reference", file, absolute: path.join(referenceDir, file) })),
+  ...referenceFiles.map((file) => ({
+    group: "reference",
+    file,
+    absolute: path.join(referenceDir, file),
+  })),
 ];
 const dimensions = new Map();
 const hashes = new Set();
@@ -69,5 +73,7 @@ if (hashes.size !== 50) {
 }
 
 console.log(`Validated ${finalFiles.length} final + ${referenceFiles.length} reference PNGs.`);
-console.log(`Dimensions: ${[...dimensions].map(([size, count]) => `${size} × ${count}`).join(", ")}`);
+console.log(
+  `Dimensions: ${[...dimensions].map(([size, count]) => `${size} × ${count}`).join(", ")}`,
+);
 console.log(`Unique SHA-256 hashes: ${hashes.size}`);

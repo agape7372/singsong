@@ -179,7 +179,12 @@ describe("CalculationStrip authoritative form state", () => {
     fireEvent.change(screen.getByLabelText("묶음 가격 (원)"), { target: { value: "2500" } });
     fireEvent.change(screen.getByLabelText("묶음 곡 수 (선택)"), { target: { value: "101" } });
     submitPricing();
-    expect(screen.getByRole("alert")).toHaveTextContent("묶음 값의 범위");
+    expect(screen.getByRole("alert")).toHaveTextContent("묶음 곡 수는 1곡부터 100곡");
+
+    // 0은 "비어 있음"이 아니라 "잘못된 값"이다. 예전에는 조용히 묶음이 사라졌다.
+    fireEvent.change(screen.getByLabelText("묶음 곡 수 (선택)"), { target: { value: "0" } });
+    submitPricing();
+    expect(screen.getByRole("alert")).toHaveTextContent("묶음 곡 수는 1곡부터 100곡");
 
     fireEvent.change(screen.getByLabelText("묶음 곡 수 (선택)"), { target: { value: "3" } });
     submitPricing();

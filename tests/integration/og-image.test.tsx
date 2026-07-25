@@ -101,6 +101,32 @@ describe("share Open Graph image", () => {
     expect(routeSource).not.toContain(plan.items[0]!.title);
     expect(routeSource).not.toContain(plan.items[0]!.artist);
     expect(routeSource).not.toMatch(/payload\.items|item\.(?:title|artist)/u);
+
+    // 앱 티켓과 같은 표기·색을 쓴다. 예전 OG는 seed로 파란 팔레트를 골랐고
+    // 금액을 잉크색으로 찍었으며 `KRW`·`UNLISTED · 30 DAYS` 영문 표기를 썼다.
+    expect(routeSource).not.toContain("#3B64D8");
+    expect(routeSource).not.toContain("KRW ");
+    expect(routeSource).not.toContain("UNLISTED");
+    expect(routeSource).not.toContain("padStart");
+
+    const { data, info } = await sharp(body).raw().toBuffer({ resolveWithObject: true });
+    let rose = 0;
+    let ochre = 0;
+    for (let offset = 0; offset < data.length; offset += info.channels) {
+      const red = data[offset]!;
+      const green = data[offset + 1]!;
+      const blue = data[offset + 2]!;
+      if (red > 200 && green < 120 && blue > 60 && blue < 190) rose += 1;
+      if (red > 110 && red < 175 && green > 60 && green < 120 && blue < 40) ochre += 1;
+    }
+    expect(rose, "로즈 픽셀").toBeGreaterThan(5_000);
+    expect(ochre, "황토 픽셀 — 금액은 money 색이어야 한다").toBeGreaterThan(500);
+
+    // 종이 영역에 리소 그레인이 실려 있어야 한다(완전 평면이면 stdev 0).
+    const paperBand = await sharp(body)
+      .extract({ left: 760, top: 120, width: 300, height: 120 })
+      .stats();
+    expect(paperBand.channels.some((channel) => channel.stdev > 1)).toBe(true);
   });
 
   it("returns the same generic no-store image contract for an invalid capability", async () => {
@@ -141,7 +167,8 @@ describe("share Open Graph image", () => {
     expect(html).toMatch(
       new RegExp(`<h2 id="${articleHeading}"[^>]*>오늘의 세션 스트립</h2>`, "u"),
     );
-    expect(html).toContain('<h3 id="shared-ledger-heading">전체 곡 순서</h3>');
+    // 곡 목록은 티켓 뒷면에만 있다. 페이지 하단 중복 렌더는 제거했다.
+    expect(html).not.toContain('id="shared-ledger-heading"');
     expect(html).toContain('<h3 id="handoff-heading">내 순서로 이어서 편집할까요?</h3>');
     expect(html).toContain(
       "이 주소는 검색 목록에 공개되지 않지만, 주소를 아는 사람은 만료 전까지 볼 수 있습니다.",

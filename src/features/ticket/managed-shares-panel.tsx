@@ -53,9 +53,7 @@ export function ManagedSharesPanel({ refreshKey, onRevoked }: ManagedSharesPanel
     try {
       const capability = await getManagedShare(share.fingerprint);
       if (!capability) {
-        setStatus(
-          "이 브라우저에 철회 키가 없어 링크를 폐기할 수 없습니다. 링크는 표시된 만료 시각까지 유지됩니다.",
-        );
+        setStatus("이 브라우저에 철회 키가 없어 폐기할 수 없어요. 링크는 만료 시각까지 유지돼요.");
         return;
       }
       const response = await fetch(`/api/shares/${share.slug}/revoke`, {
@@ -82,8 +80,8 @@ export function ManagedSharesPanel({ refreshKey, onRevoked }: ManagedSharesPanel
       onRevoked(share.fingerprint);
       setStatus(
         response.status === 404
-          ? "이미 만료되었거나 폐기된 링크를 로컬 목록에서 정리했습니다."
-          : "공유 링크를 폐기하고 이 브라우저의 공유 기록과 철회 키를 함께 삭제했습니다.",
+          ? "이미 만료됐거나 폐기된 링크를 목록에서 정리했어요."
+          : "공유 링크를 폐기하고 이 기기의 기록과 철회 키도 지웠어요.",
       );
     } catch {
       setStatus("네트워크 오류로 링크를 폐기하지 못했습니다. 연결 후 다시 시도해 주세요.");
@@ -92,6 +90,10 @@ export function ManagedSharesPanel({ refreshKey, onRevoked }: ManagedSharesPanel
     }
   }
 
+  // 관리할 링크가 없으면 섹션 자체를 숨긴다. 빈 목록 + 설명 세 줄은
+  // 처음 온 사람에게 읽을거리만 늘린다.
+  if (!loading && shares.length === 0 && !status) return null;
+
   return (
     <section
       id="managed-shares"
@@ -99,17 +101,12 @@ export function ManagedSharesPanel({ refreshKey, onRevoked }: ManagedSharesPanel
       aria-labelledby="managed-shares-title"
       aria-busy={loading}
     >
-      <p className="eyebrow">이 기기의 공유 기록</p>
       <h2 id="managed-shares-title">공유 링크 관리</h2>
-      <p className="managed-shares-intro">
-        이 목록과 철회 키는 이 브라우저에만 있습니다. 브라우저 저장 공간을 지우면 남아 있는 링크를
-        직접 철회할 수 없습니다.
-      </p>
+      <p className="managed-shares-intro">철회 키는 이 브라우저에만 있어요.</p>
       {loading ? (
         <p role="status">공유 목록을 확인하는 중…</p>
       ) : shares.length === 0 ? (
         <div className="managed-share-empty">
-          <p>이 브라우저에서 관리 중인 공유 링크가 없습니다.</p>
           <Link href="/">세션 티켓 만들기</Link>
         </div>
       ) : (

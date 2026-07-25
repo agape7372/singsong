@@ -80,7 +80,8 @@ describe("SearchLedger state semantics", () => {
     vi.stubGlobal("fetch", fetchMock);
     const { props } = renderLedger({ addedCatalogIds: new Set(["fx-001"]) });
 
-    expect(screen.getByRole("status")).toHaveTextContent("검색어는 주소나 로그에 남기지 않습니다.");
+    // idle에는 문구를 두지 않는다(시트에서 결과 행을 밀어냄). 라이브 리전은 하나만 유지.
+    expect(screen.getByRole("status")).toHaveTextContent("");
     const input = screen.getByLabelText("제목, 가수 또는 노래방 번호로 곡 찾기");
     fireEvent.change(input, { target: { value: "밤의" } });
     await finishDebounce();

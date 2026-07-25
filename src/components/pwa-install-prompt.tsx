@@ -134,14 +134,10 @@ export function PwaInstallPrompt() {
 
   return (
     <aside className="pwa-install-prompt" aria-label="앱 설치 안내">
+      {/* 첫 화면을 가리는 배너다. 한 줄로 끝내고, 임시 주소 경고만 덧붙인다. */}
       <div className="pwa-install-copy">
-        <strong>홈 화면에 추가하면 싱송을 앱처럼 바로 열 수 있어요.</strong>
-        <p>설치하지 않아도 지금 모든 플랜 기능을 계속 사용할 수 있습니다.</p>
-        {temporaryPreview && (
-          <p>
-            지금 주소는 임시 미리보기라 설치해도 PC나 미리보기 연결이 꺼지면 열리지 않을 수 있어요.
-          </p>
-        )}
+        <strong>홈 화면에 추가하면 앱처럼 열려요.</strong>
+        {temporaryPreview && <p>임시 주소라 연결이 꺼지면 안 열릴 수 있어요.</p>}
       </div>
       <div className="pwa-install-actions">
         {androidInstallAvailable ? (

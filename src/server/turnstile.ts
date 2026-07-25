@@ -7,20 +7,6 @@ const TEST_SECRET_KEYS = new Set([
   "3x0000000000000000000000000000000AA",
 ]);
 
-function loopbackRequest(request: Request) {
-  try {
-    const hostname = new URL(request.url).hostname.toLowerCase();
-    return (
-      hostname === "localhost" ||
-      hostname === "127.0.0.1" ||
-      hostname === "[::1]" ||
-      hostname === "::1"
-    );
-  } catch {
-    return false;
-  }
-}
-
 async function sha256(value: string | Uint8Array) {
   const bytes = typeof value === "string" ? new TextEncoder().encode(value) : value;
   const copy = new Uint8Array(bytes.byteLength);
@@ -59,7 +45,11 @@ export async function verifyHuman(
   idempotencyKey: string,
 ) {
   if (process.env.NODE_ENV === "test") return true;
-  if (getRuntimeProfile() === "fixture") return loopbackRequest(request);
+  // fixture 빌드는 가상 카탈로그 + 로컬 공유 저장소만 쓰는 데모다. 위젯을 아예
+  // 렌더하지 않으므로(ticket-screen은 production에서만 렌더) 호스트를 loopback으로
+  // 제한하면 터널·LAN 프리뷰에서 공유 플로우를 영영 시험할 수 없다.
+  // production 프로필은 아래 실제 Turnstile 검증을 그대로 통과해야 한다.
+  if (getRuntimeProfile() === "fixture") return true;
   const secret = process.env.TURNSTILE_SECRET_KEY;
   if (!secret || TEST_SECRET_KEYS.has(secret) || !token || token.length > 2048) return false;
   const hosts = allowedHostnames();
