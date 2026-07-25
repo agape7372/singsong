@@ -73,6 +73,19 @@
     --focus: #f5eef3;
     --shadow-strip: 0 18px 48px rgb(0 0 0 / 22%);
     --shadow-ticket: 0 26px 74px rgb(0 0 0 / 34%);
+
+    /* 인앱 티켓은 사용자 테마를 따른다(정본 §9-2). PNG·OG만 항상 라이트로 출력하는데,
+       그 둘은 ticket-art.ts의 리터럴 팔레트를 쓰므로 여기 값에 영향받지 않는다. */
+    --ticket-paper: #241c2a;
+    --ticket-ink: #f5eef3;
+    --ticket-ink-muted: #b8a9bc;
+    --ticket-accent-fill: #ff6b9b;
+    --ticket-accent-text: #ff8ab1;
+    --ticket-money-text: #f5a623;
+    --ticket-border-control: #88798d;
+    --ticket-canvas: #16111c;
+    --ticket-surface-muted: #281d27;
+    --ticket-border-subtle: #413547;
   }
 }
 
