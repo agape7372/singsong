@@ -22,12 +22,15 @@
     ],
     "types": ["@serwist/next/typings", "vitest/globals"],
     "paths": {
+      "@/domain": ["./packages/domain/src/index.ts"],
+      "@/domain/*": ["./packages/domain/src/*"],
       "@/*": ["./src/*"]
     }
   },
   "include": [
     "next-env.d.ts",
     ".next/types/**/*.ts",
+    "packages/*/src/**/*.ts",
     "src/**/*.ts",
     "src/**/*.tsx",
     "tests/**/*.ts",
