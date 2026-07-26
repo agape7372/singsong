@@ -33,9 +33,9 @@
       },
       { "kind": "circle", "cx": 40, "cy": 150, "r": 14, "fill": "paper" }
     ],
-    "grain": { "baseFrequency": 0.9, "octaves": 2, "opacity": 0.14, "blend": "multiply" }
+    "grain": { "baseFrequency": 0.9, "octaves": 2, "opacity": 0.14, "blend": "normal" }
   },
-  "cardGrain": { "baseFrequency": 0.9, "octaves": 2, "opacity": 0.16, "blend": "multiply" },
+  "cardGrain": { "baseFrequency": 0.9, "octaves": 2, "opacity": 0.16, "blend": "normal" },
   "halftone": {
     "viewBox": [0, 0, 320, 128],
     "cellPx": 2.6,
