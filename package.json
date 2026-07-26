@@ -5,23 +5,28 @@
   "description": "Local-first karaoke session planner and shareable ticket PWA",
   "license": "UNLICENSED",
   "engines": {
-    "node": "24.18.0",
-    "pnpm": "11.9.0"
+    "node": ">=22.13"
   },
-  "packageManager": "pnpm@11.9.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "//overrides": "@axe-core/playwright 는 playwright-core 를 peer '>= 1.0.0' 로 잡는다. pnpm 에서는 문제가 없었지만 npm 은 그 peer 를 만족시키려고 최신(1.62.0)을 루트에 따로 깔고, playwright@1.61.1 이 요구하는 정확 핀을 node_modules/playwright/node_modules 로 밀어넣는다. 그러면 playwright-core 타입이 두 벌이 되어 tests/e2e/core-flow.spec.ts:6 의 AxeBuilder({ page }) 가 서로 다른 Page 타입 사이에서 TS2322 로 깨진다. 1.61.1 도 peer 범위를 만족하므로 한 벌로 고정한다.",
+  "overrides": {
+    "playwright-core": "1.61.1"
+  },
   "scripts": {
-    "dev": "pnpm run dev:demo",
+    "dev": "npm run dev:demo",
     "dev:demo": "cross-env APP_PROFILE=fixture NEXT_PUBLIC_APP_PROFILE=fixture next dev --webpack",
-    "dev:fixture": "pnpm run dev:demo",
-    "build": "pnpm run build:demo",
+    "dev:fixture": "npm run dev:demo",
+    "build": "npm run build:demo",
     "build:demo": "cross-env APP_PROFILE=fixture NEXT_PUBLIC_APP_PROFILE=fixture next build --webpack",
-    "build:fixture": "pnpm run build:demo",
+    "build:fixture": "npm run build:demo",
     "preflight:release": "cross-env APP_PROFILE=release NEXT_PUBLIC_APP_PROFILE=release node scripts/release-preflight.mjs",
     "verify:release-artifact": "node scripts/verify-release-artifact.mjs",
-    "build:release": "pnpm run preflight:release && cross-env APP_PROFILE=release NEXT_PUBLIC_APP_PROFILE=release next build --webpack && pnpm run verify:release-artifact",
-    "build:production": "pnpm run build:release",
+    "build:release": "npm run preflight:release && cross-env APP_PROFILE=release NEXT_PUBLIC_APP_PROFILE=release next build --webpack && npm run verify:release-artifact",
+    "build:production": "npm run build:release",
     "start": "next start",
-    "install:frozen": "cross-env CI=1 pnpm install --frozen-lockfile",
+    "install:frozen": "cross-env CI=1 npm ci",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
@@ -36,10 +41,10 @@
     "test:pwa:release": "cross-env APP_PROFILE=production NEXT_PUBLIC_APP_PROFILE=production playwright test --config playwright.production.config.ts",
     "smoke:http": "node scripts/smoke-http.mjs",
     "perf:lab": "node scripts/perf-lab.mjs",
-    "verify": "pnpm run verify:demo",
-    "verify:demo": "pnpm run install:frozen && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build:demo && node scripts/verify-built-pwa.mjs && cross-env APP_PROFILE=fixture NEXT_PUBLIC_APP_PROFILE=fixture node scripts/smoke-http.mjs && pnpm test:e2e && pnpm test:pwa",
-    "verify:release": "pnpm run install:frozen && pnpm run preflight:release && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build:release && node scripts/verify-built-pwa.mjs && cross-env APP_PROFILE=production NEXT_PUBLIC_APP_PROFILE=production node scripts/smoke-http.mjs && pnpm run test:pwa:release",
-    "verify:production": "pnpm run verify:release",
+    "verify": "npm run verify:demo",
+    "verify:demo": "npm run install:frozen && npm run format:check && npm run lint && npm run typecheck && npm test && npm run build:demo && node scripts/verify-built-pwa.mjs && cross-env APP_PROFILE=fixture NEXT_PUBLIC_APP_PROFILE=fixture node scripts/smoke-http.mjs && npm run test:e2e && npm run test:pwa",
+    "verify:release": "npm run install:frozen && npm run preflight:release && npm run format:check && npm run lint && npm run typecheck && npm test && npm run build:release && node scripts/verify-built-pwa.mjs && cross-env APP_PROFILE=production NEXT_PUBLIC_APP_PROFILE=production node scripts/smoke-http.mjs && npm run test:pwa:release",
+    "verify:production": "npm run verify:release",
     "icons": "node scripts/generate-icons.mjs",
     "clean:generated": "node scripts/clean-generated.mjs"
   },
