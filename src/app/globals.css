@@ -2837,7 +2837,11 @@ button.home-confirm-action {
 /* 티켓 앞↔뒷 플립 */
 .flip-scene {
   width: min(100%, 420px);
-  height: min(90dvh, 720px);
+  /* dvh 는 모바일 크롬에서 주소창이 접혔다 펴질 때마다 값이 바뀐다. 스크롤 중 카드 높이가
+     오르내리면서 아래 패널까지 밀렸다 당겨져 간격이 48px↔94px 로 튀었다(녹화 프레임 실측).
+     svh 는 주소창이 보이는 상태 기준으로 고정이라 스크롤에 반응하지 않는다. */
+  height: min(90vh, 720px);
+  height: min(90svh, 720px);
   margin: 0 auto;
   perspective: 1400px;
 }
@@ -3041,8 +3045,7 @@ button.home-confirm-action {
   }
 }
 
-/* 티켓 그림자(--shadow-ticket)가 24px 내려앉아 70px 번진다. 1rem만 띄우면 바로 아래
-   패널의 첫 줄이 그림자에 잠겨 잘린 것처럼 보인다. 그림자 밖으로 내리고 자체 배경으로 덮는다. */
+/* 패널이 티켓 그림자 위에 얹히도록 스태킹을 올린다. */
 .ticket-share-panel,
 .ticket-share-result,
 .managed-shares,
