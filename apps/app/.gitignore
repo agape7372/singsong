@@ -44,3 +44,7 @@ example
 
 # 하프톤 검증 하네스 산출물 (tools/verify-halftone.mjs)
 tools/out/
+
+# 폰 전달용으로 잠깐 두는 APK — dev 서버가 public/ 을 정적 서빙한다. 커밋 대상 아님.
+public/*.apk
+public/ping.txt

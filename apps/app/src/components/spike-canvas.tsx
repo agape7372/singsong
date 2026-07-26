@@ -47,19 +47,16 @@ const RAMP_PX = ARTWORK.halftone.fontSizePx;
 
 type Scheme = "light" | "dark";
 
-function useScene(
-  width: number,
-  height: number,
-  draw: (canvas: SkCanvas) => void,
-  deps: unknown[],
-) {
-  return useMemo(() => {
-    const recorder = Skia.PictureRecorder();
-    const canvas = recorder.beginRecording(Skia.XYWHRect(0, 0, width, height));
-    draw(canvas);
-    return recorder.finishRecordingAsPicture();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [width, height, ...deps]);
+/**
+ * 훅이 아니라 평범한 함수다. 훅으로 감싸면 `useMemo` 의존성이 스프레드가 되어
+ * `react-hooks` 규칙이 요구하는 배열 리터럴이 아니게 되고, 그 규칙은 정당하다 —
+ * 스프레드는 길이가 렌더마다 달라질 수 있어 훅 순서 검증이 불가능해진다.
+ * 각 장면이 자기 `useMemo` 를 리터럴 의존성으로 들고, 이 함수는 레코더 상용구만 없앤다.
+ */
+function record(width: number, height: number, draw: (canvas: SkCanvas) => void) {
+  const recorder = Skia.PictureRecorder();
+  draw(recorder.beginRecording(Skia.XYWHRect(0, 0, width, height)));
+  return recorder.finishRecordingAsPicture();
 }
 
 function fillRect(canvas: SkCanvas, x: number, y: number, w: number, h: number, css: string) {
@@ -74,15 +71,14 @@ function RampScene({ scale, tile }: { scale: number; tile: SkImage }) {
   const w = ART_W * scale;
   const h = RAMP_PX * scale;
 
-  const picture = useScene(
-    w,
-    h,
-    (canvas) => {
-      canvas.scale(scale, scale);
-      fillRect(canvas, 0, 0, ART_W, RAMP_PX, hex("accent"));
-      canvas.drawRect(Skia.XYWHRect(0, 0, ART_W, RAMP_PX), makeHalftonePaint(tile, RAMP_PX, 0));
-    },
-    [scale, tile],
+  const picture = useMemo(
+    () =>
+      record(w, h, (canvas) => {
+        canvas.scale(scale, scale);
+        fillRect(canvas, 0, 0, ART_W, RAMP_PX, hex("accent"));
+        canvas.drawRect(Skia.XYWHRect(0, 0, ART_W, RAMP_PX), makeHalftonePaint(tile, RAMP_PX, 0));
+      }),
+    [w, h, scale, tile],
   );
 
   return <Canvas style={{ width: w, height: h }}>{<Picture picture={picture} />}</Canvas>;
@@ -94,31 +90,30 @@ function NumeralScene({ scale, tile, font }: { scale: number; tile: SkImage; fon
   const w = ART_W * scale;
   const h = 210 * scale;
 
-  const picture = useScene(
-    w,
-    h,
-    (canvas) => {
-      canvas.scale(scale, scale);
-      fillRect(canvas, 0, 0, ART_W, 210, hex("paper"));
+  const picture = useMemo(
+    () =>
+      record(w, h, (canvas) => {
+        canvas.scale(scale, scale);
+        fillRect(canvas, 0, 0, ART_W, 210, hex("paper"));
 
-      const text = "12";
-      const metrics = font.getMetrics();
-      const bounds = font.measureText(text);
-      const baseline = 175;
-      // CSS `background-clip:text` 는 요소 박스 상단부터 램프를 흘린다.
-      // 글리프 em 박스 상단 = baseline + ascent (ascent 는 음수).
-      const emTop = baseline + metrics.ascent;
-      const x = (ART_W - bounds.width) / 2;
+        const text = "12";
+        const metrics = font.getMetrics();
+        const bounds = font.measureText(text);
+        const baseline = 175;
+        // CSS `background-clip:text` 는 요소 박스 상단부터 램프를 흘린다.
+        // 글리프 em 박스 상단 = baseline + ascent (ascent 는 음수).
+        const emTop = baseline + metrics.ascent;
+        const x = (ART_W - bounds.width) / 2;
 
-      const base = Skia.Paint();
-      base.setAntiAlias(true);
-      base.setColor(color("accent"));
-      canvas.drawText(text, x, baseline, base, font);
+        const base = Skia.Paint();
+        base.setAntiAlias(true);
+        base.setColor(color("accent"));
+        canvas.drawText(text, x, baseline, base, font);
 
-      // 종이색 망점을 같은 글리프 위에 겹쳐 찍는다.
-      canvas.drawText(text, x, baseline, makeHalftonePaint(tile, RAMP_PX, emTop), font);
-    },
-    [scale, tile, font],
+        // 종이색 망점을 같은 글리프 위에 겹쳐 찍는다.
+        canvas.drawText(text, x, baseline, makeHalftonePaint(tile, RAMP_PX, emTop), font);
+      }),
+    [w, h, scale, tile, font],
   );
 
   return <Canvas style={{ width: w, height: h }}>{<Picture picture={picture} />}</Canvas>;
@@ -130,36 +125,35 @@ function GrainScene({ scale }: { scale: number }) {
   const w = ART_W * scale;
   const h = 130 * scale;
 
-  const picture = useScene(
-    w,
-    h,
-    (canvas) => {
-      canvas.scale(scale, scale);
-      const half = ART_W / 2;
-      const specs = [
-        { x: 0, spec: ARTWORK.composition.grain },
-        { x: half, spec: ARTWORK.cardGrain },
-      ];
-      for (const { x, spec } of specs) {
-        fillRect(canvas, x, 0, half, 130, hex("paper"));
-        canvas.save();
-        canvas.translate(x, 0);
-        canvas.drawRect(
-          Skia.XYWHRect(0, 0, half, 130),
-          makeGrainPaint({
-            baseFrequency: spec.baseFrequency,
-            octaves: spec.octaves,
-            opacity: spec.opacity,
-            tileWidth: half,
-            tileHeight: 130,
-          }),
-        );
-        canvas.restore();
-      }
-      // 두 패치 경계선 — 0.14 와 0.16 차이가 보이는지 확인용
-      fillRect(canvas, half - 0.5, 0, 1, 130, hex("border"));
-    },
-    [scale],
+  const picture = useMemo(
+    () =>
+      record(w, h, (canvas) => {
+        canvas.scale(scale, scale);
+        const half = ART_W / 2;
+        const specs = [
+          { x: 0, spec: ARTWORK.composition.grain },
+          { x: half, spec: ARTWORK.cardGrain },
+        ];
+        for (const { x, spec } of specs) {
+          fillRect(canvas, x, 0, half, 130, hex("paper"));
+          canvas.save();
+          canvas.translate(x, 0);
+          canvas.drawRect(
+            Skia.XYWHRect(0, 0, half, 130),
+            makeGrainPaint({
+              baseFrequency: spec.baseFrequency,
+              octaves: spec.octaves,
+              opacity: spec.opacity,
+              tileWidth: half,
+              tileHeight: 130,
+            }),
+          );
+          canvas.restore();
+        }
+        // 두 패치 경계선 — 0.14 와 0.16 차이가 보이는지 확인용
+        fillRect(canvas, half - 0.5, 0, 1, 130, hex("border"));
+      }),
+    [w, h, scale],
   );
 
   return <Canvas style={{ width: w, height: h }}>{<Picture picture={picture} />}</Canvas>;
@@ -171,31 +165,35 @@ function PunchScene({ scale, scheme }: { scale: number; scheme: Scheme }) {
   const w = ART_W * scale;
   const h = 260 * scale;
 
-  const picture = useScene(
-    w,
-    h,
-    (canvas) => {
-      canvas.scale(scale, scale);
-      // 인앱 티켓 종이는 테마를 따른다(정본 §9-2). PNG·OG 만 항상 라이트로 굽는다.
-      const ticket = ticketPalette[scheme];
-      const paper = Skia.Paint();
-      paper.setAntiAlias(true);
-      paper.setColor(Skia.Color(ticket.paper));
-      canvas.drawRRect(
-        Skia.RRectXY(Skia.XYWHRect(0, 0, ART_W, 260), ARTWORK.radiusPx, ARTWORK.radiusPx),
-        paper,
-      );
+  const picture = useMemo(
+    () =>
+      record(w, h, (canvas) => {
+        canvas.scale(scale, scale);
+        // 인앱 티켓 종이는 테마를 따른다(정본 §9-2). PNG·OG 만 항상 라이트로 굽는다.
+        const ticket = ticketPalette[scheme];
+        const paper = Skia.Paint();
+        paper.setAntiAlias(true);
+        paper.setColor(Skia.Color(ticket.paper));
+        canvas.drawRRect(
+          Skia.RRectXY(Skia.XYWHRect(0, 0, ART_W, 260), ARTWORK.radiusPx, ARTWORK.radiusPx),
+          paper,
+        );
 
-      const { insetPx, topPx, dotPx } = ARTWORK.punch;
-      // 구멍 너머로 보이는 색은 카드 뒤 캔버스다. 값을 따로 적으면 테마마다 어긋나므로
-      // `--ticket-canvas` 를 그대로 쓴다 — VISUAL_MOTION_DIRECTION §651 이 요구하는 규칙.
-      const hole = Skia.Color(ticket.canvas);
-      const height = 260 - topPx - ARTWORK.punch.bottomPx;
+        const { insetPx, topPx, dotPx } = ARTWORK.punch;
+        // 구멍 너머로 보이는 색은 카드 뒤 캔버스다. 값을 따로 적으면 테마마다 어긋나므로
+        // `--ticket-canvas` 를 그대로 쓴다 — VISUAL_MOTION_DIRECTION §651 이 요구하는 규칙.
+        const hole = Skia.Color(ticket.canvas);
+        const height = 260 - topPx - ARTWORK.punch.bottomPx;
 
-      drawPunchColumn(canvas, { x: insetPx, top: topPx, height, holeColor: hole });
-      drawPunchColumn(canvas, { x: ART_W - insetPx - dotPx, top: topPx, height, holeColor: hole });
-    },
-    [scale, scheme],
+        drawPunchColumn(canvas, { x: insetPx, top: topPx, height, holeColor: hole });
+        drawPunchColumn(canvas, {
+          x: ART_W - insetPx - dotPx,
+          top: topPx,
+          height,
+          holeColor: hole,
+        });
+      }),
+    [w, h, scale, scheme],
   );
 
   return <Canvas style={{ width: w, height: h }}>{<Picture picture={picture} />}</Canvas>;
@@ -211,12 +209,18 @@ export function SpikeCanvas({ width, scheme }: { width: number; scheme: Scheme }
   const win = useWindowDimensions();
   const insets = useSafeAreaInsets();
   useEffect(() => {
-    setReport([
-      `${Platform.OS} ${String(Platform.Version)} · ${Math.round(win.width)}x${Math.round(win.height)}dp @${win.scale}x · fontScale ${win.fontScale}`,
-      `safe-area 상${Math.round(insets.top)} 하${Math.round(insets.bottom)} 좌${Math.round(insets.left)} 우${Math.round(insets.right)} · 테마 ${scheme}`,
-      `캔버스 폭 ${width}dp → 램프 배율 ${(width / ART_W).toFixed(3)} · 실효 셀 ${(2.6 * (width / ART_W) * win.scale).toFixed(2)} 디바이스px (2.10배 미만이면 격자)`,
-      ...runSelfCheck(),
-    ]);
+    // 렌더 직후 동기로 setState 하면 렌더가 연쇄한다. 그보다 자가측정 자체가 오프스크린
+    // 래스터 4회 + 픽셀 순회라 수백 ms 를 JS 스레드에서 먹는다. 매크로태스크로 미뤄
+    // "측정 중…" 이 먼저 그려지게 한다.
+    const id = setTimeout(() => {
+      setReport([
+        `${Platform.OS} ${String(Platform.Version)} · ${Math.round(win.width)}x${Math.round(win.height)}dp @${win.scale}x · fontScale ${win.fontScale}`,
+        `safe-area 상${Math.round(insets.top)} 하${Math.round(insets.bottom)} 좌${Math.round(insets.left)} 우${Math.round(insets.right)} · 테마 ${scheme}`,
+        `캔버스 폭 ${width}dp → 램프 배율 ${(width / ART_W).toFixed(3)} · 실효 셀 ${(2.6 * (width / ART_W) * win.scale).toFixed(2)} 디바이스px (2.10배 미만이면 격자)`,
+        ...runSelfCheck(),
+      ]);
+    }, 0);
+    return () => clearTimeout(id);
   }, [win, insets, scheme, width]);
 
   const tile = useMemo(() => makeDotTile(RAMP_PX), []);
@@ -282,7 +286,8 @@ function Section({
 }: {
   title: string;
   note: string;
-  children: React.ReactNode;
+  /** 실패 표시처럼 본문 없이 제목·설명만 쓰는 경우가 있다. */
+  children?: React.ReactNode;
 }) {
   const ink = palette[useColorScheme() === "dark" ? "dark" : "light"].ink;
   return (
@@ -311,7 +316,7 @@ function SelfCheckReport({ lines }: { lines: string[] }) {
 }
 
 function Failure({ reason }: { reason: string }) {
-  return <Section title="렌더 실패" note={reason} children={null} />;
+  return <Section title="렌더 실패" note={reason} />;
 }
 
 const styles = StyleSheet.create({
