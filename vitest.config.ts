@@ -1,6 +1,18 @@
-import { defineConfig } from "vitest/config";
 import path from "node:path";
+import { defineConfig } from "vitest/config";
 
+const root = process.cwd();
+
+/**
+ * 모노레포 전환 중이라 스위트가 두 곳에 산다 — 아직 Next 트리에 남은 `tests/**` 와
+ * 새로 생긴 `packages/*`. `test.projects` 로 한 번에 돌리고 커버리지는 루트에서 합산한다.
+ *
+ * ★ `test.workspace` 가 아니라 `test.projects` 다. vitest 4 에서 `workspace` 는 런타임 throw.
+ *
+ * ★ **존재하는 패키지만 등록한다.** vitest 는 root 디렉터리가 없는 project 를 경고 없이
+ *   건너뛰고 exit 0 을 낸다. 오타 하나가 게이트 전체를 무음 no-op 으로 만들고, 그 상태로
+ *   green 서명이 나간다. `tools/check-monorepo.mjs` 가 이 목록과 실제 디렉터리를 대조한다.
+ */
 export default defineConfig({
   resolve: {
     alias: {
@@ -12,17 +24,37 @@ export default defineConfig({
       // 이 shim 은 영구물이 아니다. `@/domain` 임포터 37개 중 상당수는 어차피 이동 대상이라
       // (M4 services/share-api, M1 packages/store) 그때 specifier 가 재작성된다.
       // **마지막 임포터가 옮겨진 시점에 이 줄을 지운다** — M4/M6 체크리스트에 등록.
-      "@/domain": path.resolve(process.cwd(), "packages/domain/src"),
-      "@": path.resolve(process.cwd(), "src"),
-      "server-only": path.resolve(process.cwd(), "tests/setup/server-only.ts"),
+      "@/domain": path.resolve(root, "packages/domain/src"),
+      "@": path.resolve(root, "src"),
+      "server-only": path.resolve(root, "tests/setup/server-only.ts"),
     },
   },
   test: {
-    environment: "node",
-    include: ["tests/**/*.test.{ts,tsx}"],
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: "next",
+          environment: "node",
+          include: ["tests/**/*.test.{ts,tsx}"],
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: "store",
+          root: path.resolve(root, "packages/store"),
+          environment: "node",
+          include: ["test/**/*.test.ts"],
+        },
+      },
+    ],
     coverage: {
       provider: "v8",
       reporter: ["text", "json-summary", "html"],
+      // 임계값은 현행 유지. 전체 베이스라인이 82.27%/75.47% 라 90/85 로 올릴 근거가 없다
+      // (정본 §3.6). 글로브 키로 특정 패키지만 올리는 것도 하지 않는다 — 상향 래칫이라
+      // 되돌릴 수 없고, 아직 이식 중인 패키지에 걸면 이동 자체가 막힌다.
       thresholds: {
         statements: 80,
         branches: 75,
