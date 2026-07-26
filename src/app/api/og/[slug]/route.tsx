@@ -24,6 +24,17 @@ export const runtime = "nodejs";
 const WIDTH = 1_200;
 const HEIGHT = 630;
 const SLUG = /^[A-Za-z0-9_-]{21}[AQgw]$/u;
+
+// 카드 기하. 타공 원은 절취선 위에 놓여야 하므로 좌표를 손으로 적지 않고 여기서 만든다.
+const CARD_PADDING = 44;
+const CARD_BORDER = 1;
+const TEAR_BORDER = 2;
+const STUB_WIDTH = 470;
+const HOLE_DIAMETER = 36;
+const CARD_INNER_WIDTH = WIDTH - CARD_PADDING * 2;
+/** 절취선 중심 — 카드 안쪽 좌표계 기준. */
+const TEAR_CENTER_X = CARD_INNER_WIDTH - CARD_BORDER - STUB_WIDTH - TEAR_BORDER / 2;
+const HOLE_LEFT = TEAR_CENTER_X - HOLE_DIAMETER / 2;
 const FONT_ASSET = new URL("../../../../assets/fonts/NotoSansKR-700.subset.ttf", import.meta.url);
 
 function fontAssetPath() {
@@ -53,8 +64,15 @@ const responseHeaders = {
 };
 
 // 컴포지션은 티켓마다 같은 그림이라 요청 시점에 다시 만들 이유가 없다.
+// 폭은 반드시 스텁 폭과 같아야 한다 — 430 으로 만들어 470 으로 그리면 가로로 9% 늘어난다.
+const COMPOSITION_HEIGHT = 250;
 const compositionUri = svgDataUri(
-  compositionSvg({ width: 430, height: 250, idPrefix: "og", background: "paper" }),
+  compositionSvg({
+    width: STUB_WIDTH,
+    height: COMPOSITION_HEIGHT,
+    idPrefix: "og",
+    background: "paper",
+  }),
 );
 
 const COUNT_FONT_PX = 186;
@@ -85,7 +103,95 @@ function Metric({ label, value, tone }: { label: string; value: string; tone?: "
   );
 }
 
-function OgArtwork({ share }: { share: ShareRecord | null }) {
+/** 악센트 글자 위에 종이색 망점을 겹쳐 찍는다 — 화면 티켓의 큰 숫자와 같은 기법. */
+function HalftoneMark({ children }: { children: string }) {
+  const glyph = {
+    fontSize: COUNT_FONT_PX,
+    lineHeight: 1,
+    letterSpacing: "-0.05em",
+  } as const;
+
+  return (
+    <div style={{ display: "flex", position: "relative", marginTop: 6 }}>
+      <span style={{ ...glyph, color: TICKET_PALETTE.accent }}>{children}</span>
+      <span
+        style={{
+          ...glyph,
+          position: "absolute",
+          top: 0,
+          left: 0,
+          color: "transparent",
+          backgroundImage: `url(${halftoneTextureUri})`,
+          backgroundSize: `${COUNT_FONT_PX}px ${COUNT_FONT_PX}px`,
+          backgroundRepeat: "repeat-x",
+          backgroundClip: "text",
+        }}
+      >
+        {children}
+      </span>
+    </div>
+  );
+}
+
+const POSTER_COLUMN = {
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "center",
+  alignItems: "center",
+  textAlign: "center",
+  flex: 1,
+  padding: "44px 36px",
+} as const;
+
+/**
+ * 링크 프리뷰용 **정적** 브랜드판. 곡수·시간·비용은 티켓마다 다르므로 이미지에 굽지 않고
+ * `og:title`/`og:description` 텍스트가 나른다(정본 §9-5, 계획 D5).
+ */
+function BrandArtwork() {
+  return (
+    <div style={{ display: "flex", width: "100%", height: "100%" }}>
+      <div style={POSTER_COLUMN}>
+        <span style={{ color: TICKET_PALETTE.accentText, fontSize: 25, letterSpacing: "0.14em" }}>
+          {TICKET_COPY.kicker}
+        </span>
+        <span style={{ marginTop: 14, fontSize: 64, letterSpacing: "-0.045em", lineHeight: 1.02 }}>
+          {TICKET_COPY.title}
+        </span>
+        <HalftoneMark>싱송</HalftoneMark>
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          width: 0,
+          height: "100%",
+          borderLeft: `${TEAR_BORDER}px dashed ${TICKET_PALETTE.border}`,
+        }}
+      />
+
+      <div style={{ display: "flex", flexDirection: "column", width: STUB_WIDTH, height: "100%" }}>
+        <img src={compositionUri} width={STUB_WIDTH} height={COMPOSITION_HEIGHT} alt="" />
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            gap: 10,
+            flex: 1,
+            padding: "34px 40px 32px",
+          }}
+        >
+          <span style={{ fontSize: 34, letterSpacing: "-0.02em" }}>코인노래방 세션 플래너</span>
+          <span style={{ color: TICKET_PALETTE.inkMuted, fontSize: 22 }}>
+            {TICKET_COPY.validity}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function OgArtwork({ share, brand }: { share: ShareRecord | null; brand: boolean }) {
   const calculation = share?.payload.calculation;
 
   return (
@@ -113,21 +219,12 @@ function OgArtwork({ share }: { share: ShareRecord | null }) {
           background: TICKET_PALETTE.paper,
         }}
       >
-        {share && calculation ? (
+        {brand ? (
+          <BrandArtwork />
+        ) : share && calculation ? (
           <div style={{ display: "flex", width: "100%", height: "100%" }}>
             {/* 왼쪽: 포스터 헤더 — 화면 티켓 앞면과 같은 정보 위계 */}
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                // 화면 티켓 포스터 헤드와 같은 중앙 정렬.
-                alignItems: "center",
-                textAlign: "center",
-                flex: 1,
-                padding: "44px 36px",
-              }}
-            >
+            <div style={POSTER_COLUMN}>
               <span
                 style={{
                   color: TICKET_PALETTE.accentText,
@@ -148,35 +245,7 @@ function OgArtwork({ share }: { share: ShareRecord | null }) {
                 {TICKET_COPY.title}
               </span>
               {/* 로즈 숫자 위에 하프톤 무늬를 글자 모양으로 입힌다(화면·PNG와 같은 인상). */}
-              <div style={{ display: "flex", position: "relative", marginTop: 6 }}>
-                <span
-                  style={{
-                    color: TICKET_PALETTE.accent,
-                    fontSize: COUNT_FONT_PX,
-                    lineHeight: 1,
-                    letterSpacing: "-0.05em",
-                  }}
-                >
-                  {calculation.songCount}
-                </span>
-                <span
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    fontSize: COUNT_FONT_PX,
-                    lineHeight: 1,
-                    letterSpacing: "-0.05em",
-                    color: "transparent",
-                    backgroundImage: `url(${halftoneTextureUri})`,
-                    backgroundSize: `${COUNT_FONT_PX}px ${COUNT_FONT_PX}px`,
-                    backgroundRepeat: "repeat-x",
-                    backgroundClip: "text",
-                  }}
-                >
-                  {calculation.songCount}
-                </span>
-              </div>
+              <HalftoneMark>{String(calculation.songCount)}</HalftoneMark>
               <span style={{ marginTop: 4, fontSize: 24, letterSpacing: "0.36em" }}>
                 {TICKET_COPY.countLabel}
               </span>
@@ -188,7 +257,7 @@ function OgArtwork({ share }: { share: ShareRecord | null }) {
                 display: "flex",
                 width: 0,
                 height: "100%",
-                borderLeft: `2px dashed ${TICKET_PALETTE.border}`,
+                borderLeft: `${TEAR_BORDER}px dashed ${TICKET_PALETTE.border}`,
               }}
             />
 
@@ -197,11 +266,11 @@ function OgArtwork({ share }: { share: ShareRecord | null }) {
               style={{
                 display: "flex",
                 flexDirection: "column",
-                width: 470,
+                width: STUB_WIDTH,
                 height: "100%",
               }}
             >
-              <img src={compositionUri} width={470} height={250} alt="" />
+              <img src={compositionUri} width={STUB_WIDTH} height={COMPOSITION_HEIGHT} alt="" />
               <div
                 style={{
                   display: "flex",
@@ -262,28 +331,29 @@ function OgArtwork({ share }: { share: ShareRecord | null }) {
           </div>
         )}
 
-        {/* 절취선 양끝 타공 — 화면 티켓의 타공 열과 같은 종이색 반원 */}
+        {/* 절취선 양끝 타공 — 화면 티켓의 타공 열과 같은 종이색 반원.
+            좌표는 손으로 적지 않는다. 730 으로 적혀 있던 동안 절취선에서 106px 떨어져 떠 있었다. */}
         <div
           style={{
             position: "absolute",
-            top: -18,
-            left: 730,
-            width: 36,
-            height: 36,
+            top: -HOLE_DIAMETER / 2,
+            left: HOLE_LEFT,
+            width: HOLE_DIAMETER,
+            height: HOLE_DIAMETER,
             display: "flex",
-            borderRadius: 18,
+            borderRadius: HOLE_DIAMETER / 2,
             background: TICKET_PALETTE.hole,
           }}
         />
         <div
           style={{
             position: "absolute",
-            bottom: -18,
-            left: 730,
-            width: 36,
-            height: 36,
+            bottom: -HOLE_DIAMETER / 2,
+            left: HOLE_LEFT,
+            width: HOLE_DIAMETER,
+            height: HOLE_DIAMETER,
             display: "flex",
-            borderRadius: 18,
+            borderRadius: HOLE_DIAMETER / 2,
             background: TICKET_PALETTE.hole,
           }}
         />
@@ -303,11 +373,14 @@ async function findShare(slug: string) {
   }
 }
 
-export async function GET(_request: Request, context: { params: Promise<{ slug: string }> }) {
+export async function GET(request: Request, context: { params: Promise<{ slug: string }> }) {
   const { slug } = await context.params;
-  const [font, share] = await Promise.all([notoSansKr, findShare(slug)]);
+  // `?brand=1` 은 슬러그와 무관한 정적 브랜드판을 그린다. 링크 프리뷰용 PNG 를 한 번 뽑아
+  // 커밋하기 위한 경로이며(계획 D5), 공유 데이터를 읽지 않는다.
+  const brand = new URL(request.url).searchParams.get("brand") === "1";
+  const [font, share] = await Promise.all([notoSansKr, brand ? null : findShare(slug)]);
 
-  return new ImageResponse(<OgArtwork share={share} />, {
+  return new ImageResponse(<OgArtwork share={share} brand={brand} />, {
     width: WIDTH,
     height: HEIGHT,
     fonts: [{ name: "Noto Sans KR", data: font, weight: 700, style: "normal" }],

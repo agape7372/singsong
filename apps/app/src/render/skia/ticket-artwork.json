@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "palette": {
+    "paper": "#f6efdc",
+    "ink": "#15131a",
+    "inkMuted": "#665f68",
+    "accent": "#ff3d6e",
+    "accentText": "#d91f52",
+    "money": "#8a5200",
+    "border": "#817984",
+    "hole": "#faf7f0"
+  },
+  "radiusPx": 24,
+  "composition": {
+    "viewBox": [0, 0, 320, 200],
+    "shapes": [
+      { "kind": "circle", "cx": 56, "cy": 96, "r": 56, "fill": "ink" },
+      { "kind": "path", "d": "M112 40h58v58a58 58 0 0 1-58-58z", "fill": "accent" },
+      { "kind": "path", "d": "M112 156l30-58 30 58z", "fill": "ink" },
+      { "kind": "rect", "x": 176, "y": 40, "width": 60, "height": 60, "fill": "accent" },
+      { "kind": "path", "d": "M236 40h60v60a60 60 0 0 1-60-60z", "fill": "ink" },
+      { "kind": "circle", "cx": 266, "cy": 150, "r": 52, "fill": "accent" },
+      { "kind": "path", "d": "M176 200a44 44 0 0 1 88 0z", "fill": "ink" },
+      { "kind": "circle", "cx": 150, "cy": 150, "r": 34, "fill": "accent", "opacity": 0.6 },
+      {
+        "kind": "rect",
+        "x": 60,
+        "y": 140,
+        "width": 46,
+        "height": 46,
+        "fill": "money",
+        "rotate": { "deg": 16, "cx": 83, "cy": 163 }
+      },
+      { "kind": "circle", "cx": 40, "cy": 150, "r": 14, "fill": "paper" }
+    ],
+    "grain": { "baseFrequency": 0.9, "octaves": 2, "opacity": 0.14, "blend": "normal" }
+  },
+  "cardGrain": { "baseFrequency": 0.9, "octaves": 2, "opacity": 0.16, "blend": "normal" },
+  "halftone": {
+    "viewBox": [0, 0, 320, 128],
+    "cellPx": 2.6,
+    "dotRadiusPx": 1.2,
+    "dotCoreStop": 0.55,
+    "toneStops": [
+      [0, "#000000"],
+      [0.28, "#141414"],
+      [0.68, "#606060"],
+      [1, "#c8c8c8"]
+    ],
+    "thresholdGain": 14,
+    "thresholdBias": -8.4,
+    "fontSizePx": 150,
+    "baselineY": 110
+  },
+  "punch": {
+    "dotPx": 8,
+    "pitchPx": 18.4,
+    "insetPx": 7.2,
+    "topPx": 72,
+    "bottomPx": 88,
+    "innerStop": 42,
+    "outerStop": 46
+  },
+  "copy": {
+    "kicker": "SINGSONG · 오늘의 세션",
+    "title": "오늘의 세션 스트립",
+    "countLabel": "SONGS",
+    "validity": "공유 시 30일 · 검색 비노출",
+    "serialPrefix": "NO. ",
+    "testData": "TEST DATA · 실제 노래방 곡 목록이 아닙니다"
+  }
+}
