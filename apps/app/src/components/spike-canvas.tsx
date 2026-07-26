@@ -20,7 +20,7 @@ import {
   makeHalftonePaint,
   scaleToTile,
 } from "@/render/skia";
-import { palette } from "@/theme/tokens";
+import { palette, ticketPalette } from "@/theme/tokens";
 
 /**
  * M0 게이트용 스파이크. 판정 대상은 **하프톤 점 분포·그레인 입자감·펀치 구멍 모양** 셋뿐이다.
@@ -167,18 +167,20 @@ function PunchScene({ scale, scheme }: { scale: number; scheme: Scheme }) {
     h,
     (canvas) => {
       canvas.scale(scale, scale);
+      // 인앱 티켓 종이는 테마를 따른다(정본 §9-2). PNG·OG 만 항상 라이트로 굽는다.
+      const ticket = ticketPalette[scheme];
       const paper = Skia.Paint();
       paper.setAntiAlias(true);
-      paper.setColor(color("paper"));
+      paper.setColor(Skia.Color(ticket.paper));
       canvas.drawRRect(
         Skia.RRectXY(Skia.XYWHRect(0, 0, ART_W, 260), ARTWORK.radiusPx, ARTWORK.radiusPx),
         paper,
       );
 
       const { insetPx, topPx, dotPx } = ARTWORK.punch;
-      // 카드 밖(구멍 너머)으로 보이는 색. 인앱 티켓은 테마를 따르고 PNG·OG 는 라이트 고정이다.
-      const holeCss = scheme === "dark" ? "#16111c" : hex("hole");
-      const hole = Skia.Color(holeCss);
+      // 구멍 너머로 보이는 색은 카드 뒤 캔버스다. 값을 따로 적으면 테마마다 어긋나므로
+      // `--ticket-canvas` 를 그대로 쓴다 — VISUAL_MOTION_DIRECTION §651 이 요구하는 규칙.
+      const hole = Skia.Color(ticket.canvas);
       const height = 260 - topPx - ARTWORK.punch.bottomPx;
 
       drawPunchColumn(canvas, { x: insetPx, top: topPx, height, holeColor: hole });
