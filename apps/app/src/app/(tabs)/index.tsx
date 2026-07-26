@@ -1,4 +1,5 @@
 import { Link } from "expo-router";
+import { useEffect } from "react";
 import {
   Platform,
   StyleSheet,
@@ -23,6 +24,23 @@ export default function PlanScreen() {
   const { width, height, fontScale, scale } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const metrics = tabBarMetrics(fontScale, insets.bottom);
+
+  // 같은 값을 Metro 로그로도 흘린다. 화면을 사진 찍어 옮겨 적는 왕복이 없어지고,
+  // 무엇보다 옮겨 적다 틀릴 일이 없다. M2 레이아웃이 이 숫자 위에 올라간다.
+  useEffect(() => {
+    console.log(
+      "[METRICS]",
+      JSON.stringify({
+        platform: `${Platform.OS} ${String(Platform.Version)}`,
+        window: { width, height },
+        pixelRatio: scale,
+        fontScale,
+        insets,
+        tabBar: metrics,
+        scheme,
+      }),
+    );
+  }, [width, height, scale, fontScale, insets, metrics, scheme]);
 
   const rows: [string, string][] = [
     ["플랫폼", `${Platform.OS} ${String(Platform.Version)}`],

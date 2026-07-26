@@ -7,8 +7,16 @@ import {
   type SkFont,
   type SkImage,
 } from "@shopify/react-native-skia";
-import { useMemo } from "react";
-import { StyleSheet, Text, View, useColorScheme } from "react-native";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Platform,
+  StyleSheet,
+  Text,
+  View,
+  useColorScheme,
+  useWindowDimensions,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
   ARTWORK,
@@ -20,6 +28,7 @@ import {
   makeHalftonePaint,
   scaleToTile,
 } from "@/render/skia";
+import { runSelfCheck } from "@/render/skia/self-check";
 import { palette, ticketPalette } from "@/theme/tokens";
 
 /**
@@ -197,6 +206,19 @@ function PunchScene({ scale, scheme }: { scale: number; scheme: Scheme }) {
 export function SpikeCanvas({ width, scheme }: { width: number; scheme: Scheme }) {
   const scale = width / ART_W;
 
+  // 눈으로 못 세는 것(셀 피치·점 분리·라이트 팔레트)을 기기가 스스로 잰다.
+  const [report, setReport] = useState<string[]>([]);
+  const win = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  useEffect(() => {
+    setReport([
+      `${Platform.OS} ${String(Platform.Version)} · ${Math.round(win.width)}x${Math.round(win.height)}dp @${win.scale}x · fontScale ${win.fontScale}`,
+      `safe-area 상${Math.round(insets.top)} 하${Math.round(insets.bottom)} 좌${Math.round(insets.left)} 우${Math.round(insets.right)} · 테마 ${scheme}`,
+      `캔버스 폭 ${width}dp → 램프 배율 ${(width / ART_W).toFixed(3)} · 실효 셀 ${(2.6 * (width / ART_W) * win.scale).toFixed(2)} 디바이스px (2.10배 미만이면 격자)`,
+      ...runSelfCheck(),
+    ]);
+  }, [win, insets, scheme, width]);
+
   const tile = useMemo(() => makeDotTile(RAMP_PX), []);
   const font = useMemo(() => {
     // 시스템 최대 굵기. Android 는 Roboto Black, iOS 는 SF Pro Black 근사치가 잡힌다.
@@ -215,6 +237,13 @@ export function SpikeCanvas({ width, scheme }: { width: number; scheme: Scheme }
 
   return (
     <View style={styles.stack}>
+      <Section
+        title="0 · 기기 자가측정"
+        note="눈으로 못 세는 값을 기기가 오프스크린 CPU Surface 에 그려 픽셀을 되읽어 잰다. 이 경로가 곧 M3 의 PNG 내보내기 경로다."
+      >
+        <SelfCheckReport lines={report} />
+      </Section>
+
       <Section
         title="1 · 램프 스와치 (서체 무관)"
         note={`셀 ${cell}dp · 점 반지름 ${dotRadius}dp · 임계 A′=42L−8.4. 위는 구멍 없는 솔리드, 아래로 갈수록 종이색 망점이 커져야 한다.`}
@@ -265,6 +294,22 @@ function Section({
   );
 }
 
+function SelfCheckReport({ lines }: { lines: string[] }) {
+  const colors = palette[useColorScheme() === "dark" ? "dark" : "light"];
+  if (lines.length === 0) {
+    return <Text style={[styles.mono, { color: colors.inkMuted }]}>측정 중…</Text>;
+  }
+  return (
+    <View style={[styles.report, { borderColor: colors.borderSubtle }]}>
+      {lines.map((line) => (
+        <Text key={line} style={[styles.mono, { color: colors.ink }]} selectable>
+          {line}
+        </Text>
+      ))}
+    </View>
+  );
+}
+
 function Failure({ reason }: { reason: string }) {
   return <Section title="렌더 실패" note={reason} children={null} />;
 }
@@ -274,4 +319,6 @@ const styles = StyleSheet.create({
   section: { gap: 6 },
   sectionTitle: { fontSize: 15, fontWeight: "700" },
   sectionNote: { fontSize: 12, lineHeight: 17, opacity: 0.7, marginBottom: 4 },
+  report: { borderWidth: 1, borderRadius: 8, padding: 8, gap: 3 },
+  mono: { fontSize: 9.5, lineHeight: 13, fontFamily: "monospace" },
 });
