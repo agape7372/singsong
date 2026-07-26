@@ -48,6 +48,24 @@ export default defineConfig({
           include: ["test/**/*.test.ts"],
         },
       },
+      {
+        extends: true,
+        test: {
+          name: "tokens",
+          root: path.resolve(root, "packages/tokens"),
+          environment: "node",
+          include: ["test/**/*.test.ts"],
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: "ticket-art",
+          root: path.resolve(root, "packages/ticket-art"),
+          environment: "node",
+          include: ["test/**/*.test.ts"],
+        },
+      },
     ],
     coverage: {
       provider: "v8",
