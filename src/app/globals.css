@@ -2483,10 +2483,10 @@ button.home-confirm-action {
   max-width: 16ch;
 }
 
+/* 티켓 자체가 이미 카드다. 무대에 테두리·배경까지 주면 카드가 상자를 뚫고 나온 것처럼
+   보이고(특히 다크에서 색이 붙는다) 화면에 rounded surface가 하나 더 늘어난다. 여백만 남긴다. */
 .ticket-stage {
   padding: clamp(0.6rem, 3vw, 1.25rem);
-  border: 1px solid var(--border-subtle);
-  background: var(--surface-muted);
 }
 
 .ticket-card {
