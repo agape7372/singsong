@@ -13,6 +13,8 @@
 
 import type { Plan, SharedSnapshot, TicketSnapshot } from "@singsong/domain/models";
 
+import { base64Url } from "@singsong/domain/bytes";
+
 import { createChangeBus, type ChangeBus, type StoreTopic } from "./change-bus";
 import { MIGRATIONS } from "./migrations/index";
 import { migrate } from "./migrations/run";
@@ -22,13 +24,25 @@ import {
   RevisionConflictError,
   applyPlanMutation,
   buildImportedPlan,
+  combineManagedShare,
+  isCompleteReceipt,
+  isExpired,
+  isStalePending,
+  isValidCompletionReceipt,
+  newManagedShare,
   newPlan,
+  partitionObsoleteShares,
+  summarizeManagedShares,
+  type ImportedShare,
+  type ManagedShare,
+  type ManagedShareReceipt,
+  type ManagedShareSummary,
 } from "./policy";
 import type { StorePorts } from "./ports";
-import { assertRealSqlExecutor, type SqlExecutor } from "./sql-executor";
+import { assertRealSqlExecutor, type SqlExecutor, type SqlSession } from "./sql-executor";
 import { getImportBySlug, insertImport, listImportRows } from "./repositories/imported-share";
-import type { ImportedShare } from "./policy";
 import { readPlanRow, writePlanRow } from "./repositories/plan";
+import * as shareRepo from "./repositories/managed-share";
 import {
   claimMotion,
   getTicketRow,
@@ -227,4 +241,156 @@ export function listTickets(store: PlanStore): Promise<TicketSnapshot[]> {
 
 export function listImports(store: PlanStore): Promise<ImportedShare[]> {
   return store.withLock(() => listImportRows(store.sql));
+}
+
+/* ─────────────────────────────── 공유 링크 ─────────────────────────────── */
+
+/**
+ * ★ 보안 임계. bearer capability 토큰. 도메인의 순수 base64Url(트랙 A, bytes.ts:40)로 인코딩한다 —
+ *    plan-database.ts:318-323 의 `btoa`+replace 중복을 store 에서는 만들지 않는다(트랙 A 인계).
+ *    16바이트 → 22자(끝 [AQgw]), 32바이트 → 43자(M15 실측, completeManagedShare 정규식 통과).
+ */
+function capabilityToken(store: PlanStore, byteLength: number): string {
+  return base64Url(store.ports.randomBytes(byteLength));
+}
+
+/**
+ * 만료·stale 영수증(obsolete)과 고아 secret 을 한꺼번에 청소한다(repository 레벨, tx 안).
+ * plan-database.ts:372-388 등가. 공개 함수가 아니다 — 공개 함수가 공개 함수를 부르면 데드락이라
+ * listManagedShares 는 이 tx 헬퍼를 부른다.
+ */
+async function removeExpiredAndStale(tx: SqlSession, nowMs: number): Promise<void> {
+  const receipts = await shareRepo.listReceipts(tx);
+  const secrets = await shareRepo.listSecrets(tx);
+  const { obsolete, orphanSecrets } = partitionObsoleteShares(receipts, secrets, nowMs);
+  await shareRepo.deleteReceipts(tx, obsolete);
+  await shareRepo.deleteSecrets(tx, [...obsolete, ...orphanSecrets]);
+}
+
+// ★ 공유 링크 연산은 "managed-share" topic 으로 통지하지 않는다 — P3 에 구독자가 없고,
+//    Dexie 판도 managed share 를 signal 하지 않았다(BroadcastChannel 은 plan revision 전용).
+//    UI 옵저버가 생기는 M2 에서 배선한다.
+
+export function prepareManagedShare(store: PlanStore, fingerprint: string): Promise<ManagedShare> {
+  return store.withLock(() =>
+    store.sql.transaction(async (tx) => {
+      const receipt = await shareRepo.getReceipt(tx, fingerprint);
+      const secret = await shareRepo.getSecret(tx, fingerprint);
+      const nowMs = store.ports.now();
+      if (receipt && !isExpired(receipt, nowMs) && !isStalePending(receipt, nowMs) && secret) {
+        return combineManagedShare(receipt, secret); // 살아있는 쌍이면 재사용
+      }
+      if (receipt && isCompleteReceipt(receipt) && !isExpired(receipt, nowMs) && !secret) {
+        // ★ 사용자 대면 한국어 문구 — plan-database.ts:400-402 원문 유지.
+        throw new Error(
+          "이 링크의 철회 키를 이 브라우저에서 찾을 수 없습니다. 기존 링크는 만료 전까지 철회할 수 없습니다.",
+        );
+      }
+      await shareRepo.deleteShare(tx, fingerprint);
+      const pending = newManagedShare(fingerprint, nowIso(store), (n) => capabilityToken(store, n));
+      await shareRepo.insertReceipt(tx, pending.receipt);
+      await shareRepo.insertSecret(tx, pending.secret);
+      return pending.combined;
+    }),
+  );
+}
+
+/** 멱등성 충돌 뒤 두 bearer capability 를 모두 갈아치운다. plan-database.ts:415-425. */
+export function rotateManagedShare(store: PlanStore, fingerprint: string): Promise<ManagedShare> {
+  return store.withLock(() =>
+    store.sql.transaction(async (tx) => {
+      await shareRepo.deleteShare(tx, fingerprint);
+      const pending = newManagedShare(fingerprint, nowIso(store), (n) => capabilityToken(store, n));
+      await shareRepo.insertReceipt(tx, pending.receipt);
+      await shareRepo.insertSecret(tx, pending.secret);
+      return pending.combined;
+    }),
+  );
+}
+
+export function completeManagedShare(
+  store: PlanStore,
+  fingerprint: string,
+  receipt: { slug: string; revokeToken: string; expiresAt: string },
+): Promise<ManagedShare> {
+  // ★ 형태 검증은 트랜잭션 **밖**에서(plan-database.ts:431-436 순서 유지) — 실패 시 불필요한 BEGIN 을 안 연다.
+  if (!isValidCompletionReceipt(receipt)) {
+    throw new Error("Managed share receipt is invalid");
+  }
+  return store.withLock(() =>
+    store.sql.transaction(async (tx) => {
+      const pending = await shareRepo.getReceipt(tx, fingerprint);
+      const secret = await shareRepo.getSecret(tx, fingerprint);
+      if (!pending || !secret || secret.revokeToken !== receipt.revokeToken) {
+        throw new Error("Managed share capability changed during creation");
+      }
+      const active: ManagedShareReceipt = {
+        ...pending,
+        slug: receipt.slug,
+        expiresAt: receipt.expiresAt,
+      };
+      await shareRepo.putReceipt(tx, active);
+      return combineManagedShare(active, secret);
+    }),
+  );
+}
+
+export function getManagedShareReceipt(
+  store: PlanStore,
+  fingerprint: string,
+): Promise<ManagedShareSummary | null> {
+  return store.withLock(() =>
+    store.sql.transaction(async (tx) => {
+      const receipt = await shareRepo.getReceipt(tx, fingerprint);
+      if (!receipt) return null;
+      const nowMs = store.ports.now();
+      if (isExpired(receipt, nowMs) || isStalePending(receipt, nowMs)) {
+        await shareRepo.deleteShare(tx, fingerprint); // 읽기처럼 보이는 쓰기(만료 청소)
+        return null;
+      }
+      if (!isCompleteReceipt(receipt)) return null;
+      const secret = await shareRepo.getSecret(tx, fingerprint);
+      return { ...receipt, canRevoke: secret !== null };
+    }),
+  );
+}
+
+export function getManagedShare(
+  store: PlanStore,
+  fingerprint: string,
+): Promise<ManagedShare | null> {
+  return store.withLock(() =>
+    store.sql.transaction(async (tx) => {
+      const receipt = await shareRepo.getReceipt(tx, fingerprint);
+      const secret = await shareRepo.getSecret(tx, fingerprint);
+      if (!receipt) {
+        // ★ 고아 secret 정리 경로 ② — 영수증 없는 secret 을 지운다(§2.6).
+        if (secret) await shareRepo.deleteSecret(tx, fingerprint);
+        return null;
+      }
+      const nowMs = store.ports.now();
+      if (isExpired(receipt, nowMs) || isStalePending(receipt, nowMs)) {
+        await shareRepo.deleteShare(tx, fingerprint);
+        return null;
+      }
+      return isCompleteReceipt(receipt) && secret ? combineManagedShare(receipt, secret) : null;
+    }),
+  );
+}
+
+export function listManagedShares(store: PlanStore): Promise<ManagedShareSummary[]> {
+  return store.withLock(() =>
+    store.sql.transaction(async (tx) => {
+      await removeExpiredAndStale(tx, store.ports.now()); // ★ 고아 secret 정리 경로 ①(§2.6)
+      const receipts = await shareRepo.listReceipts(tx); // 이미 created_at desc, fingerprint
+      const secrets = await shareRepo.listSecrets(tx);
+      return summarizeManagedShares(receipts, secrets);
+    }),
+  );
+}
+
+export function deleteManagedShare(store: PlanStore, fingerprint: string): Promise<void> {
+  return store.withLock(() =>
+    store.sql.transaction((tx) => shareRepo.deleteShare(tx, fingerprint)),
+  );
 }
