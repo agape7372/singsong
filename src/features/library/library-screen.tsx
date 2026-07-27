@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AlertDialog } from "@base-ui/react/alert-dialog";
 import type { ManagedShareSummary } from "@/data/plan-database";
 import type { TicketSnapshot } from "@/domain/models";
+import { formatKstDate } from "@/domain/format";
 import { FlippableTicket } from "@/features/ticket/flippable-ticket";
 
 const fixtureBuild = process.env.NEXT_PUBLIC_APP_PROFILE !== "production";
@@ -15,11 +16,6 @@ type CollectionItem = {
   ticket: TicketSnapshot;
   share: ManagedShareSummary | null;
 };
-
-function formatDate(iso: string) {
-  const parsed = Date.parse(iso);
-  return Number.isFinite(parsed) ? new Date(parsed).toLocaleDateString("ko-KR") : "";
-}
 
 /** Tracks which card sits closest to the carousel centre for the focus scale. */
 function useCenteredCard(count: number) {
@@ -65,7 +61,7 @@ function ShareStrip({
       <p className="collection-share-meta">
         <span className="collection-live-dot" aria-hidden="true" /> 공유 중 · 만료{" "}
         {share.expiresAt ? (
-          <time dateTime={share.expiresAt}>{formatDate(share.expiresAt)}</time>
+          <time dateTime={share.expiresAt}>{formatKstDate(share.expiresAt)}</time>
         ) : (
           "확인 불가"
         )}
@@ -149,7 +145,7 @@ function CollectionCard({
             <span className="collection-archive-stamp" aria-hidden="true">
               추억
             </span>
-            <time dateTime={ticket.createdAt}>{formatDate(ticket.createdAt)}</time> 발권
+            <time dateTime={ticket.createdAt}>{formatKstDate(ticket.createdAt)}</time> 발권
           </p>
           {/* Full navigation keeps the ticket route's dedicated Turnstile CSP. */}
           <a className="button-secondary" href={`/ticket?r=${ticket.revision}`}>

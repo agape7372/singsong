@@ -6,6 +6,7 @@ import { getShareRepository } from "@/features/share/repository.server";
 import { FlippableTicket } from "@/features/ticket/flippable-ticket";
 import { getRuntimeProfile } from "@/server/runtime-profile";
 import { ShareHandoffActions } from "@/features/share/share-handoff-actions";
+import { formatKstDate } from "@/domain/format";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -70,7 +71,7 @@ export default async function SharedTicketPage({ params }: { params: Promise<{ s
           <p className="eyebrow">받은 티켓 · READ ONLY</p>
           <h1 id="shared-ticket-heading">함께 부를 세션이 도착했어요.</h1>
         </div>
-        <p>만료 {new Date(share.expiresAt).toLocaleDateString("ko-KR")}</p>
+        <p>만료 {formatKstDate(share.expiresAt)}</p>
       </header>
       <div className="shared-ticket-body">
         <FlippableTicket

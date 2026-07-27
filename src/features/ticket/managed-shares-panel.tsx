@@ -9,6 +9,7 @@ import {
   listManagedShares,
   type ManagedShareSummary,
 } from "@/data/plan-database";
+import { formatKstDateTime } from "@/domain/format";
 
 type ManagedSharesPanelProps = {
   refreshKey: number;
@@ -124,9 +125,7 @@ export function ManagedSharesPanel({ refreshKey, onRevoked }: ManagedSharesPanel
                 <p className="managed-share-meta">
                   만료:{" "}
                   {share.expiresAt ? (
-                    <time dateTime={share.expiresAt}>
-                      {new Date(share.expiresAt).toLocaleString("ko-KR")}
-                    </time>
+                    <time dateTime={share.expiresAt}>{formatKstDateTime(share.expiresAt)}</time>
                   ) : (
                     "확인할 수 없음"
                   )}

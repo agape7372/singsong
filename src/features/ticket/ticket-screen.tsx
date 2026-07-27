@@ -5,6 +5,7 @@
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import type { TicketSnapshot } from "@/domain/models";
+import { formatKstDateTime } from "@/domain/format";
 import { useActivePlan } from "@/features/plan/use-active-plan";
 import { FlippableTicket } from "./flippable-ticket";
 import { TicketExportCard } from "./ticket-export-card";
@@ -443,10 +444,7 @@ export function TicketScreen({ revision }: { revision?: number | undefined }) {
             <h2 id="share-result-title">30일 동안 열 수 있어요.</h2>
           </div>
           <p>
-            만료:{" "}
-            <time dateTime={receipt.expiresAt}>
-              {new Date(receipt.expiresAt).toLocaleString("ko-KR")}
-            </time>
+            만료: <time dateTime={receipt.expiresAt}>{formatKstDateTime(receipt.expiresAt)}</time>
           </p>
           <a href={shareUrl ?? undefined} rel="nofollow noreferrer">
             발급된 티켓 열기
