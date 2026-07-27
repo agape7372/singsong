@@ -147,5 +147,5 @@ export type ReverseBudgetResult =
       readonly possibleSongs: number;
     };
 
-/** A runtime-neutral SHA-256 adapter. Implementations must return 32 bytes. */
-export type Sha256Digest = (bytes: Uint8Array) => Promise<Uint8Array>;
+// Sha256Digest 는 ports.ts 로 이동했다(런타임 능력 어휘를 한곳에 모은다). index.ts 가
+// models·ports 를 둘 다 re-export 하므로 소비처의 `@/domain` 배럴 import 는 무변경이다.

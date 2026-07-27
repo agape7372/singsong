@@ -1,13 +1,17 @@
 import type {
   CalculationResult,
   Plan,
-  Sha256Digest,
   SharedCalculation,
   SharedSnapshot,
   TicketSnapshot,
 } from "./models";
+import type { Sha256Digest } from "./ports";
 import { calculatePlan } from "./calculation";
 import { base64Url, utf8ByteLength, utf8Encode } from "./bytes";
+// ★ C3 임시: digest 기본값을 유지하려고 web-ports 를 문다. C4 가 기본값을 제거하면서
+//    이 import 도 사라진다. 그때까지 canonical.ts 는 모듈 그래프에 crypto 를 끌고 온다 —
+//    그래서 순수성 가드(C5)는 C4 뒤에 랜딩한다(crit §A-1: 커밋 순서 의존을 코드로 제거).
+import { webSha256 } from "./web-ports";
 import {
   DOMAIN_LIMITS,
   DomainValidationError,
@@ -127,17 +131,7 @@ export function serializeSharedSnapshot(input: unknown) {
   return assertCanonicalPayloadSize(JSON.stringify(canonical));
 }
 
-const webCryptoDigest: Sha256Digest = async (bytes) => {
-  const copy = new Uint8Array(bytes.byteLength);
-  copy.set(bytes);
-  const digest = await crypto.subtle.digest("SHA-256", copy.buffer);
-  return new Uint8Array(digest);
-};
-
-export async function fingerprintSharedSnapshot(
-  input: unknown,
-  digest: Sha256Digest = webCryptoDigest,
-) {
+export async function fingerprintSharedSnapshot(input: unknown, digest: Sha256Digest = webSha256) {
   const bytes = utf8Encode(serializeSharedSnapshot(input));
   const hash = await digest(bytes);
   if (hash.byteLength !== 32)
