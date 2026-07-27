@@ -174,6 +174,15 @@ export function ruleExcludesTopLevel(rule, name) {
  *
  * 이걸 먼저 하지 않으면 뒤의 괄호 짝 맞추기가 주석 속 괄호에 속는다. vitest.config.ts
  * 의 alias 주석에는 `entries.find(matches)` 같은 문장이 실제로 들어 있다.
+ *
+ * ★ 맹점(실측 재현, crit-A-ports §A-2): 이 함수는 **정규식 리터럴을 인식하지 못한다.**
+ *   문자열·주석만 구분하고 `/…/` 는 모른다. 그래서 소스에 `s.replace(/\//g, "_")` 가 있으면
+ *   `/\//` 의 3·4번째 문자 `//` 를 줄 주석으로 읽고 그 줄 나머지를 통째로 지운다
+ *   (node strip2.mjs 로 재현: `crypto.randomUUID()` 가 붙은 줄이 통째로 사라졌다). 그러면
+ *   그 줄에 금지 토큰이 있어도 아래 순수성 검사(domainPurityViolations)에 영영 안 보인다.
+ *   대응: packages/domain 소스는 base64url 을 정규식 replace 가 아니라 알파벳 테이블
+ *   인덱싱으로 짠다(packages/domain/src/bytes.ts). 정규식 리터럴 파서를 여기 붙이는 건
+ *   비싸고, 소스 쪽에서 `//` 를 안 만드는 편이 싸다.
  */
 export function stripJsComments(text) {
   let out = "";
@@ -208,6 +217,64 @@ export function stripJsComments(text) {
     out += ch;
   }
   return out;
+}
+
+/**
+ * packages/domain 순수성 — 금지 토큰. 도메인은 웹·Hermes 양쪽에서 도는데 Hermes 에는
+ * crypto 전역이 없고 Intl·toLocale* 는 플랫폼 ICU 위임이라, 도메인이 이들을 직접 만지면
+ * 웹에서만 초록불이고 기기에서 터진다. 능력은 ports.ts 타입으로 선언하고 기본 구현은
+ * web-ports.ts 에 둔다(그 파일은 이 검사에서 제외된다).
+ *
+ * 주석을 먼저 걷어내는 이유는 이 저장소가 한국어 주석에 "crypto 를 쓰지 마라" 같은 설명을
+ * 남기기 때문이다 — 원문 스캔이면 자기 설명문에 자기가 걸린다. (단 stripJsComments 의
+ * 정규식 맹점은 위 주석 참조.)
+ *
+ * ★ Date 는 정밀하게: 무인자 `new Date()` 와 `Date.now` 만 금지한다. **`Date.parse` 는
+ *   허용**한다 — format.ts:110 이 절대 시각(오프셋/Z 포함) 문자열을 파싱하는 데 쓰고, 그건
+ *   클록을 읽지 않아 결정적이다. 금지 대상은 "지금 몇 시냐" 를 읽는 비결정 호출뿐이다.
+ *   (스펙 §5 는 Date.parse 도 금지하라 했으나 그 스펙은 format.ts 랜딩 전에 쓰였다 —
+ *    디스크가 정본이라 여기서 갈라진다.) `new Date(ports.now())` 는 인자가 있어 통과한다.
+ */
+const DOMAIN_FORBIDDEN = [
+  { token: "crypto", re: /\bcrypto\b/ },
+  { token: "btoa", re: /\bbtoa\b/ },
+  { token: "atob", re: /\batob\b/ },
+  { token: "TextEncoder", re: /\bTextEncoder\b/ },
+  { token: "TextDecoder", re: /\bTextDecoder\b/ },
+  { token: "Intl", re: /\bIntl\b/ },
+  { token: "localeCompare", re: /\blocaleCompare\b/ },
+  { token: "toLocale*", re: /\btoLocale\w*/ },
+  { token: "structuredClone", re: /\bstructuredClone\b/ },
+  { token: "Math.random", re: /\bMath\.random\b/ },
+  { token: "performance.", re: /\bperformance\./ },
+  { token: "process.", re: /\bprocess\./ },
+  { token: "globalThis", re: /\bglobalThis\b/ },
+  { token: "window", re: /\bwindow\b/ },
+  { token: "document", re: /\bdocument\b/ },
+  { token: "navigator", re: /\bnavigator\b/ },
+  { token: "Buffer", re: /\bBuffer\b/ },
+  { token: "require(", re: /\brequire\s*\(/ },
+  { token: "new Date()", re: /new\s+Date\s*\(\s*\)/ },
+  { token: "Date.now", re: /\bDate\.now\b/ },
+];
+
+/** 소스에서 발견된 금지 토큰들(주석 제거 후). 없으면 빈 배열. */
+export function domainPurityViolations(source) {
+  const stripped = stripJsComments(source);
+  return DOMAIN_FORBIDDEN.filter(({ re }) => re.test(stripped)).map(({ token }) => token);
+}
+
+/**
+ * 도메인 소스가 web-ports 를 import/require 하는가(crit-A-ports §A-1).
+ *
+ * 왜 토큰 스캔만으로 부족한가 — canonical.ts 가 crypto 라는 문자열을 한 글자도 안 갖고도
+ * `./web-ports` 를 물면 crypto.subtle 을 모듈 그래프에 그대로 끌고 온다(index→canonical→
+ * web-ports→crypto). 토큰 스캔은 이걸 통과시킨다. 그래서 import 엣지를 따로 막는다.
+ * web-ports.ts 자신은 호출부에서 제외한다.
+ */
+export function importsWebPorts(source) {
+  const stripped = stripJsComments(source);
+  return /(?:from|import|require)\s*\(?\s*["'`][^"'`]*web-ports["'`]/.test(stripped);
 }
 
 /**
@@ -769,6 +836,45 @@ function main() {
       );
     }
     return `${canonicalBytes.length} 바이트 동일`;
+  });
+
+  // ── 7b. packages/domain 런타임 순수성 ────────────────────────────────────
+  check("packages/domain/src 가 런타임 순수(전역·web-ports 미참조)", () => {
+    const srcDirectory = join(ROOT, "packages/domain/src");
+    if (!existsSync(srcDirectory)) return "packages/domain/src 없음 — 검사 대상 없음";
+
+    // packages/domain/src 아래 .ts 를 재귀로 모은다. web-ports.ts 는 기본 구현이라 제외.
+    const files = [];
+    const walk = (directory) => {
+      for (const entry of readdirSync(directory, { withFileTypes: true })) {
+        const full = join(directory, entry.name);
+        if (entry.isDirectory()) walk(full);
+        else if (entry.name.endsWith(".ts") && entry.name !== "web-ports.ts") files.push(full);
+      }
+    };
+    walk(srcDirectory);
+
+    const offenders = [];
+    for (const file of files) {
+      const source = readFileSync(file, "utf8");
+      const relative = file.replace(ROOT, "").replace(/\\/g, "/").replace(/^\//, "");
+      const tokens = domainPurityViolations(source);
+      if (tokens.length > 0) offenders.push(`${relative}: ${tokens.join(", ")}`);
+      if (importsWebPorts(source)) offenders.push(`${relative}: web-ports import`);
+    }
+
+    if (offenders.length > 0) {
+      fail(
+        `packages/domain/src 에서 다음을 걷어내라:\n` +
+          offenders.map((line) => `        - ${line}`).join("\n") +
+          `\n  → 도메인은 웹·Hermes 양쪽에서 도는 순수 코드다. crypto/Intl/toLocale* 같은 전역·` +
+          `플랫폼 능력은 ports.ts 에 타입으로 선언하고 기본 구현은 web-ports.ts 에 둔 뒤 주입하라. ` +
+          `web-ports 를 도메인이 직접 import 하면 crypto 가 모듈 그래프로 새어 들어와 이 검사가 ` +
+          `무의미해진다 — @/domain/web-ports 는 호출부(src/·M2 앱)에서만 집는다. ` +
+          `(Date.parse 는 절대 시각 파싱이라 허용, Date.now·무인자 new Date() 만 금지.)`,
+      );
+    }
+    return `${files.length}개 파일 순수 (web-ports.ts 제외)`;
   });
 
   // ── 8. .easignore ───────────────────────────────────────────────────────

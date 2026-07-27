@@ -15,8 +15,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  domainPurityViolations,
   easignoreRules,
   findPnpmResidueKeys,
+  importsWebPorts,
   missingAppDependencies,
   packagesMissingVitestProject,
   parseNpmrc,
@@ -159,4 +161,39 @@ test("missingAppDependencies: devDependencies 는 보지 않는다", () => {
   // 번들에 안 들어가므로 EAS 워커에서 부재해도 무해하다.
   const manifests = [{ name: "@singsong/tokens", devDependencies: { vitest: "4.1.10" } }];
   assert.deepEqual(missingAppDependencies(manifests, {}), []);
+});
+
+test("domainPurityViolations: 전역·플랫폼 능력을 잡는다", () => {
+  // 초록불이 진짜인지는 깨진 입력에 빨간불이 뜨는지로만 안다.
+  assert.deepEqual(domainPurityViolations("const f = () => crypto.getRandomValues(x);"), [
+    "crypto",
+  ]);
+  assert.deepEqual(domainPurityViolations('const s = x.toLocaleLowerCase("ko");'), ["toLocale*"]);
+  assert.deepEqual(domainPurityViolations("const n = Math.random();"), ["Math.random"]);
+  // Math.round 는 무해 — Math.random 만 잡아야 한다.
+  assert.deepEqual(domainPurityViolations("const n = Math.round(1.2);"), []);
+  // 주석 속 금지어는 무시(stripJsComments). 자기 설명문에 자기가 걸리면 안 된다.
+  assert.deepEqual(domainPurityViolations("// crypto 는 여기 설명일 뿐\nexport const a = 1;"), []);
+  // 단어 경계 — windowSize 는 window 가 아니다.
+  assert.deepEqual(domainPurityViolations("const windowSize = 10;"), []);
+});
+
+test("domainPurityViolations: Date 는 클록 판독만 금지(Date.parse 는 허용)", () => {
+  // format.ts:110 이 절대 시각 문자열을 Date.parse 로 읽는다 — 클록을 안 읽어 결정적이라 통과.
+  assert.deepEqual(domainPurityViolations("const n = Date.parse(iso); const d = new Date(n);"), []);
+  assert.deepEqual(domainPurityViolations("const d = new Date(ports.now());"), []);
+  // 무인자 new Date() 와 Date.now 는 "지금 몇 시냐" 라 금지.
+  assert.deepEqual(domainPurityViolations("const d = new Date();"), ["new Date()"]);
+  assert.deepEqual(domainPurityViolations("const n = Date.now();"), ["Date.now"]);
+});
+
+test("importsWebPorts: 도메인이 web-ports 를 물면 잡는다(crit §A-1)", () => {
+  // 토큰 스캔만으로는 못 잡는 import 엣지. canonical.ts 가 crypto 문자열 없이도
+  // ./web-ports 를 물면 crypto.subtle 이 모듈 그래프로 새어 들어온다.
+  assert.equal(importsWebPorts('import { webSha256 } from "./web-ports";'), true);
+  assert.equal(importsWebPorts('import { webPorts } from "@singsong/domain/web-ports";'), true);
+  assert.equal(importsWebPorts('const w = require("./web-ports");'), true);
+  // 음성: ports(타입)·web-ports 아닌 것은 통과.
+  assert.equal(importsWebPorts('import type { Sha256Digest } from "./ports";'), false);
+  assert.equal(importsWebPorts('import { calculatePlan } from "./calculation";'), false);
 });
