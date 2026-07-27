@@ -130,11 +130,38 @@ const formatterDiscipline = {
   },
 };
 
+/**
+ * `apps/app`(Expo/React Native)에서 React Compiler 의 불변성 규칙을 끈다.
+ *
+ * 루트 eslint 는 `eslint-config-next` 를 쓰고 그게 `react-hooks/immutability` 를 켠다.
+ * 그런데 Reanimated 의 SharedValue 는 **`.value` 대입이 곧 공개 API** 다 —
+ * `progress.value = withRepeat(...)` 가 정본 사용법이고, 그 쓰기는 React 렌더 트리가 아니라
+ * UI 스레드 런타임으로 간다. React Compiler 는 SharedValue 를 모델링하지 않아서 이걸 전부
+ * "This value cannot be modified" 로 신고한다(실측: 스모크 3파일에서 8건).
+ *
+ * 파일마다 `eslint-disable` 을 뿌리면 M2 에서 화면이 늘 때마다 같은 줄이 번식한다.
+ * 규칙 하나를 경로로 끄고 이유를 여기 한 번 적는 편이 정직하다.
+ *
+ * ★ 끄는 것은 이 규칙 **하나뿐**이다. 나머지 react-hooks 규칙(의존성 배열·조건부 훅 등)은
+ *   그대로 살아 있다. 그리고 `src/**`(웹)에는 적용하지 않는다 — 거기엔 SharedValue 가 없다.
+ *
+ * 더 깊은 문제는 따로 있다: Expo 앱을 **Next 의 eslint 설정으로** 린트하고 있다는 것.
+ * `apps/app/package.json` 에는 자체 `expo lint` 가 있는데 루트 체인이 그걸 안 부른다.
+ * 정리는 M2 사안으로 남긴다(지금 바꾸면 앱 린트 커버리지가 통째로 흔들린다).
+ */
+const nativeMotionRules = {
+  files: ["apps/app/src/**/*.{ts,tsx}"],
+  rules: {
+    "react-hooks/immutability": "off",
+  },
+};
+
 export default defineConfig([
   ...nextCoreWebVitals,
   ...nextTypeScript,
   packageBoundaries,
   formatterDiscipline,
+  nativeMotionRules,
   globalIgnores([
     ".next/**",
     "node_modules/**",
