@@ -1,5 +1,5 @@
 import { getActivePlan, mutateActivePlan } from "@/data/plan-database";
-import { normalizeTrackText } from "@/domain/validation";
+import { DOMAIN_LIMITS, normalizeTrackText } from "@/domain/validation";
 import type { Track } from "@/domain/models";
 import type { CatalogTrack } from "@/features/catalog/types";
 
@@ -9,7 +9,8 @@ export type AddTracksResult = {
   skippedFull: number;
 };
 
-const MAX_TRACKS = 100;
+// 리터럴 100 의 네 번째 사본을 없앤다 — 도메인 상수를 참조한다(C8, crit §N-2).
+const MAX_TRACKS = DOMAIN_LIMITS.maxTracks;
 
 function toKaraokeCodes(catalog: CatalogTrack) {
   return Object.entries(catalog.karaokeCodes)

@@ -25,6 +25,10 @@ export default defineConfig({
       // (M4 services/share-api, M1 packages/store) 그때 specifier 가 재작성된다.
       // **마지막 임포터가 옮겨진 시점에 이 줄을 지운다** — M4/M6 체크리스트에 등록.
       "@/domain": path.resolve(root, "packages/domain/src"),
+      // ★ `@/store` 도 `@` 보다 앞. src/data/plan-database.ts 가 C8 에서 `@/store/policy` 를 물고,
+      //   next project 의 통합 테스트가 그 파일을 거쳐 이 별칭을 탄다. `@/domain` 과 같은 shim 이라
+      //   마지막 임포터(src/)가 M6 에 사라지면 함께 지운다.
+      "@/store": path.resolve(root, "packages/store/src"),
       "@": path.resolve(root, "src"),
       "server-only": path.resolve(root, "tests/setup/server-only.ts"),
     },

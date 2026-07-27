@@ -19,6 +19,10 @@
     "paths": {
       "@/domain": ["./packages/domain/src/index.ts"],
       "@/domain/*": ["./packages/domain/src/*"],
+      "@singsong/domain": ["./packages/domain/src/index.ts"],
+      "@singsong/domain/*": ["./packages/domain/src/*"],
+      "@/store": ["./packages/store/src/index.ts"],
+      "@/store/*": ["./packages/store/src/*"],
       "@/*": ["./src/*"]
     }
   },
