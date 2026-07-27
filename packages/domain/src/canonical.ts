@@ -5,13 +5,9 @@ import type {
   SharedSnapshot,
   TicketSnapshot,
 } from "./models";
-import type { Sha256Digest } from "./ports";
+import type { DomainPorts, RandomBytes, Sha256Digest } from "./ports";
 import { calculatePlan } from "./calculation";
 import { base64Url, utf8ByteLength, utf8Encode } from "./bytes";
-// ★ C3 임시: digest 기본값을 유지하려고 web-ports 를 문다. C4 가 기본값을 제거하면서
-//    이 import 도 사라진다. 그때까지 canonical.ts 는 모듈 그래프에 crypto 를 끌고 온다 —
-//    그래서 순수성 가드(C5)는 C4 뒤에 랜딩한다(crit §A-1: 커밋 순서 의존을 코드로 제거).
-import { webSha256 } from "./web-ports";
 import {
   DOMAIN_LIMITS,
   DomainValidationError,
@@ -19,10 +15,16 @@ import {
   parseSharedSnapshot,
 } from "./validation";
 
-export function generateArtworkSeed(random = crypto.getRandomValues(new Uint8Array(16))) {
+/** 128비트 엔트로피 16바이트를 base64url 22자로. 엔트로피 생성은 하지 않는다(순수). */
+export function encodeArtworkSeed(random: Uint8Array): string {
   if (random.byteLength !== 16)
     throw new DomainValidationError("INVALID_RANDOM_SEED", "seed must be 128-bit");
   return base64Url(random);
+}
+
+/** 포트에서 엔트로피를 받아 시드를 만든다. crypto 전역 대신 주입된 RandomBytes 를 쓴다. */
+export function generateArtworkSeed(randomBytes: RandomBytes): string {
+  return encodeArtworkSeed(randomBytes(16));
 }
 
 export function buildSharedSnapshot(
@@ -131,7 +133,9 @@ export function serializeSharedSnapshot(input: unknown) {
   return assertCanonicalPayloadSize(JSON.stringify(canonical));
 }
 
-export async function fingerprintSharedSnapshot(input: unknown, digest: Sha256Digest = webSha256) {
+// digest 는 낱개 능력으로 받는다(DomainPorts 통째가 아니라). canonical.test.ts:159 가
+// 이미 맨 digest 함수를 넘겨 무수정으로 살고, 서버 라우트도 webSha256 하나만 있으면 된다.
+export async function fingerprintSharedSnapshot(input: unknown, digest: Sha256Digest) {
   const bytes = utf8Encode(serializeSharedSnapshot(input));
   const hash = await digest(bytes);
   if (hash.byteLength !== 32)
@@ -139,10 +143,17 @@ export async function fingerprintSharedSnapshot(input: unknown, digest: Sha256Di
   return Array.from(hash, (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
-export async function createTicketSnapshot(plan: Plan): Promise<TicketSnapshot> {
+// 집합 진입점은 DomainPorts 를 통째로 받는다 — randomBytes·digest·now 를 한 번에.
+// new Date(ports.now()).toISOString(): toISOString 출력은 ECMA-262 고정이라 locale·tz·ICU
+// 무관하고, now 만 주입하면 테스트가 createdAt 을 결정적으로 고정할 수 있다(테스트 2곳이
+// 이미 이 값을 우회 중이었다 — spec §1 표).
+export async function createTicketSnapshot(
+  plan: Plan,
+  ports: DomainPorts,
+): Promise<TicketSnapshot> {
   assertValidPlan(plan, true);
   const calculation = calculatePlan(plan.items.length, plan.pricing!, plan.people!);
-  const artworkSeed = generateArtworkSeed();
+  const artworkSeed = generateArtworkSeed(ports.randomBytes);
   const payload = buildSharedSnapshot(plan, calculation, artworkSeed);
   const canonicalPayload = serializeSharedSnapshot(payload);
   return {
@@ -151,8 +162,8 @@ export async function createTicketSnapshot(plan: Plan): Promise<TicketSnapshot> 
     payload,
     canonicalPayload,
     artworkSeed,
-    fingerprint: await fingerprintSharedSnapshot(payload),
+    fingerprint: await fingerprintSharedSnapshot(payload, ports.digest),
     issueMotionClaimedAt: null,
-    createdAt: new Date().toISOString(),
+    createdAt: new Date(ports.now()).toISOString(),
   };
 }

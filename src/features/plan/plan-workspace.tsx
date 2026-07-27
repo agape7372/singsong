@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { createTicketSnapshot } from "@/domain/canonical";
+import { webPorts } from "@/domain/web-ports";
 import { josa } from "@/domain/josa";
 import { DOMAIN_LIMITS, normalizeTrackText } from "@/domain/validation";
 import type { Plan, PricingConfig, Track } from "@/domain/models";
@@ -304,7 +305,7 @@ export function PlanWorkspace() {
     if (issuing.current || !plan!.people || !plan!.pricing || plan!.items.length === 0) return;
     issuing.current = true;
     try {
-      const ticket = await createTicketSnapshot(plan!);
+      const ticket = await createTicketSnapshot(plan!, webPorts);
       const { saveTicket } = await import("@/data/plan-database");
       await saveTicket(ticket);
       announce("지금 순서로 티켓을 만들었어요.");

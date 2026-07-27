@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildSharedSnapshot, fingerprintSharedSnapshot } from "@/domain/canonical";
 import { calculatePlan } from "@/domain/calculation";
 import type { Plan } from "@/domain/models";
+import { webSha256 } from "@/domain/web-ports";
 import { LocalShareRepository } from "@/features/share/local-repository.server";
 import type { CreateShareInput } from "@/features/share/types";
 
@@ -59,7 +60,7 @@ async function createInput(): Promise<CreateShareInput> {
     revokeToken: "G".repeat(43),
     payload,
     canonicalPayload: JSON.stringify(payload),
-    fingerprint: await fingerprintSharedSnapshot(payload),
+    fingerprint: await fingerprintSharedSnapshot(payload, webSha256),
     rateBucketHashes: { hour: `\\x${"1".repeat(64)}`, day: `\\x${"2".repeat(64)}` },
   };
 }

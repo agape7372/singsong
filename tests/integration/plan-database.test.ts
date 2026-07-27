@@ -3,6 +3,7 @@ import Dexie from "dexie";
 import { afterEach, describe, expect, it } from "vitest";
 import { buildSharedSnapshot, createTicketSnapshot } from "@/domain/canonical";
 import { calculatePlan } from "@/domain/calculation";
+import { testPorts } from "../setup/domain-ports";
 import { addCatalogTracks } from "@/features/plan/add-tracks";
 import type { CatalogTrack } from "@/features/catalog/types";
 import {
@@ -322,7 +323,7 @@ describe("library accessors", () => {
         },
       ],
     }));
-    const base = await createTicketSnapshot(plan);
+    const base = await createTicketSnapshot(plan, testPorts);
     await saveTicket({
       ...base,
       revision: 1,
