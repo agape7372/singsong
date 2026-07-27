@@ -21,10 +21,12 @@ import { migrate } from "./migrations/run";
 import { createMutex, type Mutex } from "./mutex";
 import {
   ACTIVE_PLAN_ID,
+  PROFILE_ID,
   RevisionConflictError,
   applyPlanMutation,
   buildImportedPlan,
   combineManagedShare,
+  emptyProfile,
   isCompleteReceipt,
   isExpired,
   isStalePending,
@@ -43,6 +45,7 @@ import { assertRealSqlExecutor, type SqlExecutor, type SqlSession } from "./sql-
 import { getImportBySlug, insertImport, listImportRows } from "./repositories/imported-share";
 import { readPlanRow, writePlanRow } from "./repositories/plan";
 import * as shareRepo from "./repositories/managed-share";
+import { getProfileRow, upsertProfile, type StoredProfile } from "./repositories/profile";
 import {
   claimMotion,
   getTicketRow,
@@ -393,4 +396,110 @@ export function deleteManagedShare(store: PlanStore, fingerprint: string): Promi
   return store.withLock(() =>
     store.sql.transaction((tx) => shareRepo.deleteShare(tx, fingerprint)),
   );
+}
+
+/* ──────────────────────────────── 프로필 ───────────────────────────────── */
+
+/** 기본값(emptyProfile)에 photoUri:null 을 채운다 — StoredProfile 은 photoUri 를 요구한다(crit §N-8). */
+function defaultStoredProfile(store: PlanStore): StoredProfile {
+  return { ...emptyProfile(nowIso(store)), photoUri: null };
+}
+
+/** getActivePlan 과 달리 없으면 **삽입하지 않는다**(순수 기본값 반환) — 원본의 비대칭 유지(:524-526). */
+export function getProfile(store: PlanStore): Promise<StoredProfile> {
+  return store.withLock(async () => {
+    const row = await getProfileRow(store.sql, PROFILE_ID);
+    return row ?? defaultStoredProfile(store);
+  });
+}
+
+export function observeProfile(
+  store: PlanStore,
+  onValue: (profile: StoredProfile) => void,
+  onError: (error: unknown) => void,
+): () => void {
+  void getProfile(store).then(onValue, onError);
+  return store.bus.subscribe("profile", () => {
+    void getProfile(store).then(onValue, onError);
+  });
+}
+
+export function saveProfile(
+  store: PlanStore,
+  patch: Partial<Pick<StoredProfile, "nickname" | "colorId" | "photoUri">>,
+): Promise<StoredProfile> {
+  return store.withLock(async () => {
+    const next = await store.sql.transaction(async (tx) => {
+      const current = (await getProfileRow(tx, PROFILE_ID)) ?? defaultStoredProfile(store);
+      const merged: StoredProfile = {
+        ...current,
+        ...patch,
+        id: PROFILE_ID,
+        updatedAt: nowIso(store),
+      };
+      await upsertProfile(tx, merged);
+      return merged;
+    });
+    notify(store, "profile");
+    return next;
+  });
+}
+
+/**
+ * photo 만 지운다. Dexie 판은 photo 키를 생략했지만(exactOptionalPropertyTypes), SQL 은
+ * `photo_uri = null` 이다 — 표현이 달라도 계약(사진 제거)은 같다(§2.4).
+ */
+export function clearProfilePhoto(store: PlanStore): Promise<StoredProfile> {
+  return store.withLock(async () => {
+    const next = await store.sql.transaction(async (tx) => {
+      const current = (await getProfileRow(tx, PROFILE_ID)) ?? defaultStoredProfile(store);
+      const cleared: StoredProfile = {
+        ...current,
+        photoUri: null,
+        id: PROFILE_ID,
+        updatedAt: nowIso(store),
+      };
+      await upsertProfile(tx, cleared);
+      return cleared;
+    });
+    notify(store, "profile");
+    return next;
+  });
+}
+
+/* ──────────────────────────────── 전역 ─────────────────────────────────── */
+
+// deleteAllLocalData 가 비우는 전 테이블. 사용자 입력이 아니라 고정 목록이라 문자열 보간이 안전하다.
+const ALL_TABLES = [
+  "plan",
+  "ticket",
+  "imported_share",
+  "managed_share_receipt",
+  "managed_share_secret",
+  "profile",
+] as const;
+
+/**
+ * clearLocalDataForTests 개명(계획 §3.4). 이름과 달리 settings-screen.tsx:70 이 프로덕션
+ * "데이터 지우기" 로 쓴다(src/ 쪽 이름은 M6 까지 clearLocalDataForTests 로 남는다).
+ *
+ * 뮤텍스 1회 획득 안에서 전 테이블 DELETE → 싱글턴(cachedPlan) 리셋 → **재수화** → 통지를
+ * 한 단위로. ★ 재수화가 필수다(crit §C-5, 계획 §3.4) — 빼면 싱글턴이 옛 revision 을 들고 있다가
+ * 다음 mutate 가 영구 RevisionConflictError 가 된다. 여기서 새 활성 플랜 1행을 만들어 다음
+ * mutate(0) 이 성공하게 한다.
+ */
+export function deleteAllLocalData(store: PlanStore): Promise<void> {
+  return store.withLock(async () => {
+    const rehydrated = await store.sql.transaction(async (tx) => {
+      for (const table of ALL_TABLES) await tx.run(`delete from ${table}`);
+      const fresh = newPlan(nowIso(store));
+      await writePlanRow(tx, fresh); // 재수화: 새 활성 플랜(revision 0)
+      return fresh;
+    });
+    store.cachedPlan = rehydrated;
+    // 옵저버가 재조회하도록 통지한다. 프로필도 비웠으니 함께 알린다(Dexie 는 DB 삭제 → liveQuery
+    // 재발화였지만 SQL 은 명시 통지가 필요하다).
+    notify(store, "plan");
+    notify(store, "profile");
+  });
 }

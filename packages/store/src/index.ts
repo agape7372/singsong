@@ -43,7 +43,10 @@ export { MIGRATIONS } from "./migrations/index";
 export {
   closePlanStore,
   createPlanStore,
+  clearProfilePhoto,
+  deleteAllLocalData,
   getActivePlan,
+  getProfile,
   getTicket,
   claimTicketMotion,
   completeManagedShare,
@@ -56,9 +59,12 @@ export {
   listTickets,
   mutateActivePlan,
   observeActivePlan,
+  observeProfile,
   openPlanStore,
   prepareManagedShare,
   rotateManagedShare,
+  saveProfile,
   saveTicket,
   type PlanStore,
 } from "./plan-store";
+export type { StoredProfile } from "./repositories/profile";

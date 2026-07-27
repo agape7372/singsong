@@ -21,9 +21,12 @@ export type SqlRow = Record<string, SqlValue>;
 
 export interface SqlRunResult {
   /**
-   * 충실한 `sqlite3_changes()`. no-op UPDATE 는 0, 실제 변경은 1.
-   * `claimTicketMotion` 을 `UPDATE … WHERE issue_motion_claimed_at IS NULL` +
-   * `changes === 1` 로 환원할 수 있는 근거다.
+   * `sqlite3_changes()`. ★ *값이 바뀐 행* 이 아니라 ***쓰인 행*** 을 센다 — 같은 값으로 다시
+   * UPDATE 해도 changes=1 이다(M7 실측: `update … set v='same'` → changes 1, `update … where 없는키`
+   * → 0). 즉 "no-op UPDATE 는 0" 은 **틀린 근거**였다(정정).
+   * `claimTicketMotion` 을 `UPDATE … WHERE issue_motion_claimed_at IS NULL` + `changes === 1` 로
+   * 환원할 수 있는 진짜 근거는 값 비교가 아니라 **WHERE 가 이미-청구·없는 행을 걸러서** 이번에
+   * 청구한 경우에만 한 행이 쓰이기 때문이다.
    */
   readonly changes: number;
   /**
