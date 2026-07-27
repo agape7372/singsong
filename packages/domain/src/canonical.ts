@@ -7,18 +7,13 @@ import type {
   TicketSnapshot,
 } from "./models";
 import { calculatePlan } from "./calculation";
+import { base64Url, utf8ByteLength, utf8Encode } from "./bytes";
 import {
   DOMAIN_LIMITS,
   DomainValidationError,
   assertValidPlan,
   parseSharedSnapshot,
 } from "./validation";
-
-function base64Url(bytes: Uint8Array) {
-  let binary = "";
-  for (const byte of bytes) binary += String.fromCharCode(byte);
-  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/u, "");
-}
 
 export function generateArtworkSeed(random = crypto.getRandomValues(new Uint8Array(16))) {
   if (random.byteLength !== 16)
@@ -121,7 +116,7 @@ export function canonicalizeSharedSnapshot(input: unknown): SharedSnapshot {
 }
 
 export function assertCanonicalPayloadSize(serialized: string) {
-  if (new TextEncoder().encode(serialized).byteLength > DOMAIN_LIMITS.maxCanonicalBytes) {
+  if (utf8ByteLength(serialized) > DOMAIN_LIMITS.maxCanonicalBytes) {
     throw new DomainValidationError("CANONICAL_TOO_LARGE", "canonical payload exceeds 96 KiB");
   }
   return serialized;
@@ -143,7 +138,7 @@ export async function fingerprintSharedSnapshot(
   input: unknown,
   digest: Sha256Digest = webCryptoDigest,
 ) {
-  const bytes = new TextEncoder().encode(serializeSharedSnapshot(input));
+  const bytes = utf8Encode(serializeSharedSnapshot(input));
   const hash = await digest(bytes);
   if (hash.byteLength !== 32)
     throw new DomainValidationError("INVALID_DIGEST", "SHA-256 must return 32 bytes");
