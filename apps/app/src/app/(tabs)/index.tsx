@@ -70,6 +70,10 @@ export default function PlanScreen() {
       <Link href="/spike" style={[styles.link, { color: colors.accentText }]}>
         하프톤 스파이크 열기 (dev-client 전용)
       </Link>
+
+      <Link href="/motion" style={[styles.link, { color: colors.accentText }]}>
+        모션 스모크 열기 (Reanimated·worklets 계측)
+      </Link>
     </PlaceholderScreen>
   );
 }
