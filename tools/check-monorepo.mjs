@@ -749,6 +749,28 @@ function main() {
     return `패키지 ${manifests.length}개의 런타임 의존 전부 앱에 선언됨`;
   });
 
+  check("ticket-artwork.json 사본이 정본과 바이트 동일", () => {
+    const canonical = "packages/ticket-art/src/ticket-artwork.json";
+    const copy = "apps/app/src/render/skia/ticket-artwork.json";
+    if (!exists(canonical)) {
+      fail(`정본 ${canonical} 이 없다. 옮겼다면 이 검사의 경로도 함께 고쳐라.`);
+    }
+    if (!exists(copy)) return "사본 없음 — 앱이 패키지를 직접 읽는다면 이 검사를 지워라";
+
+    const canonicalBytes = readFileSync(join(ROOT, canonical));
+    const copyBytes = readFileSync(join(ROOT, copy));
+    if (!canonicalBytes.equals(copyBytes)) {
+      fail(
+        `${copy} 를 정본으로 다시 복사하라 — \`cp ${canonical} ${copy}\`\n` +
+          `  → 이 사본은 apps/app 이 워크스페이스 멤버가 아니라 @singsong/* 를 해석할 수 ` +
+          `없어서(M2 로 연기) 존재한다. 두 장이 어긋나면 화면 티켓과 네이티브 티켓이 ` +
+          `다른 그림을 그리는데, 둘을 나란히 볼 수 있는 곳이 없어 아무도 눈치채지 못한다. ` +
+          `M2 에서 앱이 패키지를 import 하게 되면 사본과 이 검사를 함께 지운다.`,
+      );
+    }
+    return `${canonicalBytes.length} 바이트 동일`;
+  });
+
   // ── 8. .easignore ───────────────────────────────────────────────────────
   check("`.easignore` 가 /apps·/packages 를 제외하지 않음", () => {
     const text = readIfExists(".easignore");

@@ -1,5 +1,7 @@
 ﻿import { z } from "zod";
-import artwork from "./ticket-artwork.json";
+// 정본은 `packages/ticket-art/src/ticket-artwork.json` 이다. 이 Next 트리는 M6 에 사라지므로
+// 살아남을 패키지를 참조하는 방향이 맞다(그 파일 상단 주석 참조).
+import artwork from "@singsong/ticket-art/ticket-artwork.json";
 
 /**
  * 티켓 그림의 단일 정본.

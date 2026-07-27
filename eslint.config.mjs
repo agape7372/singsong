@@ -2,9 +2,90 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
 import nextTypeScript from "eslint-config-next/typescript";
 
+/**
+ * `packages/*` 의 수입 경계.
+ *
+ * 이 저장소는 Next PWA 를 Expo 네이티브로 재구축하는 중이고, `packages/*` 는 **양쪽 다에서
+ * 돌아야 하는 순수 코드**다. 그런데 지금 트리에는 Next 트리(`src/`)가 그대로 살아 있어서
+ * (M6 까지 유지) `react` 도 `dexie` 도 `next` 도 루트 node_modules 에 있다. 즉
+ * `packages/store` 에 `import Dexie from "dexie"` 를 적어도 **설치돼 있으니 그냥 돌아간다** —
+ * typecheck 도 테스트도 통과한다. 깨지는 건 M2 에서 Metro 가 그 패키지를 번들할 때다.
+ *
+ * 그래서 lint 로 막는다. 여기 걸리는 규칙 3종은 전부 "지금은 조용하고 나중에 비싼" 종류다.
+ *
+ * ★ `\p{}` 정규식 금지는 **의도적으로 넣지 않았다.** 계획 §3.4 가 `catalog.ts:12` 의
+ *   `/[\p{P}\p{S}]+/gu` 를 "Hermes 모듈 로드 실패 · M1 하드 블로커" 로 지목했으나 실측으로
+ *   반증됐다 — 앱이 싣는 hermesc(hermes-v0.17.0)로 컴파일 exit 0 이고,
+ *   `-dump-bytecode` 결과 그 문자 클래스는 **컴파일 시점에 339 개의 명시 코드포인트 범위로
+ *   전개된다**(`U16Bracket`). 즉 기기 ICU 와 무관하다. 규칙을 넣었다면 근거 없이
+ *   `catalog.ts:12` 를 빨간불로 만들었을 것이다. 자세한 실측은 그 파일 주석에 있다.
+ */
+const packageBoundaries = {
+  files: ["packages/*/src/**/*.ts", "packages/*/src/**/*.tsx"],
+  rules: {
+    "no-restricted-imports": [
+      "error",
+      {
+        paths: [
+          {
+            name: "react",
+            message:
+              "packages/* 는 UI 프레임워크를 모른다. 훅이 필요하면 순수 모듈로 내려 쓰고 훅은 앱에서 감싸라.",
+          },
+          {
+            name: "react-dom",
+            message: "packages/* 는 UI 프레임워크를 모른다.",
+          },
+          {
+            name: "react-native",
+            message:
+              "packages/* 는 Next 트리와 네이티브 앱 양쪽에서 돈다. 플랫폼 API 는 포트로 주입하라.",
+          },
+          {
+            name: "dexie",
+            message: "Dexie 는 M6 에 폐기된다. 저장은 packages/store 의 SqlExecutor 포트를 거친다.",
+          },
+          {
+            name: "next",
+            message: "packages/* 는 프레임워크를 모른다.",
+          },
+          {
+            name: "server-only",
+            message: "packages/* 는 서버 전용이 아니다. 같은 코드가 기기에서도 돌아야 한다.",
+          },
+        ],
+        patterns: [
+          {
+            group: ["next/*", "react-native/*", "expo", "expo-*", "@shopify/react-native-skia"],
+            message: "packages/* 는 프레임워크·네이티브 모듈을 모른다. 필요하면 포트로 주입하라.",
+          },
+          {
+            // `packages/store/src/x.ts` 에서 `../../../src/...` 로 나가는 것을 막는다.
+            // 실제로 `packages/ticket-art/src/artwork.ts` 가 이 모양으로 Next 트리의 JSON 을
+            // 물고 있었다(M6 에 삭제될 트리). 패키지 경계 = 디렉터리 경계여야
+            // "M6 에 src/ 를 지웠더니 패키지가 빌드 불가" 가 생기지 않는다.
+            group: ["../../*", "../../../*", "../../../../*"],
+            message:
+              "패키지 디렉터리 밖으로 나가는 상대경로 금지. 필요한 것은 패키지 안으로 옮기거나 다른 워크스페이스 패키지로 선언해 import 하라.",
+          },
+          {
+            // Node 빌트인은 Metro 번들에 없다. 루트 tsconfig(TS 5.9.3)는 @types/node 를
+            // 자동 포함해서 통과시키지만, apps/app 의 TS 6.0.3 은 자동 포함을 제거했다.
+            // 지금 이 규칙에 걸리는 소스는 0건이다 — 0건일 때 못박는 것이 요점.
+            group: ["node:*"],
+            message:
+              "packages/*/src 는 Node 빌트인을 쓰지 않는다(Metro 번들에 없다). 테스트 하네스에서만 허용된다.",
+          },
+        ],
+      },
+    ],
+  },
+};
+
 export default defineConfig([
   ...nextCoreWebVitals,
   ...nextTypeScript,
+  packageBoundaries,
   globalIgnores([
     ".next/**",
     "node_modules/**",

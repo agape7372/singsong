@@ -1,22 +1,25 @@
 import { z } from "zod";
 
 /**
- * 그림 상수의 정본을 **참조**한다. 사본을 뜨지 않는다.
+ * 그림 상수의 정본. 사본을 뜨지 않는다.
  *
- * 지금 이 저장소에 같은 JSON 이 두 장 있다 — Next 트리의 원본과, M0 스파이크가 바이트 단위로
- * 복사해 둔 `apps/app/src/render/skia/ticket-artwork.json`(사유는 그 옆
- * `artwork.ts:5-9`). 여기서 또 뜨면 세 장이 되고, "그림은 한 곳에 선언하고 해석만 한다"는
- * 원칙(`src/features/ticket/ticket-art.ts:4-15`)이 그 순간 무너진다.
+ * 이 파일이 곧 정본이 된 경위 — 원래 정본은 Next 트리의
+ * `src/features/ticket/ticket-artwork.json` 이었고 여기서 `../../../` 로 거슬러 올라가
+ * 읽었다. 의도(정본 1벌 유지)는 옳았지만 **방향이 거꾸로였다**: 계획 §4 M6 이
+ * Next 트리를 삭제하므로, 살아남을 패키지가 죽을 트리를 물고 있는 형태였다.
+ * 그날 이 패키지는 빌드 불가가 된다. 그래서 JSON 을 이쪽으로 옮기고(R100) 화살표를
+ * 뒤집었다 — 이제 Next 트리가 패키지를 참조한다.
  *
- * 그래서 패키지 경계를 넘어 파일째 읽는다. **데이터만** 거슬러 올라간다 —
- * `ticket-art.ts` 모듈을 import 하면 SVG 문자열 인터프리터와 `Buffer`/`Intl` 의존까지
- * 네이티브 번들에 딸려 들어온다.
+ * 아직 남은 사본 1장: `apps/app/src/render/skia/ticket-artwork.json`. apps/app 이
+ * 워크스페이스 멤버가 아니라 `@singsong/*` 를 해석할 수 없어서(M2 로 연기) 지금은
+ * 지울 수 없다. 대신 `tools/check-monorepo.mjs` 가 두 파일의 바이트 동일성을
+ * 매 게이트마다 강제한다 — "한 번 대조했다" 를 영구 불변식으로 바꿔 둔 것이다.
+ * M2 에서 앱이 `@singsong/ticket-art` 를 import 하게 되면 그 사본과 검사를 함께 지운다.
  *
- * 이 상대경로는 임시 이음매다. M6 에서 Next 트리를 지울 때 JSON 이 이 패키지 안으로 들어오고
- * 경로는 `./ticket-artwork.json` 이 된다. 같은 커밋에서 apps/app 의 사본도
- * `import { ARTWORK } from "@singsong/ticket-art"` 로 바뀌며 삭제된다.
+ * **데이터만** 공유한다 — `ticket-art.ts` 모듈을 import 하면 SVG 문자열 인터프리터와
+ * `Buffer`/`Intl` 의존까지 네이티브 번들에 딸려 들어온다.
  */
-import artwork from "../../../src/features/ticket/ticket-artwork.json";
+import artwork from "./ticket-artwork.json";
 
 const hex = z.string().regex(/^#[0-9a-f]{6}$/u, "팔레트는 소문자 6자리 hex만 쓴다");
 const unit = z.number().min(0).max(1);
