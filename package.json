@@ -5,7 +5,7 @@
   "description": "Local-first karaoke session planner and shareable ticket PWA",
   "license": "UNLICENSED",
   "engines": {
-    "node": ">=22.13"
+    "node": ">=24"
   },
   "workspaces": [
     "packages/*"
