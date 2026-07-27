@@ -1,7 +1,10 @@
 {
-  "extends": "expo/tsconfig.base",
+  // ★ 순서가 의미를 갖는다. 뒤가 앞을 덮는다 — `expo/tsconfig.base` 의 번들러 설정
+  //   (module/moduleResolution/jsx/lib)은 살리고, 타입 안전성 스위치만 저장소 공통값으로
+  //   덮어쓴다. `expo/tsconfig.base` 에는 noUncheckedIndexedAccess·exactOptionalPropertyTypes
+  //   가 없어서(실측), 이걸 안 걸면 M2 에서 앱이 packages/*/src 를 느슨한 옵션으로 보게 된다.
+  "extends": ["expo/tsconfig.base", "../../tsconfig.base.json"],
   "compilerOptions": {
-    "strict": true,
     "paths": {
       "@/*": ["./src/*"],
       "@/assets/*": ["./assets/*"]

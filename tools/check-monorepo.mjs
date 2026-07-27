@@ -326,6 +326,75 @@ export function parseVitestProjects(source) {
   });
 }
 
+/**
+ * 테스트 디렉터리를 가진 패키지 중 vitest project 로 **등록되지 않은** 것.
+ *
+ * 위 5번 검사(`vitest projects 가 모두 실재하는 디렉터리`)의 **역방향**이다.
+ * 그쪽은 "선언됐는데 디렉터리가 없다"를 잡고, 이쪽은 "디렉터리가 있는데 선언이 없다"를 잡는다.
+ *
+ * ★ 이 방향이 더 위험하다. 선언 오타는 vitest 가 project 를 조용히 건너뛰고 0 으로 끝내지만
+ *   (그래도 다른 project 는 돈다), 미등록은 **테스트 파일을 쓴 사람이 초록불을 보면서
+ *   자기 테스트가 한 번도 실행되지 않았다는 걸 모른다**. 검사 5번은 이걸 못 잡는다 —
+ *   등록된 것만 순회하기 때문이다.
+ *
+ * `packages/domain` 이 정확히 이 상태였다(실측 2026-07-27: projects = next·store·tokens·
+ * ticket-art, domain 없음). 지금은 `packages/domain/test/` 가 없어서 무해하지만,
+ * 도메인 테스트를 패키지 안에 만드는 순간 무음 no-op 이 된다.
+ *
+ * @param packagesWithTests 테스트 디렉터리를 가진 패키지 이름들 (예: ["store", "tokens"])
+ * @param projects `parseVitestProjects` 결과
+ * @returns 등록되지 않은 패키지 이름들
+ */
+export function packagesMissingVitestProject(packagesWithTests, projects) {
+  if (projects === null) return [...packagesWithTests];
+  // project 의 root 는 `packages/<name>` 형태로 적힌다. 글롭(`packages/*`)이 있으면
+  // 그 하나가 전부를 덮으므로 미등록이 없다.
+  const covered = new Set();
+  let glob = false;
+  for (const { dir } of projects) {
+    if (!dir) continue;
+    const normalized = String(dir).replace(/\\/g, "/").replace(/\/+$/, "");
+    if (normalized.includes("*")) {
+      if (/^packages\/\*+$/.test(normalized)) glob = true;
+      continue;
+    }
+    const match = /^packages\/([^/]+)$/.exec(normalized);
+    if (match) covered.add(match[1]);
+  }
+  if (glob) return [];
+  return packagesWithTests.filter((name) => !covered.has(name));
+}
+
+/**
+ * `packages/*` 가 선언한 런타임 의존 중 `apps/app` 에 없는 것.
+ *
+ * 왜 이걸 검사하는가 — `apps/app` 은 워크스페이스 멤버가 아니고 자기 lockfile 로 따로
+ * 설치된다(설계, 7번 검사 참조). 로컬에서는 앱이 `@singsong/domain` 을 import 했을 때
+ * Node/Metro 가 상위 디렉터리로 걸어 올라가 루트 `node_modules/zod` 를 우연히 찾아낸다.
+ * **EAS 워커에는 그 루트가 없다** — `.easignore` 가 `node_modules` 를 업로드에서 빼고
+ * 워커는 `apps/app/package-lock.json` 으로만 설치한다. 결과는 10~20분 클라우드 빌드를
+ * 왕복한 뒤에야 보이는 모듈 해석 실패다.
+ *
+ * 그래서 "패키지의 런타임 의존은 앱에도 선언돼 있어야 한다"를 로컬에서 즉시 강제한다.
+ * devDependencies 는 보지 않는다 — 번들에 안 들어간다.
+ *
+ * @param packageManifests [{ name, dependencies }] 형태의 packages/* 매니페스트
+ * @param appDependencies apps/app 의 dependencies 객체
+ * @returns [{ package, dependency, wanted, appHas }] 누락 목록
+ */
+export function missingAppDependencies(packageManifests, appDependencies) {
+  const missing = [];
+  for (const manifest of packageManifests) {
+    for (const [dependency, wanted] of Object.entries(manifest.dependencies ?? {})) {
+      // 워크스페이스 내부 참조는 앱이 따로 설치하는 대상이 아니다(M2 에서 경로로 노출된다).
+      if (dependency.startsWith("@singsong/")) continue;
+      const appHas = appDependencies?.[dependency];
+      if (!appHas) missing.push({ package: manifest.name, dependency, wanted, appHas: null });
+    }
+  }
+  return missing;
+}
+
 /* ─────────────────────────── 파일 시스템 헬퍼 ─────────────────────────── */
 
 const exists = (relative) => existsSync(join(ROOT, relative));
@@ -536,6 +605,34 @@ function main() {
     return `project ${projects.length}개 중 경로 지정 ${checked}개 실재`;
   });
 
+  check("test 디렉터리를 가진 패키지가 모두 vitest project 로 등록됨", () => {
+    const text = readIfExists("vitest.config.ts");
+    if (text === null) fail("vitest.config.ts 가 없다.");
+    const projects = parseVitestProjects(text);
+
+    const packagesDirectory = join(ROOT, "packages");
+    const packagesWithTests = existsSync(packagesDirectory)
+      ? readdirSync(packagesDirectory, { withFileTypes: true })
+          .filter((entry) => entry.isDirectory())
+          .map((entry) => entry.name)
+          .filter((name) => existsSync(join(packagesDirectory, name, "test")))
+      : [];
+
+    const missing = packagesMissingVitestProject(packagesWithTests, projects);
+    if (missing.length > 0) {
+      fail(
+        `vitest.config.ts 의 projects 에 다음 패키지를 등록하라: ${missing.join(", ")}\n` +
+          `  → 검사 5번의 역방향이다. 등록되지 않은 패키지의 test/ 는 어떤 project 의 ` +
+          `include 에도 안 걸려 vitest 가 **수집조차 하지 않는다**. 테스트를 쓴 사람은 ` +
+          `초록불을 보고 통과했다고 믿지만 그 파일은 한 번도 실행되지 않았다. ` +
+          `\`next\` project 의 include 는 tests/** 라 packages/*/test 를 덮지 않는다.`,
+      );
+    }
+    return packagesWithTests.length > 0
+      ? `test/ 보유 ${packagesWithTests.length}개 전부 등록 (${packagesWithTests.join(", ")})`
+      : "test/ 를 가진 패키지 없음";
+  });
+
   // ── 6. 패키지 중복 ──────────────────────────────────────────────────────
   /**
    * 영역(realm)을 나눠서 센다. apps/app 은 M1 에서 **의도적으로** 워크스페이스 멤버가
@@ -618,6 +715,38 @@ function main() {
       );
     }
     return covered ? "워크스페이스 멤버 + 루트 lockfile" : "격리 + 자체 lockfile (M1 설계)";
+  });
+
+  check("packages/* 의 런타임 의존이 apps/app 에도 선언됨", () => {
+    const packagesDirectory = join(ROOT, "packages");
+    if (!existsSync(packagesDirectory)) return "packages/ 없음 — 검사 대상 없음";
+
+    const manifests = readdirSync(packagesDirectory, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => readIfExists(join("packages", entry.name, "package.json")))
+      .filter((text) => text !== null)
+      .map((text) => JSON.parse(text));
+
+    const appManifest = readIfExists("apps/app/package.json");
+    if (appManifest === null) return "apps/app 없음 — 검사 대상 없음";
+
+    const missing = missingAppDependencies(manifests, JSON.parse(appManifest).dependencies);
+    if (missing.length > 0) {
+      fail(
+        `apps/app/package.json 의 dependencies 에 다음을 추가하라:\n` +
+          missing
+            .map(
+              (entry) =>
+                `        - ${entry.dependency}@${entry.wanted}  (${entry.package} 가 요구)`,
+            )
+            .join("\n") +
+          `\n  → apps/app 은 워크스페이스 멤버가 아니라 자기 lockfile 로 따로 설치된다. ` +
+          `로컬에서는 Node 가 상위로 걸어 올라가 루트 node_modules 에서 우연히 찾아내지만, ` +
+          `EAS 워커에는 그 루트가 없다(.easignore 가 node_modules 를 업로드에서 제외). ` +
+          `여기서 안 잡으면 클라우드 빌드 10~20분을 왕복한 뒤에야 모듈 해석 실패로 드러난다.`,
+      );
+    }
+    return `패키지 ${manifests.length}개의 런타임 의존 전부 앱에 선언됨`;
   });
 
   // ── 8. .easignore ───────────────────────────────────────────────────────

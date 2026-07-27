@@ -17,6 +17,8 @@ import test from "node:test";
 import {
   easignoreRules,
   findPnpmResidueKeys,
+  missingAppDependencies,
+  packagesMissingVitestProject,
   parseNpmrc,
   parseVitestProjects,
   ruleExcludesTopLevel,
@@ -118,4 +120,43 @@ test("parseVitestProjects: 주석 속 괄호에 속지 않는다", () => {
       projects: ["packages/store"],
     }`;
   assert.deepEqual(parseVitestProjects(text), [{ label: "packages/store", dir: "packages/store" }]);
+});
+
+test("packagesMissingVitestProject: 등록 안 된 test 디렉터리를 잡는다", () => {
+  // 검사 5번의 역방향. 이게 없으면 packages/domain/test/x.test.ts 를 만든 사람이
+  // 초록불을 보면서 자기 테스트가 한 번도 안 돌았다는 걸 모른다.
+  const projects = [
+    { label: "next", dir: null },
+    { label: "store", dir: "packages/store" },
+  ];
+  assert.deepEqual(packagesMissingVitestProject(["store", "domain"], projects), ["domain"]);
+  assert.deepEqual(packagesMissingVitestProject(["store"], projects), []);
+});
+
+test("packagesMissingVitestProject: 글롭 project 하나가 전부를 덮는다", () => {
+  const projects = [{ label: "packages/*", dir: "packages/*" }];
+  assert.deepEqual(packagesMissingVitestProject(["store", "domain"], projects), []);
+});
+
+test("packagesMissingVitestProject: projects 자체가 없으면 전부 미등록", () => {
+  // `test.projects` 를 통째로 지우면 packages/*/test 는 아무 include 에도 안 걸린다.
+  assert.deepEqual(packagesMissingVitestProject(["store"], null), ["store"]);
+});
+
+test("missingAppDependencies: 패키지 런타임 의존이 앱에 없으면 잡는다", () => {
+  const manifests = [
+    { name: "@singsong/domain", dependencies: { zod: "4.4.3" } },
+    { name: "@singsong/store", dependencies: { "@singsong/domain": "*" } },
+  ];
+  // 워크스페이스 내부 참조(@singsong/*)는 앱이 npm 으로 설치할 대상이 아니라 제외된다.
+  assert.deepEqual(missingAppDependencies(manifests, { expo: "~57.0.8" }), [
+    { package: "@singsong/domain", dependency: "zod", wanted: "4.4.3", appHas: null },
+  ]);
+  assert.deepEqual(missingAppDependencies(manifests, { zod: "4.4.3" }), []);
+});
+
+test("missingAppDependencies: devDependencies 는 보지 않는다", () => {
+  // 번들에 안 들어가므로 EAS 워커에서 부재해도 무해하다.
+  const manifests = [{ name: "@singsong/tokens", devDependencies: { vitest: "4.1.10" } }];
+  assert.deepEqual(missingAppDependencies(manifests, {}), []);
 });

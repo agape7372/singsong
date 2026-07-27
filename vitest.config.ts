@@ -70,6 +70,10 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "json-summary", "html"],
+      // 테스트 하네스를 프로덕션 코드로 세지 않는다. `packages/store/test/node-sql-executor.ts`
+      // 는 SqlExecutor 의 두 번째 구현(node:sqlite)이지 배포물이 아닌데, 빼지 않으면
+      // 커버리지 분모에 들어가 임계를 실제 코드와 무관하게 흔든다.
+      exclude: ["**/test/**", "**/tests/**", "**/*.config.*", "**/dist/**"],
       // 임계값은 현행 유지. 전체 베이스라인이 82.27%/75.47% 라 90/85 로 올릴 근거가 없다
       // (정본 §3.6). 글로브 키로 특정 패키지만 올리는 것도 하지 않는다 — 상향 래칫이라
       // 되돌릴 수 없고, 아직 이식 중인 패키지에 걸면 이동 자체가 막힌다.

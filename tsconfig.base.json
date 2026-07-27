@@ -1,0 +1,29 @@
+{
+  "//": [
+    "두 컴파일러가 같은 소스를 본다 — 그 둘이 합의한 것만 여기 둔다.",
+    "",
+    "루트(TypeScript 5.9.3, Next/webpack, moduleResolution=bundler)와 apps/app",
+    "(TypeScript 6.0.3, expo/tsconfig.base 상속)이 `packages/*/src` 를 **둘 다** 검사하게 된다.",
+    "M2 에서 apps/app 이 `@singsong/*` 를 import 하는 순간부터는 같은 파일을 서로 다른",
+    "옵션으로 컴파일하는 상태가 되고, 그러면 '앱에서만 타입이 다르게 보인다' 가 시작된다.",
+    "",
+    "★ 여기 넣을 것 / 넣지 말 것",
+    "  넣는다 — 타입 안전성 스위치. 나중에 켜려면 이미 쌓인 코드를 전부 고쳐야 하는 것들.",
+    "           `exactOptionalPropertyTypes` 를 M2 이후에 켜려면 앱 코드 전량을 다시 만져야 한다.",
+    "           앱 코드가 22파일뿐인 지금이 유일하게 싼 시점이다.",
+    "  안 넣는다 — target·lib·module·moduleResolution·jsx·types. 둘의 번들러가 다르다",
+    "           (Next/webpack vs Metro). 여기서 통일하면 한쪽이 반드시 틀린 값을 받는다.",
+    "",
+    "실측(2026-07-27): 이 파일을 도입하기 전 `apps/app` 의 `tsc --noEmit` 은 exit 0 이었고,",
+    "도입 후에도 exit 0 이다. 즉 앱 코드는 이미 이 엄격도를 만족하고 있었다 — 지금 못박는",
+    "비용이 0 이라는 뜻이고, 나중에 못박는 비용은 0 이 아니다."
+  ],
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true
+  }
+}
