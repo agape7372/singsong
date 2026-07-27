@@ -82,10 +82,47 @@ const packageBoundaries = {
   },
 };
 
+/**
+ * 표시 포맷의 결정성 경계 — `Intl` 과 tz 의존 `toLocale*` 금지.
+ *
+ * Intl 은 플랫폼 ICU 위임이라 Hermes(Android ICU4J · Apple NSNumberFormatter) · Node · 브라우저가
+ * 같은 바이트를 낸다는 보장이 없다. 서브셋 폰트는 예상 못 한 구분자·전각 기호에 두부를 띄우고
+ * (계획 §3.3), 만료 시각은 서버 tz(Vercel UTC)에 따라 다른 날짜를 그린다. 포맷은 전부
+ * `@/domain/format`(순수 · import 0)을 거친다. C2·C3 이 마지막 사용처(Intl 4벌·toLocale 5곳)를
+ * 걷어냈고 이 규칙이 되돌아오는 걸 막는다.
+ *
+ * apps/app/src 까지 거는 이유: 지금은 0건이지만 M2 에서 화면이 포팅되면 Intl 이 모듈 스코프
+ * const 로 다시 들어와, 기기에서 throw 시 모듈 로드가 화이트스크린이 된다. 0건일 때 못박는 게 요점.
+ *
+ * ★ 아직 넣지 않는 것: `toLocaleLowerCase`·`localeCompare`. `packages/domain/src/catalog.ts:11,82`
+ *   가 즉시 걸리는데 그 정규화는 트랙 A(카탈로그) 소관이라, 그쪽이 끝난 뒤 같은 셀렉터에 더한다.
+ *   또 tools/·scripts/·tests/·M4 services/ 는 글롭 밖이다(테스트는 ICU 를 오라클로 써야 한다).
+ *   글롭이 각 패키지의 src 하위라 packages 의 test 디렉터리는 자유롭다. design-lab 은 files 밖이라 제외된다.
+ */
+const formatterDiscipline = {
+  files: ["src/**/*.{ts,tsx}", "packages/*/src/**/*.{ts,tsx}", "apps/app/src/**/*.{ts,tsx}"],
+  rules: {
+    "no-restricted-syntax": [
+      "error",
+      {
+        selector: "MemberExpression[object.name='Intl']",
+        message:
+          "Intl 금지 — @/domain/format 의 순수 포맷터를 써라(기기별 ICU 로 골든·서브셋 폰트가 갈린다).",
+      },
+      {
+        selector: "CallExpression[callee.property.name=/^toLocale(String|DateString|TimeString)$/]",
+        message:
+          "toLocale* 금지 — formatKstDate / formatKstDateTime 을 써라(서버 tz 의존이라 만료 시각이 어긋난다).",
+      },
+    ],
+  },
+};
+
 export default defineConfig([
   ...nextCoreWebVitals,
   ...nextTypeScript,
   packageBoundaries,
+  formatterDiscipline,
   globalIgnores([
     ".next/**",
     "node_modules/**",
