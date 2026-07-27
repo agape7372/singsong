@@ -5,6 +5,7 @@
 
 import { forwardRef } from "react";
 import type { SharedSnapshot } from "@/domain/models";
+import { formatWonRange } from "@/domain/format";
 import {
   TICKET_COPY,
   TICKET_FONT_STACK,
@@ -12,7 +13,6 @@ import {
   TICKET_RADIUS_PX,
   cardGrainSvg,
   compositionSvg,
-  formatWonRange,
   halftoneTextureSvg,
   punchColumnStyle,
   svgDataUri,

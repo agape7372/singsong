@@ -17,7 +17,7 @@ import { z } from "zod";
  * M2 에서 앱이 `@singsong/ticket-art` 를 import 하게 되면 그 사본과 검사를 함께 지운다.
  *
  * **데이터만** 공유한다 — `ticket-art.ts` 모듈을 import 하면 SVG 문자열 인터프리터와
- * `Buffer`/`Intl` 의존까지 네이티브 번들에 딸려 들어온다.
+ * `Buffer` 의존까지 네이티브 번들에 딸려 들어온다(C2 에서 `Intl` 의존은 제거됐다).
  */
 import artwork from "./ticket-artwork.json";
 

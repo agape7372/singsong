@@ -292,28 +292,6 @@ export function svgDataUri(svg: string) {
   return `data:image/svg+xml;base64,${base64}`;
 }
 
-const won = new Intl.NumberFormat("ko-KR", {
-  style: "currency",
-  currency: "KRW",
-  maximumFractionDigits: 0,
-});
-
-export function formatWon(value: number) {
-  return won.format(value);
-}
-
-export function formatWonRange(lowWon: number, highWon: number) {
-  const low = won.format(lowWon);
-  return lowWon === highWon ? low : `${low}–${won.format(highWon)}`;
-}
-
-/** 5분 단위로 낮은 쪽은 내리고 높은 쪽은 올린다. 화면 뒷면과 OG가 같은 값을 보여야 한다. */
-export function formatMinuteRange(lowSec: number, highSec: number) {
-  const low = Math.floor(lowSec / 300) * 5;
-  const high = Math.ceil(highSec / 300) * 5;
-  return low === high ? `${low}분` : `${low}–${high}분`;
-}
-
 export function ticketSerial(fingerprint: string | undefined, artworkSeed: string) {
   return fingerprint ? fingerprint.slice(0, 10).toUpperCase() : artworkSeed.slice(0, 10);
 }

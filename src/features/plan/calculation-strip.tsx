@@ -11,17 +11,7 @@ import {
 } from "@/domain/calculation";
 import type { Plan, PricingConfig } from "@/domain/models";
 import { trackAnalytics } from "@/analytics/port";
-
-const won = new Intl.NumberFormat("ko-KR", {
-  style: "currency",
-  currency: "KRW",
-  maximumFractionDigits: 0,
-});
-
-function formatWonRange(lowWon: number, highWon: number) {
-  const low = won.format(lowWon);
-  return lowWon === highWon ? low : `${low}–${won.format(highWon)}`;
-}
+import { formatMinuteSpan, formatWonRange } from "@/domain/format";
 
 // 빈 값과 잘못된 값을 구분한다. 둘 다 null로 뭉개면 묶음 곡 수 0이 "비어 있음"으로
 // 취급돼 묶음 요금이 말없이 사라진다.
@@ -113,10 +103,7 @@ export const CalculationStrip = forwardRef<CalculationStripHandle, CalculationSt
       }
     }, [plan.items.length, plan.pricing]);
 
-    const durationLabel =
-      duration.lowMinutes === duration.highMinutes
-        ? `${duration.lowMinutes}분`
-        : `${duration.lowMinutes}–${duration.highMinutes}분`;
+    const durationLabel = formatMinuteSpan(duration.lowMinutes, duration.highMinutes);
     const costLabel =
       plan.pricing === null
         ? "요금 입력 필요"
@@ -394,25 +381,28 @@ export const CalculationStrip = forwardRef<CalculationStripHandle, CalculationSt
                       <div>
                         <dt>예상 시간</dt>
                         <dd>
-                          {calculation.displayDuration.lowMinutes}–
-                          {calculation.displayDuration.highMinutes}분
+                          {formatMinuteSpan(
+                            calculation.displayDuration.lowMinutes,
+                            calculation.displayDuration.highMinutes,
+                          )}
                         </dd>
                       </div>
                       <div>
                         <dt>총 비용</dt>
                         <dd>
-                          {won.format(calculation.derived.totalLowWon)}
-                          {calculation.derived.totalLowWon !== calculation.derived.totalHighWon &&
-                            `–${won.format(calculation.derived.totalHighWon)}`}
+                          {formatWonRange(
+                            calculation.derived.totalLowWon,
+                            calculation.derived.totalHighWon,
+                          )}
                         </dd>
                       </div>
                       <div>
                         <dt>1인당</dt>
                         <dd>
-                          {won.format(calculation.derived.perPersonLowWon)}
-                          {calculation.derived.perPersonLowWon !==
-                            calculation.derived.perPersonHighWon &&
-                            `–${won.format(calculation.derived.perPersonHighWon)}`}
+                          {formatWonRange(
+                            calculation.derived.perPersonLowWon,
+                            calculation.derived.perPersonHighWon,
+                          )}
                         </dd>
                       </div>
                     </dl>

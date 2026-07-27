@@ -2,9 +2,6 @@ import { describe, expect, it } from "vitest";
 import {
   TICKET_PALETTE,
   compositionSvg,
-  formatMinuteRange,
-  formatWon,
-  formatWonRange,
   halftoneTextureSvg,
   punchColumnStyle,
   svgDataUri,
@@ -46,18 +43,6 @@ describe("ticket art", () => {
   it("places punch columns on the requested edge", () => {
     expect(punchColumnStyle("left")).toMatchObject({ left: "7.2px", width: "8px" });
     expect(punchColumnStyle("right")).toMatchObject({ right: "7.2px" });
-  });
-
-  it("formats money with the won sign and an en dash range", () => {
-    expect(formatWon(8_000)).toBe("₩8,000");
-    expect(formatWonRange(6_000, 6_000)).toBe("₩6,000");
-    expect(formatWonRange(6_000, 8_000)).toBe("₩6,000–₩8,000");
-  });
-
-  it("rounds minutes outward in five minute steps", () => {
-    expect(formatMinuteRange(900, 1_800)).toBe("15–30분");
-    expect(formatMinuteRange(901, 1_799)).toBe("15–30분");
-    expect(formatMinuteRange(900, 900)).toBe("15분");
   });
 
   it("prefers the fingerprint for the serial and falls back to the artwork seed", () => {

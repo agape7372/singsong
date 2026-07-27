@@ -6,13 +6,12 @@ import { fileURLToPath } from "node:url";
 import { ImageResponse } from "next/og";
 import { getShareRepository } from "@/features/share/repository.server";
 import type { ShareRecord } from "@/features/share/types";
+import { formatMinuteRange, formatWonRange } from "@/domain/format";
 import {
   TICKET_COPY,
   TICKET_PALETTE,
   TICKET_RADIUS_PX,
   compositionSvg,
-  formatMinuteRange,
-  formatWonRange,
   halftoneTextureSvg,
   svgDataUri,
 } from "@/features/ticket/ticket-art";

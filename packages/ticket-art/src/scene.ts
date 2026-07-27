@@ -291,9 +291,12 @@ export type TicketScene = {
 /**
  * 씬이 그릴 티켓의 값.
  *
- * 금액은 이미 포맷된 문자열을 받는다. `formatWonRange`(`ticket-art.ts:303`)를 여기로 복사하면
- * 통화 포맷이 두 벌이 되고, 계획 §D(Intl 결정성)가 그 함수를 순수 정수 포맷터로 **교체**하기로
- * 이미 정해 두었다. 교체된 함수가 이 패키지로 오는 건 M3 다.
+ * 금액은 이미 포맷된 문자열(`totalLabel`)을 받는다. 통화 포맷의 정본은
+ * `packages/domain/src/format.ts` 의 `formatWonRange` 한 곳이다(C2 에서 Intl.NumberFormat 4벌을
+ * 그 순수 정수 포맷터로 통일했다). 여기로 복사하지 않는다 — 두 벌이 되면 서브셋 폰트 두부·
+ * 골든 붕괴가 갈라진다. `packages/ticket-art` 가 아니라 `packages/domain` 에 둔 이유는 소비자가
+ * 네 트리(`src`·`packages/store`·`apps/app`·`services/share-api`)에 걸쳐 있어서다(계획 §3-1).
+ * 이 패키지가 `@singsong/domain` 을 의존해 그 포맷터를 직접 부르는 건 M3 다.
  */
 export type TicketModel = {
   readonly songCount: number;
@@ -348,7 +351,7 @@ const CANONICAL_WIDTH = 540;
  *      PNG·OG 가 쓰는 `compositionSvg`(`ticket-art.ts:162`)에는 곱연산이 없다.
  *   ② 큰 숫자 서체 — 화면 Archivo Black 150px/-0.06em(`globals.css:2795-2800`),
  *      내보내기 Pretendard-900 152px/-0.04em(`ticket-export-card.tsx:47,73-79`),
- *      OG 는 같은 스택에 186px(`api/og/[slug]/route.tsx:78`).
+ *      OG 는 같은 스택에 186px(`api/og/[slug]/route.tsx:77`).
  *   ③ TEST DATA — 화면은 헤더에 문장 전체(`ticket-card.tsx:187-189`),
  *      내보내기는 스텁에 "TEST DATA" 알약(`ticket-export-card.tsx:244-259`).
  *
@@ -400,7 +403,7 @@ const VARIANT_FACTS = {
     /**
      * OG 는 시리얼·바코드를 뺀다. 취향이 아니라 기록된 결정이다 — 카톡·X 가 1200×630 을
      * 폭 500px 안팎으로 줄여 띄우므로 그 크기에서 안 읽히는 장식은 싣지 않는다
-     * (`api/og/[slug]/route.tsx:83-85`).
+     * (`api/og/[slug]/route.tsx:84-87`).
      */
     stubIdentity: false,
   },

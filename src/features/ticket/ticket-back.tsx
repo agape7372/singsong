@@ -1,14 +1,5 @@
 import type { SharedSnapshot } from "@/domain/models";
-
-const won = new Intl.NumberFormat("ko-KR", {
-  style: "currency",
-  currency: "KRW",
-  maximumFractionDigits: 0,
-});
-
-function range(low: number, high: number) {
-  return low === high ? won.format(low) : `${won.format(low)}–${won.format(high)}`;
-}
+import { formatMinuteSpan, formatWonRange } from "@/domain/format";
 
 /** Back face of a session ticket: the full song ledger and calculation detail
  *  that the summary front deliberately omits. Data comes from the same payload. */
@@ -54,13 +45,13 @@ export function TicketBack({
         <dl className="ticket-back-summary">
           <div>
             <dt>예상 시간</dt>
-            <dd>
-              {lowMinutes}–{highMinutes}분
-            </dd>
+            <dd>{formatMinuteSpan(lowMinutes, highMinutes)}</dd>
           </div>
           <div>
             <dt>총 비용</dt>
-            <dd>{range(calculation.derived.totalLowWon, calculation.derived.totalHighWon)}</dd>
+            <dd>
+              {formatWonRange(calculation.derived.totalLowWon, calculation.derived.totalHighWon)}
+            </dd>
           </div>
           <div>
             <dt>인원</dt>
@@ -69,7 +60,10 @@ export function TicketBack({
           <div>
             <dt>1인당</dt>
             <dd>
-              {range(calculation.derived.perPersonLowWon, calculation.derived.perPersonHighWon)}
+              {formatWonRange(
+                calculation.derived.perPersonLowWon,
+                calculation.derived.perPersonHighWon,
+              )}
             </dd>
           </div>
           <div>
