@@ -2,10 +2,12 @@
  * 스토어 테스트 공용 헬퍼. **이 파일은 vitest 수집 대상이 아니다**(include 는 *.test.ts 만).
  */
 
-import { webRandomBytes, webRandomId } from "@singsong/domain/web-ports";
+import type { DomainPorts } from "@singsong/domain/ports";
+import { webPorts, webRandomBytes, webRandomId } from "@singsong/domain/web-ports";
 
 import { MIGRATIONS } from "../src/migrations/index";
 import { migrate } from "../src/migrations/run";
+import { openPlanStore, type PlanStore } from "../src/plan-store";
 import type { StorePorts } from "../src/ports";
 import type { SqlExecutor } from "../src/sql-executor";
 import { createNodeSqlExecutor } from "./node-sql-executor";
@@ -20,9 +22,19 @@ export const testStorePorts: StorePorts = {
   randomBytes: webRandomBytes,
 };
 
+/** createTicketSnapshot 용 DomainPorts. digest·randomBytes 는 진짜, 시계만 고정. */
+export const testDomainPorts: DomainPorts = { ...webPorts, now: () => FIXED_NOW_MS };
+
 /** 마이그레이션까지 끝난 node:sqlite 실행기. location 미지정이면 연결당 독립 `:memory:`(M2). */
 export async function createMigratedExecutor(location?: string): Promise<SqlExecutor> {
   const executor = createNodeSqlExecutor(location);
   await migrate(executor, MIGRATIONS);
   return executor;
+}
+
+/** 연결당 독립 `:memory:` 위에 연 스토어. 각 테스트가 자기 스토어를 갖는다(오염 0, M2). */
+export async function openTestStore(): Promise<{ store: PlanStore; executor: SqlExecutor }> {
+  const executor = createNodeSqlExecutor();
+  const store = await openPlanStore(executor, testStorePorts);
+  return { store, executor };
 }
