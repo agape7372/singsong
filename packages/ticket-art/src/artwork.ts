@@ -19,7 +19,11 @@ import { z } from "zod";
  * **데이터만** 공유한다 — `ticket-art.ts` 모듈을 import 하면 SVG 문자열 인터프리터와
  * `Buffer` 의존까지 네이티브 번들에 딸려 들어온다(C2 에서 `Intl` 의존은 제거됐다).
  */
-import artwork from "./ticket-artwork.json";
+// import attribute(`with { type: "json" }`)는 Node ESM 이 JSON 을 로드할 때 요구한다.
+// 없으면 맨 Node 에서 ERR_IMPORT_ATTRIBUTE_MISSING(M1 게이트 tools/gate-m1.mjs 가 실측으로
+// 잡았다) — vite/vitest/webpack 은 관대해 통과시키지만 위 index.ts 주석의 "Node 에서 그대로
+// 돈다" 는 이 한 줄이 없으면 거짓이었다. ES2025 표준이라 세 번들러 모두 수용한다.
+import artwork from "./ticket-artwork.json" with { type: "json" };
 
 const hex = z.string().regex(/^#[0-9a-f]{6}$/u, "팔레트는 소문자 6자리 hex만 쓴다");
 const unit = z.number().min(0).max(1);

@@ -32,6 +32,7 @@
     "check:monorepo": "node tools/check-monorepo.mjs",
     "check:monorepo:test": "node tools/check-monorepo.test.mjs",
     "check:tokens": "node tools/generate-tokens.mjs --check",
+    "gate:m1": "node tools/gate-m1.mjs",
     "tokens": "node tools/generate-tokens.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -46,8 +47,8 @@
     "smoke:http": "node scripts/smoke-http.mjs",
     "perf:lab": "node scripts/perf-lab.mjs",
     "verify": "npm run verify:demo",
-    "verify:demo": "npm run install:frozen && npm run check:monorepo && npm run check:monorepo:test && npm run check:tokens && npm run format:check && npm run lint && npm run typecheck && npm test && npm run build:demo && node scripts/verify-built-pwa.mjs && cross-env APP_PROFILE=fixture NEXT_PUBLIC_APP_PROFILE=fixture node scripts/smoke-http.mjs && npm run test:e2e && npm run test:pwa",
-    "verify:release": "npm run install:frozen && npm run check:monorepo && npm run check:monorepo:test && npm run check:tokens && npm run preflight:release && npm run format:check && npm run lint && npm run typecheck && npm test && npm run build:release && node scripts/verify-built-pwa.mjs && cross-env APP_PROFILE=production NEXT_PUBLIC_APP_PROFILE=production node scripts/smoke-http.mjs && npm run test:pwa:release",
+    "verify:demo": "npm run install:frozen && npm run check:monorepo && npm run check:monorepo:test && npm run check:tokens && npm run format:check && npm run lint && npm run typecheck && npm test && npm run gate:m1 && npm run build:demo && node scripts/verify-built-pwa.mjs && cross-env APP_PROFILE=fixture NEXT_PUBLIC_APP_PROFILE=fixture node scripts/smoke-http.mjs && npm run test:e2e && npm run test:pwa",
+    "verify:release": "npm run install:frozen && npm run check:monorepo && npm run check:monorepo:test && npm run check:tokens && npm run preflight:release && npm run format:check && npm run lint && npm run typecheck && npm test && npm run gate:m1 && npm run build:release && node scripts/verify-built-pwa.mjs && cross-env APP_PROFILE=production NEXT_PUBLIC_APP_PROFILE=production node scripts/smoke-http.mjs && npm run test:pwa:release",
     "verify:production": "npm run verify:release",
     "icons": "node scripts/generate-icons.mjs",
     "clean:generated": "node scripts/clean-generated.mjs"
