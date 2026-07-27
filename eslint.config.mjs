@@ -94,10 +94,12 @@ const packageBoundaries = {
  * apps/app/src 까지 거는 이유: 지금은 0건이지만 M2 에서 화면이 포팅되면 Intl 이 모듈 스코프
  * const 로 다시 들어와, 기기에서 throw 시 모듈 로드가 화이트스크린이 된다. 0건일 때 못박는 게 요점.
  *
- * ★ 아직 넣지 않는 것: `toLocaleLowerCase`·`localeCompare`. `packages/domain/src/catalog.ts:11,82`
- *   가 즉시 걸리는데 그 정규화는 트랙 A(카탈로그) 소관이라, 그쪽이 끝난 뒤 같은 셀렉터에 더한다.
- *   또 tools/·scripts/·tests/·M4 services/ 는 글롭 밖이다(테스트는 ICU 를 오라클로 써야 한다).
- *   글롭이 각 패키지의 src 하위라 packages 의 test 디렉터리는 자유롭다. design-lab 은 files 밖이라 제외된다.
+ * ★ `toLocaleLowerCase`·`localeCompare` 도 금지한다(트랙 A 가 추가). 둘 다 플랫폼 ICU 위임이라
+ *   기기별로 소문자화·정렬이 갈릴 수 있다. `catalog.ts:11,82` 가 마지막 사용처였고, 트랙 A 가
+ *   각각 `toLowerCase()`·코드유닛 비교로 교체하면서(전 코드포인트 차이 0·순서쌍 전수 일치 실측)
+ *   이 규칙으로 되돌아오는 걸 막는다. tools/·scripts/·tests/·M4 services/ 는 글롭 밖이다
+ *   (테스트는 ICU 를 오라클로 써야 한다). 글롭이 각 패키지의 src 하위라 packages 의 test
+ *   디렉터리는 자유롭고, design-lab 은 files 밖이라 제외된다.
  */
 const formatterDiscipline = {
   files: ["src/**/*.{ts,tsx}", "packages/*/src/**/*.{ts,tsx}", "apps/app/src/**/*.{ts,tsx}"],
@@ -113,6 +115,16 @@ const formatterDiscipline = {
         selector: "CallExpression[callee.property.name=/^toLocale(String|DateString|TimeString)$/]",
         message:
           "toLocale* 금지 — formatKstDate / formatKstDateTime 을 써라(서버 tz 의존이라 만료 시각이 어긋난다).",
+      },
+      {
+        selector: "CallExpression[callee.property.name=/^toLocale(LowerCase|UpperCase)$/]",
+        message:
+          "toLocaleLowerCase/UpperCase 금지 — toLowerCase()/toUpperCase() 를 써라(플랫폼 ICU 위임이라 기기별로 갈린다. ko 로케일엔 조건부 casing 이 없어 결과도 같다).",
+      },
+      {
+        selector: "CallExpression[callee.property.name='localeCompare']",
+        message:
+          "localeCompare 금지 — 코드유닛 비교(a < b ? -1 : …)를 써라(ICU 콜레이션은 기기별로 정렬 순서가 갈린다).",
       },
     ],
   },
