@@ -26,6 +26,7 @@
     "next-env.d.ts",
     ".next/types/**/*.ts",
     "packages/*/src/**/*.ts",
+    "packages/store/test/**/*.ts",
     "src/**/*.ts",
     "src/**/*.tsx",
     "tests/**/*.ts",
