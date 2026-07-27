@@ -13,3 +13,29 @@ export { migrate, readUserVersion, type Migration } from "./migrations/run";
 export type { StorePorts } from "./ports";
 export { createChangeBus, type ChangeBus, type StoreTopic } from "./change-bus";
 export { createMutex, type Mutex } from "./mutex";
+export {
+  ACTIVE_PLAN_ID,
+  DEFAULT_PROFILE_COLOR,
+  PENDING_SHARE_RETENTION_MS,
+  PROFILE_ID,
+  PlanLimitError,
+  RevisionConflictError,
+  applyPlanMutation,
+  buildImportedPlan,
+  combineManagedShare,
+  emptyProfile,
+  isCompleteReceipt,
+  isExpired,
+  isStalePending,
+  isValidCompletionReceipt,
+  newManagedShare,
+  newPlan,
+  partitionObsoleteShares,
+  summarizeManagedShares,
+  type BaseProfile,
+  type ImportedShare,
+  type ManagedShare,
+  type ManagedShareReceipt,
+  type ManagedShareSecret,
+  type ManagedShareSummary,
+} from "./policy";
