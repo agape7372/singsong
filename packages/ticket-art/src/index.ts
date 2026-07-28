@@ -3,7 +3,7 @@
  *
  * 여기서 나온 `TicketScene` 하나를 백엔드 둘이 실행한다:
  *   ① Skia   — `apps/app/src/render/skia/` (M0 에서 하프톤·그레인·타공 프리미티브 완료)
- *   ② SVG 문자열 — `services/share-api/src/render/` (M4)
+ *   ② SVG 문자열 — 이 패키지의 `svg.ts` (공유 랜딩·서버 이미지 파이프라인)
  *
  * 이 패키지는 값으로 React·RN·DOM 을 전혀 import 하지 않는다. Node 에서 그대로 돈다.
  */
@@ -18,7 +18,7 @@ export {
   type PaletteKey,
   type Theme,
   type TicketArtwork,
-} from "./artwork";
+} from "./artwork.js";
 
 export {
   IDENTITY,
@@ -46,4 +46,6 @@ export {
   type TicketScene,
   type TicketSceneOptions,
   type TicketVariant,
-} from "./scene";
+} from "./scene.js";
+
+export { escapeTicketSvgText, renderTicketSceneSvg, type TicketSvgOptions } from "./svg.js";

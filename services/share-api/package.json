@@ -1,0 +1,30 @@
+{
+  "name": "@singsong/share-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --config vitest.config.ts",
+    "smoke": "npm run build && node ../../tools/smoke-share-api.mjs",
+    "preflight": "npm run build && cross-env APP_PROFILE=production node dist/preflight.js",
+    "vercel-build": "npm run build && node dist/preflight.js"
+  },
+  "dependencies": {
+    "@singsong/domain": "file:../../packages/domain",
+    "@singsong/ticket-art": "file:../../packages/ticket-art",
+    "zod": "4.4.3"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

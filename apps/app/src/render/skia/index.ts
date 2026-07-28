@@ -10,6 +10,9 @@ import * as artwork from "./artwork";
 import * as grain from "./grain";
 import * as halftone from "./halftone";
 import * as punch from "./punch";
+import * as ticketScene from "./ticket-scene";
+
+import type { TicketScene } from "@singsong/ticket-art";
 
 /**
  * 앱에서 쓰는 진입점. **RN 의 `Skia` 를 값으로 import 하는 곳은 여기 하나뿐이다.**
@@ -54,4 +57,13 @@ export function drawPunchColumn(
   spec: { x: number; top: number; height: number; holeColor: SkColor },
 ) {
   return punch.drawPunchColumn(Skia, canvas, spec);
+}
+
+/** Same scene backend is used by the on-screen Picture and the CPU PNG export. */
+export function recordTicketScene(scene: TicketScene) {
+  return ticketScene.recordTicketScene(Skia, scene);
+}
+
+export function rasterizeTicketScene(scene: TicketScene) {
+  return ticketScene.rasterizeTicketScene(Skia, scene);
 }

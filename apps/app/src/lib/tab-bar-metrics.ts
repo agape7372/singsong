@@ -1,4 +1,4 @@
-import { PRIMARY_NAV_CONTENT_HEIGHT } from "@/theme/tokens";
+import { PRIMARY_NAV_CONTENT_HEIGHT } from "../theme/tokens";
 
 export type TabBarMetrics = {
   /** 인셋 포함 전체 높이. `--primary-nav-height` 의 네이티브 등가물. */

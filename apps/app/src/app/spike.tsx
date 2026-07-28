@@ -1,15 +1,8 @@
 import { Stack } from "expo-router";
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-  useColorScheme,
-  useWindowDimensions,
-} from "react-native";
+import { ScrollView, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { palette } from "@/theme/tokens";
+import { useAppTheme } from "@/theme/theme-provider";
 
 /**
  * M0 게이트 화면 — 하프톤·그레인·펀치를 실기기에서 눈으로 판정한다.
@@ -31,8 +24,7 @@ function loadSpikeCanvas(): {
 }
 
 export default function SpikeScreen() {
-  const scheme = useColorScheme() === "dark" ? "dark" : "light";
-  const colors = palette[scheme];
+  const { scheme, colors } = useAppTheme();
   const { width } = useWindowDimensions();
   const { Component, error } = loadSpikeCanvas();
 

@@ -7,8 +7,22 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"],
-      "@/assets/*": ["./assets/*"]
+      "@/assets/*": ["./assets/*"],
+      "@singsong/domain": ["../../packages/domain/src/index.ts"],
+      "@singsong/domain/*": ["../../packages/domain/src/*"],
+      "@singsong/store": ["../../packages/store/src/index.ts"],
+      "@singsong/store/*": ["../../packages/store/src/*"],
+      "@singsong/ticket-art": ["../../packages/ticket-art/src/index.ts"],
+      "@singsong/ticket-art/*": ["../../packages/ticket-art/src/*"],
+      "@singsong/tokens": ["../../packages/tokens/src/index.ts"],
+      "@singsong/tokens/*": ["../../packages/tokens/src/*"]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "../../packages/*/src/**/*.ts",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
+  ]
 }

@@ -1,9 +1,9 @@
 import { Stack } from "expo-router";
-import { ScrollView, StyleSheet, useColorScheme, useWindowDimensions } from "react-native";
+import { ScrollView, StyleSheet, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { MotionSmoke } from "@/components/motion-smoke";
-import { palette } from "@/theme/tokens";
+import { useAppTheme } from "@/theme/theme-provider";
 
 /**
  * M2 선행 게이트 화면 — Reanimated·worklets 가 이 기기에서 도는지 판정한다.
@@ -13,8 +13,7 @@ import { palette } from "@/theme/tokens";
  * 판정 맥락이 같이 흔들린다. 이 화면은 M3 모션 랩으로 이어 쓴다.
  */
 export default function MotionScreen() {
-  const scheme = useColorScheme() === "dark" ? "dark" : "light";
-  const colors = palette[scheme];
+  const { scheme, colors } = useAppTheme();
   const { width } = useWindowDimensions();
 
   return (

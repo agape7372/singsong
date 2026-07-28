@@ -17,6 +17,7 @@ const UNPAIRED_SURROGATE = /[\uD800-\uDFFF]/u;
 const ASCII_DIGITS = /^[0-9]{1,6}$/u;
 // Canonical unpadded base64url for exactly 16 bytes: the final 4 padding bits are zero.
 const ARTWORK_SEED = /^[A-Za-z0-9_-]{21}[AQgw]$/u;
+const SHARE_SLUG = /^[A-Za-z0-9_-]{21}[AQgw]$/u;
 
 export class DomainValidationError extends Error {
   constructor(
@@ -155,6 +156,17 @@ export function assertValidPlan(plan: Plan, ticketReady = false) {
 
 export function isCanonicalArtworkSeed(value: string) {
   return ARTWORK_SEED.test(value);
+}
+
+/** 128비트 capability를 canonical unpadded base64url로 표현한 공유 slug. */
+export function isValidShareSlug(value: string): boolean {
+  return SHARE_SLUG.test(value);
+}
+
+export function assertValidShareSlug(value: string): void {
+  if (!isValidShareSlug(value)) {
+    throw new DomainValidationError("INVALID_SHARE_SLUG", "share slug is not canonical");
+  }
 }
 
 const safeInteger = z.number().int().safe();

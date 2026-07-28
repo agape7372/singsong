@@ -1,31 +1,53 @@
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useColorScheme } from "react-native";
+import { KeyboardProvider } from "react-native-keyboard-controller";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { palette } from "@/theme/tokens";
+import { ToastHost, ToastProvider } from "@/lib/toast";
+import { NativeStoreProvider } from "@/store/store-provider";
+import { ThemeProvider, useAppTheme } from "@/theme/theme-provider";
 
-/**
- * M0 루트. KeyboardProvider·ThemeProvider·useFonts·ToastHost 는 M2 에서 붙인다.
- */
 export default function RootLayout() {
-  const scheme = useColorScheme() === "dark" ? "dark" : "light";
-  const colors = palette[scheme];
-
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: colors.canvas },
-          }}
-        >
-          <Stack.Screen name="(tabs)" />
-        </Stack>
-        <StatusBar style={scheme === "dark" ? "light" : "dark"} />
+        <KeyboardProvider preserveEdgeToEdge>
+          <ThemeProvider>
+            <NativeStoreProvider>
+              <ToastProvider>
+                <RootStack />
+                <ToastHost />
+              </ToastProvider>
+            </NativeStoreProvider>
+          </ThemeProvider>
+        </KeyboardProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
+  );
+}
+
+function RootStack() {
+  const { colors, scheme } = useAppTheme();
+  return (
+    <>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.canvas },
+        }}
+      >
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen
+          name="search"
+          options={{
+            presentation: "formSheet",
+            sheetAllowedDetents: [0.72, 1],
+            sheetGrabberVisible: true,
+          }}
+        />
+      </Stack>
+      <StatusBar style={scheme === "dark" ? "light" : "dark"} />
+    </>
   );
 }

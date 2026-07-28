@@ -784,6 +784,26 @@ function main() {
     return covered ? "워크스페이스 멤버 + 루트 lockfile" : "격리 + 자체 lockfile (M1 설계)";
   });
 
+  check("루트 lockfile 이 Linux CI optional dependency를 보존", () => {
+    const lock = JSON.parse(readIfExists("package-lock.json") ?? "{}");
+    const packages = lock.packages ?? {};
+    const required = [
+      "node_modules/@emnapi/core",
+      "node_modules/@emnapi/runtime",
+      "node_modules/@unrs/resolver-binding-wasm32-wasi",
+    ];
+    const missing = required.filter((name) => !packages[name]);
+    if (missing.length > 0) {
+      fail(
+        `Windows npm이 Linux CI용 optional dependency를 lockfile에서 제거했다: ` +
+          `${missing.join(", ")}.\n` +
+          "  → 검증된 Linux 환경에서 `npm install --package-lock-only --no-audit --no-fund`로 " +
+          "다시 생성하라. Windows에서 루트 lockfile 전체를 재생성하면 CI npm ci가 EUSAGE로 실패한다.",
+      );
+    }
+    return `${required.length}개 cross-platform 항목 보존`;
+  });
+
   check("packages/* 의 런타임 의존이 apps/app 에도 선언됨", () => {
     const packagesDirectory = join(ROOT, "packages");
     if (!existsSync(packagesDirectory)) return "packages/ 없음 — 검사 대상 없음";
@@ -816,26 +836,24 @@ function main() {
     return `패키지 ${manifests.length}개의 런타임 의존 전부 앱에 선언됨`;
   });
 
-  check("ticket-artwork.json 사본이 정본과 바이트 동일", () => {
+  check("앱 ticket-art 가 패키지 정본을 직접 사용", () => {
     const canonical = "packages/ticket-art/src/ticket-artwork.json";
     const copy = "apps/app/src/render/skia/ticket-artwork.json";
     if (!exists(canonical)) {
       fail(`정본 ${canonical} 이 없다. 옮겼다면 이 검사의 경로도 함께 고쳐라.`);
     }
-    if (!exists(copy)) return "사본 없음 — 앱이 패키지를 직접 읽는다면 이 검사를 지워라";
-
-    const canonicalBytes = readFileSync(join(ROOT, canonical));
-    const copyBytes = readFileSync(join(ROOT, copy));
-    if (!canonicalBytes.equals(copyBytes)) {
+    if (exists(copy)) {
       fail(
-        `${copy} 를 정본으로 다시 복사하라 — \`cp ${canonical} ${copy}\`\n` +
-          `  → 이 사본은 apps/app 이 워크스페이스 멤버가 아니라 @singsong/* 를 해석할 수 ` +
-          `없어서(M2 로 연기) 존재한다. 두 장이 어긋나면 화면 티켓과 네이티브 티켓이 ` +
-          `다른 그림을 그리는데, 둘을 나란히 볼 수 있는 곳이 없어 아무도 눈치채지 못한다. ` +
-          `M2 에서 앱이 패키지를 import 하게 되면 사본과 이 검사를 함께 지운다.`,
+        `${copy} 사본을 지워라.\n` +
+          `  → M2에서 Metro가 @singsong/ticket-art를 직접 해석한다. JSON 사본이 돌아오면 ` +
+          `화면·PNG·OG가 다시 서로 다른 값을 읽을 수 있다.`,
       );
     }
-    return `${canonicalBytes.length} 바이트 동일`;
+    const adapter = readIfExists("apps/app/src/render/skia/artwork.ts") ?? "";
+    if (!/from\s+["']@singsong\/ticket-art["']/u.test(adapter)) {
+      fail("apps/app/src/render/skia/artwork.ts 에서 @singsong/ticket-art 정본을 import 하라.");
+    }
+    return "사본 0개 · @singsong/ticket-art 직접 import";
   });
 
   // ── 7b. packages/domain 런타임 순수성 ────────────────────────────────────

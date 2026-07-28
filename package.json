@@ -2,17 +2,22 @@
   "name": "singsong-session-strip",
   "version": "0.1.0",
   "private": true,
-  "description": "Local-first karaoke session planner and shareable ticket PWA",
+  "description": "Local-first Expo karaoke planner with a share-ticket landing service",
   "license": "UNLICENSED",
   "engines": {
     "node": ">=24"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "services/*"
   ],
   "//overrides": "@axe-core/playwright 는 playwright-core 를 peer '>= 1.0.0' 로 잡는다. pnpm 에서는 문제가 없었지만 npm 은 그 peer 를 만족시키려고 최신(1.62.0)을 루트에 따로 깔고, playwright@1.61.1 이 요구하는 정확 핀을 node_modules/playwright/node_modules 로 밀어넣는다. 그러면 playwright-core 타입이 두 벌이 되어 tests/e2e/core-flow.spec.ts:6 의 AxeBuilder({ page }) 가 서로 다른 Page 타입 사이에서 TS2322 로 깨진다. 1.61.1 도 peer 범위를 만족하므로 한 벌로 고정한다.",
   "overrides": {
-    "playwright-core": "1.61.1"
+    "next": {
+      "postcss": "8.5.23"
+    },
+    "playwright-core": "1.61.1",
+    "sharp": "$sharp"
   },
   "scripts": {
     "dev": "npm run dev:demo",
@@ -29,6 +34,13 @@
     "install:frozen": "cross-env CI=1 npm ci",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
+    "share-api:typecheck": "npm run typecheck --workspace @singsong/share-api",
+    "share-api:build": "npm run build --workspace @singsong/share-api",
+    "share-api:test": "npm run test --workspace @singsong/share-api",
+    "share-api:smoke": "npm run smoke --workspace @singsong/share-api",
+    "share-api:preflight": "npm run preflight --workspace @singsong/share-api",
+    "share-api:verify": "npm run share-api:typecheck && npm run share-api:test && npm run share-api:smoke",
+    "test:share-landing": "playwright test --config e2e/landing/playwright.config.ts",
     "check:monorepo": "node tools/check-monorepo.mjs",
     "check:monorepo:test": "node tools/check-monorepo.test.mjs",
     "check:tokens": "node tools/generate-tokens.mjs --check",
@@ -64,6 +76,7 @@
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "server-only": "0.0.1",
+    "sharp": "0.35.3",
     "zod": "4.4.3"
   },
   "devDependencies": {
@@ -84,7 +97,6 @@
     "jsdom": "29.1.1",
     "prettier": "3.9.5",
     "serwist": "9.5.11",
-    "sharp": "0.34.5",
     "tailwindcss": "4.3.3",
     "typescript": "5.9.3",
     "vitest": "4.1.10"

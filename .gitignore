@@ -4,6 +4,7 @@ node_modules/
 .next/
 out/
 coverage/
+services/*/dist/
 
 # Generated Serwist worker
 public/sw.js

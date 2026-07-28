@@ -166,6 +166,7 @@ export default defineConfig([
     ".next/**",
     "node_modules/**",
     "coverage/**",
+    "apps/app/dist/**",
     "playwright-report/**",
     "test-results/**",
     "public/sw.js",

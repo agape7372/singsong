@@ -1,70 +1,83 @@
+import { CONSTANT_TOKENS, THEMED_TOKENS } from "@singsong/tokens";
+
 /**
- * M0 최소 토큰. 정본은 여전히 `src/app/globals.css` 이고,
- * 102개 전량 이관 + 대비 테스트는 M1 `packages/tokens` 에서 한다.
- * 여기 있는 값은 그 부분집합이며 리터럴이 어긋나면 M1 이관 때 걸린다.
+ * 네이티브용 이름만 얇게 붙인다. 색과 반경의 값은 packages/tokens 생성물을
+ * 정본으로 삼아 웹 CSS와 네이티브 사이에 두 번째 리터럴 복사본을 만들지 않는다.
  */
 export const palette = {
   light: {
-    canvas: "#faf7f0",
-    paper: "#ffffff",
-    surfaceMuted: "#f5efe7",
-    ink: "#15131a",
-    inkMuted: "#665f68",
-    accentFill: "#ff3d6e",
-    accentText: "#d91f52",
-    borderSubtle: "#e2dbcf",
-    borderControl: "#817984",
+    canvas: THEMED_TOKENS["--canvas"].light,
+    paper: THEMED_TOKENS["--paper"].light,
+    surfaceMuted: THEMED_TOKENS["--surface-muted"].light,
+    ink: THEMED_TOKENS["--ink"].light,
+    inkMuted: THEMED_TOKENS["--ink-muted"].light,
+    accentFill: THEMED_TOKENS["--accent-fill"].light,
+    accentText: THEMED_TOKENS["--accent-text"].light,
+    onAccent: THEMED_TOKENS["--on-accent"].light,
+    danger: THEMED_TOKENS["--danger"].light,
+    focus: THEMED_TOKENS["--focus"].light,
+    moneyText: THEMED_TOKENS["--money-text"].light,
+    borderSubtle: THEMED_TOKENS["--border-subtle"].light,
+    borderControl: THEMED_TOKENS["--border-control"].light,
   },
   dark: {
-    canvas: "#16111c",
-    paper: "#221b29",
-    surfaceMuted: "#2a2130",
-    ink: "#f5eef3",
-    inkMuted: "#b8a9bc",
-    accentFill: "#ff6b9b",
-    accentText: "#ff8ab1",
-    borderSubtle: "#413547",
-    borderControl: "#88798d",
+    canvas: THEMED_TOKENS["--canvas"].dark,
+    paper: THEMED_TOKENS["--paper"].dark,
+    surfaceMuted: THEMED_TOKENS["--surface-muted"].dark,
+    ink: THEMED_TOKENS["--ink"].dark,
+    inkMuted: THEMED_TOKENS["--ink-muted"].dark,
+    accentFill: THEMED_TOKENS["--accent-fill"].dark,
+    accentText: THEMED_TOKENS["--accent-text"].dark,
+    onAccent: THEMED_TOKENS["--on-accent"].dark,
+    danger: THEMED_TOKENS["--danger"].dark,
+    focus: THEMED_TOKENS["--focus"].dark,
+    moneyText: THEMED_TOKENS["--money-text"].dark,
+    borderSubtle: THEMED_TOKENS["--border-subtle"].dark,
+    borderControl: THEMED_TOKENS["--border-control"].dark,
   },
 } as const;
 
 export type Scheme = keyof typeof palette;
 export type Palette = (typeof palette)[Scheme];
 
-/** 티켓 팔레트는 PNG·OG 가 항상 라이트로 나가므로 별도 스코프다(정본 §9-2). */
+/** 티켓 팔레트는 PNG·OG가 항상 라이트로 나가므로 별도 스코프다(정본 §9-2). */
 export const ticketPalette = {
   light: {
-    paper: "#f6efdc",
-    ink: "#15131a",
-    inkMuted: "#665f68",
-    accentFill: "#ff3d6e",
-    accentText: "#d91f52",
-    moneyText: "#8a5200",
-    borderControl: "#817984",
-    canvas: "#faf7f0",
-    surfaceMuted: "#fff5f8",
-    borderSubtle: "#e2dbcf",
+    paper: THEMED_TOKENS["--ticket-paper"].light,
+    ink: THEMED_TOKENS["--ticket-ink"].light,
+    inkMuted: THEMED_TOKENS["--ticket-ink-muted"].light,
+    accentFill: THEMED_TOKENS["--ticket-accent-fill"].light,
+    accentText: THEMED_TOKENS["--ticket-accent-text"].light,
+    moneyText: THEMED_TOKENS["--ticket-money-text"].light,
+    borderControl: THEMED_TOKENS["--ticket-border-control"].light,
+    canvas: THEMED_TOKENS["--ticket-canvas"].light,
+    surfaceMuted: THEMED_TOKENS["--ticket-surface-muted"].light,
+    borderSubtle: THEMED_TOKENS["--ticket-border-subtle"].light,
   },
   dark: {
-    paper: "#241c2a",
-    ink: "#f5eef3",
-    inkMuted: "#b8a9bc",
-    accentFill: "#ff6b9b",
-    accentText: "#ff8ab1",
-    moneyText: "#f5a623",
-    borderControl: "#88798d",
-    canvas: "#16111c",
-    surfaceMuted: "#281d27",
-    borderSubtle: "#413547",
+    paper: THEMED_TOKENS["--ticket-paper"].dark,
+    ink: THEMED_TOKENS["--ticket-ink"].dark,
+    inkMuted: THEMED_TOKENS["--ticket-ink-muted"].dark,
+    accentFill: THEMED_TOKENS["--ticket-accent-fill"].dark,
+    accentText: THEMED_TOKENS["--ticket-accent-text"].dark,
+    moneyText: THEMED_TOKENS["--ticket-money-text"].dark,
+    borderControl: THEMED_TOKENS["--ticket-border-control"].dark,
+    canvas: THEMED_TOKENS["--ticket-canvas"].dark,
+    surfaceMuted: THEMED_TOKENS["--ticket-surface-muted"].dark,
+    borderSubtle: THEMED_TOKENS["--ticket-border-subtle"].dark,
   },
 } as const;
 
+function px(token: string): number {
+  return Number(token.endsWith("px") ? token.slice(0, -2) : token);
+}
+
 export const radius = {
-  control: 8,
-  action: 10,
-  strip: 14,
-  ticket: 24,
-  full: 999,
+  control: px(CONSTANT_TOKENS["--radius-control"]),
+  action: px(CONSTANT_TOKENS["--radius-action"]),
+  strip: px(CONSTANT_TOKENS["--radius-strip"]),
+  ticket: px(CONSTANT_TOKENS["--radius-ticket"]),
+  full: px(CONSTANT_TOKENS["--radius-full"]),
 } as const;
 
 /**
@@ -73,5 +86,5 @@ export const radius = {
  */
 export const PRIMARY_NAV_CONTENT_HEIGHT = 60;
 
-/** Android 접근성 스캐너 기준으로 44 대신 48dp 로 의도적 상향(계획 §3.5). */
+/** Android 접근성 스캐너 기준으로 44 대신 48dp로 의도적 상향(계획 §3.5). */
 export const MIN_TOUCH_TARGET = 48;

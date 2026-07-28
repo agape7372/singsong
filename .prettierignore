@@ -2,9 +2,11 @@
 node_modules
 .pnpm-store
 coverage
+services/*/dist/
 
 # Expo 가 생성하는 타입. 커밋 대상이 아니며(apps/app/.gitignore) 포맷 검사도 무의미하다.
 apps/app/.expo
+apps/app/dist
 apps/app/expo-env.d.ts
 apps/app/tools/out
 

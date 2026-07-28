@@ -23,6 +23,8 @@ import {
 const MODEL: TicketModel = {
   songCount: 23,
   totalLabel: "₩12,000–₩18,000",
+  durationLabel: "약 75–105분",
+  perPersonLabel: "1인 ₩3,000–₩4,500",
   serial: "A1B2C3D4E5",
   testData: true,
 };
@@ -307,6 +309,19 @@ describe("백엔드가 기하를 다시 유도하지 않아도 되는가", () =>
 });
 
 describe("페인트 순서와 og 의 생략", () => {
+  it("화면·PNG 공통 씬에 약 시간과 1인당 금액이 함께 남는다", () => {
+    for (const scene of [
+      card("light"),
+      buildTicketScene(MODEL, { ...CANONICAL, variant: "export" }),
+    ]) {
+      const summary = find(scene.primitives, "text").find(
+        (primitive) => primitive.text === `${MODEL.durationLabel} · ${MODEL.perPersonLabel}`,
+      );
+      expect(summary).toBeDefined();
+      expect(summary?.announce).toBe(`${MODEL.durationLabel}, ${MODEL.perPersonLabel}`);
+    }
+  });
+
   it("카드 몸통이 맨 뒤, 타공 열이 맨 앞", () => {
     const { primitives, clip } = card("light");
     expect(primitives[0]).toEqual(clip);

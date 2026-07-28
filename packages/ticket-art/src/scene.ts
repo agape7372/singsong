@@ -7,7 +7,7 @@ import {
   type Palette,
   type PaletteKey,
   type Theme,
-} from "./artwork";
+} from "./artwork.js";
 
 /**
  * 티켓 디스플레이 리스트.
@@ -301,6 +301,8 @@ export type TicketScene = {
 export type TicketModel = {
   readonly songCount: number;
   readonly totalLabel: string;
+  readonly durationLabel: string;
+  readonly perPersonLabel: string;
   /** 접두사(`NO. `)는 카피에서 붙인다. */
   readonly serial: string;
   readonly testData?: boolean;
@@ -434,6 +436,8 @@ const L = {
   count: { size: 152, lineHeight: 152, weight: 900 },
   gapCountLabel: 2,
   countLabel: { size: 15, lineHeight: 18, weight: 800, letterSpacingEm: 0.36 },
+  gapSummary: 6,
+  summary: { size: 13, lineHeight: 15.6, weight: 700, letterSpacingEm: 0.01 },
   gapTestData: 8,
   testDataLine: { size: 11, lineHeight: 13.2, weight: 800, letterSpacingEm: 0.05 },
   compositionGap: 12,
@@ -710,6 +714,13 @@ export function buildTicketScene(model: TicketModel, options: TicketSceneOptions
 
   y += px(L.gapCountLabel);
   pushText(TICKET_COPY.countLabel, L.countLabel, palette.inkMuted);
+
+  // 화면·PNG에 계산 핵심 세 축(곡수·약 시간·1인당)을 모두 남긴다.
+  // 한 줄로 묶어 가변 높이를 늘리지 않고, 백엔드마다 별도 표기를 만들지 않는다.
+  y += px(L.gapSummary);
+  pushText(`${model.durationLabel} · ${model.perPersonLabel}`, L.summary, palette.inkMuted, {
+    announce: `${model.durationLabel}, ${model.perPersonLabel}`,
+  });
 
   // 불일치 ③ — 화면판은 헤더에 문장 전체.
   if (model.testData && !facts.testDataInStub) {

@@ -1,10 +1,10 @@
 import { Tabs } from "expo-router";
-import { useColorScheme, useWindowDimensions } from "react-native";
+import { useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { TabGlyph, type TabGlyphName } from "@/components/tab-glyph";
 import { tabBarMetrics } from "@/lib/tab-bar-metrics";
-import { palette } from "@/theme/tokens";
+import { useAppTheme } from "@/theme/theme-provider";
 
 /**
  * `NativeTabs`(expo-router/unstable-native-tabs) 가 SDK 57 템플릿 기본값이지만 쓰지 않는다.
@@ -19,8 +19,7 @@ const TABS: { name: string; title: string; glyph: TabGlyphName }[] = [
 ];
 
 export default function TabsLayout() {
-  const scheme = useColorScheme() === "dark" ? "dark" : "light";
-  const colors = palette[scheme];
+  const { colors } = useAppTheme();
   const { fontScale } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const metrics = tabBarMetrics(fontScale, insets.bottom);

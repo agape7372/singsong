@@ -70,6 +70,15 @@ export default defineConfig({
           include: ["test/**/*.test.ts"],
         },
       },
+      {
+        extends: true,
+        test: {
+          name: "share-api",
+          root: path.resolve(root, "services/share-api"),
+          environment: "node",
+          include: ["test/**/*.test.ts"],
+        },
+      },
     ],
     coverage: {
       provider: "v8",
@@ -78,10 +87,10 @@ export default defineConfig({
       // 는 SqlExecutor 의 두 번째 구현(node:sqlite)이지 배포물이 아닌데, 빼지 않으면
       // 커버리지 분모에 들어가 임계를 실제 코드와 무관하게 흔든다.
       exclude: ["**/test/**", "**/tests/**", "**/*.config.*", "**/dist/**"],
-      // 임계값 = P3 착지 직후(트랙 A·B·C·E 완료) `npx vitest run --coverage` 실측값을
-      // 정수로 내린 것. 실측 2026-07-27, Node v24.11.1:
-      //   Statements 80.82% (2416/2989) · Branches 72.09% (1462/2028)
-      //   Functions  82.02% ( 552/673 ) · Lines    83.37% (2271/2724)
+      // 임계값은 P3 착지 직후 실측을 정수로 내린 래칫이다. 공유 서비스까지 편입한
+      // 최신 실측(2026-07-28, Node v24.11.1)은 이 기준을 그대로 넘는다:
+      //   Statements 83.53% (3344/4003) · Branches 76.02% (2169/2853)
+      //   Functions  84.11% ( 699/831 ) · Lines    85.69% (3127/3649)
       // 정수 내림 이유: v8 커버리지가 Node 패치버전 간 소수점 아래에서 미세하게 흔들려
       // 정확한 실측값을 그대로 박으면 무관한 런타임 차이로 red 가 뜬다.
       //

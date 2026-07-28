@@ -6,14 +6,15 @@
 # 무거운 빌드+브라우저(e2e)는 별도 job 으로 병렬로 돈다.
 #
 # ┌─ 이 CI 가 검증하는 것 ─────────────────────────────────────────────────────┐
-# │ · 모노레포 구조 불변식(pnpm 잔재·워크스페이스·.easignore·순수성) — check:monorepo (16검사) │
+# │ · 모노레포 구조 불변식(pnpm 잔재·워크스페이스·.easignore·순수성) — check:monorepo (17검사) │
 # │ · 그 가드 자신의 단위테스트 — check:monorepo:test (20 pass)                    │
 # │ · globals.css → packages/tokens 파생물 동기화 — check:tokens                 │
 # │ · 포맷 · 린트(packages/* 수입 경계 + Intl/toLocale 금지 + apps/app 소스 구문) · 루트 타입체크 │
-# │ · 순수 로직 테스트 + 커버리지 임계(node:sqlite 기반 store 계약 테스트 포함, 57파일/355) │
+# │ · 순수 로직 테스트 + 커버리지 임계(node:sqlite + 공유 서비스 계약 포함, 64파일/504)      │
 # │ · M1 헤드리스 코어 왕복 — gate:m1 (12검사, 빌드 없이 순수 Node)               │
 # │ · 빌드된 PWA 아티팩트 + HTTP/CSP/OG 스모크 + Playwright e2e/pwa(fixture 모드)  │
-# │ · apps/app 타입체크(별도 job, Skia 네이티브 다운로드 없이)                     │
+# │ · apps/app lint/typecheck/Expo doctor/install check/Android Hermes export       │
+# │ · services/share-api typecheck/test/fixture smoke + credential-less preflight   │
 # └────────────────────────────────────────────────────────────────────────────┘
 #
 # ┌─ 이 CI 가 **할 수 없는 것**(설계상 — 권위는 다른 경로에 있다) ─────────────────┐
@@ -75,7 +76,7 @@ jobs:
       # 여기서 안 깔린다(설계). engine-strict=true 라 Node 가 어긋나면 여기서 멈춘다.
       - run: npm ci
 
-      - run: npm run check:monorepo # 구조 가드 16검사
+      - run: npm run check:monorepo # 구조 가드 17검사
       - run: npm run check:monorepo:test # 가드 자체 단위테스트 20건
       - run: npm run check:tokens # globals.css → tokens 드리프트
 
@@ -173,12 +174,11 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-  # ── apps/app 타입체크: 루트 typecheck 가 안 보는 사각 ────────────────────────
-  # 린트는 checks job 의 `eslint .` 가 이미 앱 소스를 덮으므로 여기선 tsc 만.
+  # ── Expo 앱: 독립 lockfile 기준 정적 검사 + 실제 Metro/Hermes export ──────────
   # 루트 tsconfig 에 apps/** 를 include 하면 안 된다 — TS 버전(5.9.3 vs 6.0.3)과
   # 옵션이 달라 같은 소스를 두 컴파일러가 다르게 본다.
-  app-typecheck:
-    name: apps/app 타입체크(TS 6.0.3)
+  app-verify:
+    name: Expo 앱 검증 + Android export
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -196,13 +196,74 @@ jobs:
         working-directory: apps/app
         run: npm ci --ignore-scripts
 
+      - name: 앱 린트
+        working-directory: apps/app
+        run: npm run lint
+
       - name: 타입체크
         working-directory: apps/app
         run: npm run typecheck
 
-      # (선택) expo-doctor / expo install --check 는 네트워크 의존이라 차단 게이트로 두지
-      # 않는다. 필요하면 주간 스케줄 워크플로로 분리하거나 아래를 비차단으로 붙인다.
-      # - name: expo-doctor (비차단)
-      #   working-directory: apps/app
-      #   run: npx expo-doctor
-      #   continue-on-error: true
+      - name: 앱 순수 계약 테스트
+        working-directory: apps/app
+        run: npm test
+
+      - name: Expo 프로젝트 진단
+        working-directory: apps/app
+        run: npx expo-doctor
+
+      - name: Expo SDK 의존성 정합
+        working-directory: apps/app
+        run: npx expo install --check
+
+      - name: Android Metro + Hermes export
+        working-directory: apps/app
+        run: npm run export:android
+
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: expo-android-export-metadata
+          path: apps/app/dist/android/metadata.json
+          if-no-files-found: warn
+          retention-days: 14
+
+  # ── 공유 서비스: 브라우저/PWA와 독립된 Node/Web API 계약 ─────────────────────
+  share-api:
+    name: 공유 API build/test/smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+
+      - run: npm ci
+
+      - name: 타입체크
+        working-directory: services/share-api
+        run: npm run typecheck
+
+      - name: 계약 테스트
+        working-directory: services/share-api
+        run: npm test
+
+      - name: fixture HTTP 스모크
+        working-directory: services/share-api
+        run: npm run smoke
+
+      - name: Chromium 설치
+        run: npx playwright install --with-deps chromium
+
+      - name: 공유 랜딩 브라우저 계약
+        run: npm run test:share-landing
+
+      - name: 운영 credential 없는 preflight는 반드시 차단
+        working-directory: services/share-api
+        run: |
+          if npm run preflight; then
+            echo "credential-less production preflight가 잘못 통과했습니다."
+            exit 1
+          fi

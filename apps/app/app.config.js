@@ -12,6 +12,15 @@
  *
  * @type {import("expo/config").ExpoConfig}
  */
+const shareOrigin = process.env.EXPO_PUBLIC_SHARE_API_ORIGIN;
+let shareHost = null;
+try {
+  const parsed = shareOrigin ? new URL(shareOrigin) : null;
+  if (parsed?.protocol === "https:") shareHost = parsed.host;
+} catch {
+  // release preflight가 명시적 오류를 낸다. config introspection은 개발 셸을 위해 계속 허용한다.
+}
+
 const config = {
   name: "싱송",
   slug: "singsong",
@@ -19,6 +28,7 @@ const config = {
   // 딥링크: singsong://s/{slug} — 정규식 정본은 packages/domain 이 갖는다(M5).
   scheme: "singsong",
   version: "0.1.0",
+  platforms: ["ios", "android"],
   orientation: "portrait",
   userInterfaceStyle: "automatic",
   // 네이티브 산출물에만 반영된다. OTA 로는 바뀌지 않으므로 아이콘 교체 시 재빌드가 필요하다.
@@ -36,9 +46,22 @@ const config = {
   ios: {
     supportsTablet: false,
     bundleIdentifier: "com.singsong.app",
+    ...(shareHost ? { associatedDomains: [`applinks:${shareHost}`] } : {}),
   },
   android: {
     package: "com.singsong.app",
+    ...(shareHost
+      ? {
+          intentFilters: [
+            {
+              action: "VIEW",
+              autoVerify: true,
+              data: [{ scheme: "https", host: shareHost, pathPrefix: "/s/" }],
+              category: ["BROWSABLE", "DEFAULT"],
+            },
+          ],
+        }
+      : {}),
     // `edgeToEdgeEnabled` 는 SDK 57 설정 타입에서 사라졌다 — SDK 56+ 는 항상 edge-to-edge 라
     // 끌 수 있는 스위치가 아니다. 인셋은 safe-area-context 로 처리한다.
     adaptiveIcon: {
@@ -48,6 +71,23 @@ const config = {
   },
   plugins: [
     "expo-router",
+    [
+      "expo-image-picker",
+      {
+        photosPermission: "프로필 사진을 고르기 위해 사진 보관함에 접근합니다.",
+        cameraPermission: false,
+        microphonePermission: false,
+      },
+    ],
+    [
+      "expo-media-library",
+      {
+        photosPermission: false,
+        savePhotosPermission: "만든 티켓 이미지를 사진 보관함에 저장합니다.",
+        isAccessMediaLocationEnabled: false,
+        granularPermissions: [],
+      },
+    ],
     [
       "expo-build-properties",
       {
@@ -91,10 +131,8 @@ const config = {
   ],
   experiments: {
     typedRoutes: true,
-    // React Compiler 는 SDK 57 템플릿 기본값이지만 M0 스파이크에서는 끈다.
-    // Skia/worklets 실패를 컴파일러 탓으로 오귀인하지 않기 위한 변수 축소이며,
-    // M2 진입 시 켜고 재측정한다.
-    reactCompiler: false,
+    // M0에서 Skia/worklets 변수 축소를 위해 껐고, M2 통합 export부터 다시 켠다.
+    reactCompiler: true,
   },
 };
 

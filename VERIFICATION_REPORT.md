@@ -2,6 +2,62 @@
 
 이 문서는 실행 증거의 최종 진입점이다. 소스나 테스트 파일의 존재와 실제 명령 PASS를 구분하며 `docs/verification/QA_MATRIX_V3.md`의 최종 행 판정과 함께 읽는다. local fixture production artifact의 성공을 실제 release/production 성공으로 승격하지 않는다.
 
+## 네이티브 저장소 완료 검증 — 2026-07-28
+
+이 절이 현재 제품 경로의 최신 판정을 소유한다. 아래의 Next/PWA 절은 롤백 기준선과 과거
+실행 기록이며 네이티브 배포 증거가 아니다.
+
+| 항목 | 값 |
+| --- | --- |
+| Branch / base HEAD | `rebuild/expo-monorepo` / `1abfaca` |
+| Runtime | Node `v24.11.1`, npm `11.6.2`, Windows, Asia/Seoul |
+| 제품 경로 | `apps/app` + `services/share-api` + `packages/*` |
+| 저장소 판정 | `NATIVE_REPOSITORY_READY` |
+| Production 판정 | `BLOCKED_EXTERNAL` |
+
+| Gate | 상태 | 실행 결과 |
+| --- | --- | --- |
+| Root frozen install | `PASS` | `npm ci --ignore-scripts --include=optional --no-audit`; 528 packages |
+| Monorepo 구조 | `PASS` | 17/17, Linux/WASI optional lock 항목 포함 |
+| Guard/tokens | `PASS` | guard tests 20/20; 고유 token 56, 선언 102 |
+| Format/lint/type | `PASS` | Prettier 전체, ESLint warning 0, `tsc --noEmit` |
+| M1 core | `PASS` | 맨 Node 헤드리스 gate 12/12 |
+| Root coverage | `PASS` | 64 files / 504 tests; statements 83.53%, branches 76.02%, functions 84.11%, lines 85.69% |
+| Expo app | `PASS` | lint, typecheck, 1 file / 15 tests |
+| Expo dependency health | `PASS` | Expo doctor 20/20, `expo install --check` 최신 |
+| Android bundle | `PASS` | React Compiler + Hermes, 2,220 modules, 약 5.6MB HBC |
+| Share API | `PASS` | typecheck/build, 6 files / 144 tests, fixture route smoke |
+| Share landing browser | `PASS` | 실제 API create, script-free HTML/SVG, absolute OG, axe, revoke/unknown 404 — 3/3 |
+| Preserved Next build | `PASS` | Next 16.2.11 Webpack fixture production build, 모든 route 생성 |
+| Runtime dependency audit | `PASS` | app 전체 0건, root `npm audit --omit=dev` 0건 |
+| Full root audit | `TRACKED_DEV_ONLY` | 보존된 ESLint/minimatch 3의 `brace-expansion` high 9건 |
+| Share production preflight | `PASS_FAIL_CLOSED` | 운영 입력 없이 `BLOCKED_EXTERNAL`, exit 1, blocker 이름만 출력 |
+| EAS build hook | `PASS_FAIL_CLOSED` | local profile은 skip; production origin 없이는 `BLOCKED`, exit 1 |
+
+전체 감사 숫자를 낮추기 위한 `brace-expansion` 5 전역 override는 사용하지 않는다.
+`minimatch` 3은 CommonJS 함수 export를 호출하지만 5.x는 객체를 export하므로 실제
+`TypeError`를 만든다. 대신 운영 취약점인 Next 내부 PostCSS를 `8.5.23`, Sharp를 `0.35.3`으로
+패치했고 `minimatch` 3의 1.x 호출 계약도 별도 smoke로 확인했다. 개발 도구 체인은 upstream
+교체 전까지 별도 추적한다.
+
+첫 Playwright 실행은 managed sandbox가 Chromium spawn을 `EPERM`으로 막아 세 테스트가
+브라우저 시작 전에 실패했다. 같은 source/server/assertion을 승인된 실행 경계에서 다시 돌려
+3/3 PASS했으며 fixture server의 HTTP 200도 별도로 확인했다.
+
+최종 코드 리뷰는 계산 저장 직후 provider observer가 늦게 반영되면 이전 revision 티켓까지
+동결될 수 있는 P1 race를 발견했다. 플랜 화면이 mutation queue의 최신 committed plan을 읽어
+`/ticket/<revision>`을 명시하고, 티켓 화면도 발권 직전에 SQLite active plan을 재조회하도록
+고쳤다. 준비되지 않은 플랜은 route를 만들지 않는 계약을 추가한 뒤 앱 15/15를 재실행했다.
+
+다음 항목은 저장소에서 닫을 수 없어 `BLOCKED_EXTERNAL`이다.
+
+- 권리 승인 production catalog와 서명된 manifest
+- 실제 Supabase migration/ACL/RPC/TTL, Redis와 trusted proxy 수신 헤더
+- stable HTTPS origin의 association/OG crawler/Kakao preview와 운영 관측
+- Expo 계정·release certificate·clean commit을 사용한 production APK와 OTA manifest
+- Android/iOS 실기기 PNG 저장/공유, TalkBack/VoiceOver, IME, 폰 A→B handoff
+- 위 증거가 닫힌 뒤의 Next/PWA 트리 삭제
+
 ## Folded Session S 아이콘 반영 최신 검증 — 2026-07-23
 
 | Gate | 상태 | 최신 결과 |
