@@ -15,7 +15,8 @@
       "@singsong/ticket-art": ["../../packages/ticket-art/src/index.ts"],
       "@singsong/ticket-art/*": ["../../packages/ticket-art/src/*"],
       "@singsong/tokens": ["../../packages/tokens/src/index.ts"],
-      "@singsong/tokens/*": ["../../packages/tokens/src/*"]
+      "@singsong/tokens/*": ["../../packages/tokens/src/*"],
+      "zod": ["./node_modules/zod"]
     }
   },
   "include": [
