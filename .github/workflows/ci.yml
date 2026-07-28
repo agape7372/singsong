@@ -219,6 +219,8 @@ jobs:
       - name: Android Metro + Hermes export
         working-directory: apps/app
         run: npm run export:android
+        env:
+          EXPO_DEBUG: "1"
 
       - if: always()
         uses: actions/upload-artifact@v4
