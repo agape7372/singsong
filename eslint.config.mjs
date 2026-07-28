@@ -145,9 +145,8 @@ const formatterDiscipline = {
  * ★ 끄는 것은 이 규칙 **하나뿐**이다. 나머지 react-hooks 규칙(의존성 배열·조건부 훅 등)은
  *   그대로 살아 있다. 그리고 `src/**`(웹)에는 적용하지 않는다 — 거기엔 SharedValue 가 없다.
  *
- * 더 깊은 문제는 따로 있다: Expo 앱을 **Next 의 eslint 설정으로** 린트하고 있다는 것.
- * `apps/app/package.json` 에는 자체 `expo lint` 가 있는데 루트 체인이 그걸 안 부른다.
- * 정리는 M2 사안으로 남긴다(지금 바꾸면 앱 린트 커버리지가 통째로 흔들린다).
+ * Expo 앱의 독립 CI는 `apps/app/eslint.config.mjs`와 `expo lint`를 사용한다. 루트 lint도
+ * 공유 경계·결정성 규칙을 앱까지 한 번 더 적용하므로 이 경로별 override는 계속 필요하다.
  */
 const nativeMotionRules = {
   files: ["apps/app/src/**/*.{ts,tsx}"],
