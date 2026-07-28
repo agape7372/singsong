@@ -23,8 +23,7 @@ const slug = (value) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
 
-const filename = ({ serial, name }) =>
-  `${String(serial).padStart(2, "0")}-${slug(name)}.png`;
+const filename = ({ serial, name }) => `${String(serial).padStart(2, "0")}-${slug(name)}.png`;
 
 const conceptById = new Map(concepts.map((concept) => [concept.serial, concept]));
 const finalists = finalIds.map((serial) => {
@@ -142,7 +141,17 @@ const palette = `
     <span><i class="swatch" style="background:#B76E00"></i>#B76E00</span>
   </div>`;
 
-const document = ({ title, eyebrow, heading, subtitle, linkHref, linkLabel, rubric, sections, footer }) => `<!doctype html>
+const document = ({
+  title,
+  eyebrow,
+  heading,
+  subtitle,
+  linkHref,
+  linkLabel,
+  rubric,
+  sections,
+  footer,
+}) => `<!doctype html>
 <html lang="ko">
   <head>
     <meta charset="utf-8" />
@@ -191,7 +200,8 @@ const finalHtml = document({
   title: "SingSong — Final 8 Logo Directions",
   eyebrow: "SINGSONG / FINAL SHORTLIST / 2026",
   heading: "최종 후보<br />8가지 비교 보드",
-  subtitle: "Matched Tear, Bridge Pass, Folded Receipt, Double Gate, Seal Cut S, Corner Fold S, Twin Stub Negative S, Folded Session S를 최종 후보로 분리했다.",
+  subtitle:
+    "Matched Tear, Bridge Pass, Folded Receipt, Double Gate, Seal Cut S, Corner Fold S, Twin Stub Negative S, Folded Session S를 최종 후보로 분리했다.",
   linkHref: "html/index.html",
   linkLabel: "참고용 42안 보기 →",
   rubric: ["8 FINALISTS", "USER SELECTION", "24PX CHECK", "MASKABLE 66%", "NEXT: SVG REDRAW"],
@@ -206,7 +216,8 @@ const referenceHtml = document({
   title: "SingSong — 42 Reference Logo Directions",
   eyebrow: "SINGSONG / REFERENCE ARCHIVE / 2026",
   heading: "참고용 로고<br />42가지 아카이브",
-  subtitle: "최종 후보 8안을 제외한 탐색 결과다. 삭제하지 않고 비교·회고용으로 보존하며, 신규 최종 후보에는 포함하지 않는다.",
+  subtitle:
+    "최종 후보 8안을 제외한 탐색 결과다. 삭제하지 않고 비교·회고용으로 보존하며, 신규 최종 후보에는 포함하지 않는다.",
   linkHref: "../index.html",
   linkLabel: "← 최종 8안으로 돌아가기",
   rubric: ["42 REFERENCES", "NOT FINAL", "ORIGINAL IDS", "24PX CHECK", "ARCHIVE ONLY"],

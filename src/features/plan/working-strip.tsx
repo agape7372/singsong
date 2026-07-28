@@ -2,6 +2,7 @@
 
 import type { KeyboardEvent } from "react";
 import type { Track } from "@/domain/models";
+import { josa } from "@/domain/josa";
 import { DOMAIN_LIMITS } from "@/domain/validation";
 import { ProfileAvatar } from "@/features/profile/profile-avatar";
 import { useProfile } from "@/features/profile/use-profile";
@@ -101,16 +102,11 @@ export function WorkingStrip({
         <>
           <div className="section-heading">
             <div>
-              <p className="step-label">
-                곡 담기{" "}
-                <span className="serial-meta" aria-hidden="true">
-                  QUEUE / 01
-                </span>
-              </p>
+              <p className="step-label">곡 담기</p>
               <h2 id="working-strip-title">오늘의 순서</h2>
             </div>
             <output className="count-stamp" aria-label="최대 100곡 중 0곡">
-              00 / 100
+              0곡
             </output>
           </div>
           <div className="empty-strip">
@@ -205,7 +201,9 @@ export function WorkingStrip({
       )}
       {undoLabel && (
         <div className="undo-bar" role="status">
-          <span>‘{undoLabel}’을 목록에서 뺐습니다.</span>
+          <span>
+            ‘{undoLabel}’{josa(undoLabel, "을/를")} 목록에서 뺐어요.
+          </span>
           <button className="button-link" type="button" onClick={onUndo}>
             되돌리기
           </button>

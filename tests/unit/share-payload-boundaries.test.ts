@@ -7,6 +7,7 @@ import {
 } from "@/domain/canonical";
 import { calculatePlan } from "@/domain/calculation";
 import type { Plan, Track } from "@/domain/models";
+import { webSha256 } from "@/domain/web-ports";
 import { DOMAIN_LIMITS, DomainValidationError } from "@/domain/validation";
 
 const encoder = new TextEncoder();
@@ -61,7 +62,7 @@ describe("shared snapshot byte boundaries", () => {
     expect(Array.from(payload.items[0]!.title)).toHaveLength(80);
     expect(byteLength).toBe(77_916);
     expect(byteLength).toBeLessThanOrEqual(DOMAIN_LIMITS.maxCanonicalBytes);
-    await expect(fingerprintSharedSnapshot(payload)).resolves.toBe(
+    await expect(fingerprintSharedSnapshot(payload, webSha256)).resolves.toBe(
       "81e8445ee06770c7d0111eaecb71c673f8b80d251ddca7b419b05360629bf6f5",
     );
   });

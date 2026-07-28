@@ -1,0 +1,269 @@
+# .github/workflows/ci.yml
+#
+# 싱송 모노레포 CI — Next PWA(M6 에 reference/ 로 폐기 예정) + packages/*(네이티브로
+# 이식되는 순수 코드)의 게이트. 루트 `verify:demo` 체인(package.json:50)을 두 갈래로
+# 쪼개 병렬화한 것이다. 순수 로직 게이트(checks)는 설치 포함 ~30s 안에 빨간불을 주고,
+# 무거운 빌드+브라우저(e2e)는 별도 job 으로 병렬로 돈다.
+#
+# ┌─ 이 CI 가 검증하는 것 ─────────────────────────────────────────────────────┐
+# │ · 모노레포 구조 불변식(pnpm 잔재·워크스페이스·.easignore·순수성) — check:monorepo (17검사) │
+# │ · 그 가드 자신의 단위테스트 — check:monorepo:test (20 pass)                    │
+# │ · globals.css → packages/tokens 파생물 동기화 — check:tokens                 │
+# │ · 포맷 · 린트(packages/* 수입 경계 + Intl/toLocale 금지 + apps/app 소스 구문) · 루트 타입체크 │
+# │ · 순수 로직 테스트 + 커버리지 임계(node:sqlite + 공유 서비스 계약 포함, 64파일/504)      │
+# │ · M1 헤드리스 코어 왕복 — gate:m1 (12검사, 빌드 없이 순수 Node)               │
+# │ · 빌드된 PWA 아티팩트 + HTTP/CSP/OG 스모크 + Playwright e2e/pwa(fixture 모드)  │
+# │ · apps/app lint/typecheck/Expo doctor/install check/Android Hermes export       │
+# │ · services/share-api typecheck/test/fixture smoke + credential-less preflight   │
+# └────────────────────────────────────────────────────────────────────────────┘
+#
+# ┌─ 이 CI 가 **할 수 없는 것**(설계상 — 권위는 다른 경로에 있다) ─────────────────┐
+# │ · 네이티브 컴파일(Android/iOS): EAS 클라우드 빌드 전용. GitHub Actions 로 못 한다. │
+# │ · Maestro E2E 플로우: 미작성(M5 이후 판단). 실행 안 되는 테스트는 쓰지 않는다.   │
+# │ · 실제 Supabase 호출: 서비스 키·네트워크 부작용. 서버 계약은 모킹으로만 검증.    │
+# │ · 실기기 검증(하프톤 룩·발권·갤러리 저장·TalkBack·한국어 IME): 사람 판정 게이트. │
+# │   paper 의 6일 프로덕션 크래시는 모든 자동 테스트가 green 이었고 검출은 실기기뿐. │
+# │ · apps/app/tools/verify-halftone.mjs(17 어서션): Skia 전체 설치+sharp 필요 →    │
+# │   M3 골든 하네스에서 편입. per-commit CI 에는 넣지 않는다.                      │
+# └────────────────────────────────────────────────────────────────────────────┘
+#
+# ┌─ ⚠ 의도적으로 CI 에서 뺀 검사: 홈 번들 예산(170 KiB gzip) ──────────────────┐
+# │ scripts/smoke-http.mjs:102 의 "홈 초기 JS ≤ 170 KiB gzip" 검사만 제외한다.    │
+# │ smoke-http 의 나머지(HTTP 200·CSP·x-frame·OG PNG 스모크)는 e2e job 에서 살린다. │
+# │ · 왜: P3 이전부터 이 예산을 초과 중이고(사용자 결정 2026-07-27), 원인은 페이지 │
+# │   코드가 아니라 벤더 청크(motion·@base-ui/react·React)라 P3·M1 과 무관하다.     │
+# │ · 현재 실측(2026-07-27, .next 산출물 직접 gzip): 홈 초기 JS **225.8 KiB**       │
+# │   (예산의 133%, 36% 초과). 벤더 청크만 124.0 KiB(4bd1b696 61.3 + 192 60.6).     │
+# │ · 예산 숫자 170 은 올리지 않았다 — 로컬 `npm run verify:demo` 는 이 검사를 계속 │
+# │   강제하므로 복구 기준선이 살아 있다. e2e job 은 SMOKE_SKIP_BUNDLE_BUDGET=1 로  │
+# │   이 검사만 끈다(측정값은 스킵 여부와 무관하게 스텝 로그에 항상 보고된다).       │
+# │ · **복구 조건**: 홈 초기 JS gzip ≤ 170 KiB 가 되면 e2e job 의 그 env 를 지운다. │
+# │   벤더 다이어트는 별건 작업(docs/engineering/CI.md 참조). 실제 가치는 M6 까지    │
+# │   살아 있는 웹 랜딩 /s/[slug] 에 한정된다(src/ 는 M6 폐기, 네이티브 번들과 무관). │
+# └────────────────────────────────────────────────────────────────────────────┘
+
+name: CI
+
+on:
+  push:
+    branches: [rebuild/expo-monorepo, main]
+  pull_request:
+
+# 같은 ref 에 새 푸시가 오면 진행 중 런을 취소한다. PR 연타 시 러너 낭비 방지.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── 빠른 게이트: 설치 포함 ~30s 안에 빨간불을 준다 ───────────────────────────
+  checks:
+    name: 정적 검사 + 순수 로직 테스트
+    runs-on: ubuntu-latest # EAS 워커와 같은 리눅스. .npmrc 에 ignore-scripts 가 없어 스크립트가 정상 실행된다.
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # ★ .nvmrc 는 24 다. node:sqlite(packages/store 계약 테스트)는 Node 22 에서
+          #   --experimental-sqlite 플래그를 요구할 수 있고(22.x 백포트 미확정), 계약이
+          #   측정된 검증 환경도 Node v24.11.1 로 고정돼 있다(sql-executor.ts:9). 측정에
+          #   쓴 런타임과 CI 런타임을 일치시켜 에러 문자열 어서션의 버전 감수성을 없앤다.
+          #   engines.node 도 >=24 로 함께 올렸고, check:monorepo 가 24 ⊨ >=24 를 강제한다.
+          node-version-file: ".nvmrc"
+          cache: "npm"
+
+      # 루트 워크스페이스(packages/*)만 설치. apps/app 은 워크스페이스 멤버가 아니라
+      # 여기서 안 깔린다(설계). engine-strict=true 라 Node 가 어긋나면 여기서 멈춘다.
+      - run: npm ci
+
+      - run: npm run check:monorepo # 구조 가드 17검사
+      - run: npm run check:monorepo:test # 가드 자체 단위테스트 20건
+      - run: npm run check:tokens # globals.css → tokens 드리프트
+
+      - run: npm run format:check # prettier --check
+
+      # eslint . — packages/* 수입 경계(react-native/next/dexie 금지)와 Intl/toLocale 금지를
+      # 강제하고, apps/app 소스도 구문 린트한다. eslint-config-next 는 타입 린팅(project:)을
+      # 켜지 않으므로 apps/app 설치 없이 돈다(실측: 22파일 처리, import 해석 미사용).
+      - run: npm run lint
+
+      - run: npm run typecheck # 루트 tsconfig. apps/app 제외(app-typecheck job 담당).
+
+      # ★ 커버리지 강제. `npm test`(=vitest run, --coverage 없음)를 따로 돌리지 않고
+      #   여기서 --coverage 로 한 번에 테스트+임계를 본다(중복 실행 방지). 임계는
+      #   vitest.config.ts thresholds(80/72/82/83) — P3 착지 직후 실측값을 정수로 내린 것.
+      #   실측 2026-07-27: statements 80.82 / branches 72.09 / functions 82.02 / lines 83.37
+      #   → EXIT 0. 이 임계는 이 CI 스텝이 처음으로 강제한다(이전엔 죽은 설정이었다).
+      - run: npx vitest run --coverage
+
+      # gate:m1 은 빌드 없이 순수 Node 로 도메인·스토어 왕복을 12검사로 증명한다(싸다).
+      # verify:demo 체인 순서(test → gate:m1 → build:demo)를 보존해 coverage 뒤에 둔다.
+      - run: npm run gate:m1
+
+      # 커버리지 요약을 아티팩트로 남긴다(text/json-summary/html — vitest.config.ts).
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-summary
+          path: coverage/
+          if-no-files-found: warn
+          retention-days: 14
+
+  # ── 빌드 + 브라우저 E2E: 폐기 예정 PWA 표면을 M6 까지 지킨다 ──────────────────
+  # (M6 에 Next 트리가 reference/next-pwa 로 이동하면 이 job 을 통째로 제거한다.)
+  e2e:
+    name: 빌드 + HTTP 스모크 + Playwright(fixture)
+    runs-on: ubuntu-latest
+    env:
+      # Playwright 설정은 아티팩트를 os.tmpdir() 에 떨군다(playwright.config.ts:7).
+      # 업로드하려면 워크스페이스 안으로 끌어온다.
+      PLAYWRIGHT_ARTIFACT_ROOT: ${{ github.workspace }}/playwright-artifacts
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+
+      - run: npm ci
+
+      # 브라우저 바이너리 캐시. 키의 1.61.1 은 @playwright/test 핀(package.json:71).
+      # 올릴 때 이 키도 함께 바꿔야 캐시가 무효화된다.
+      - name: Playwright 브라우저 캐시
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-1.61.1
+
+      # 두 config 모두 chromium 프로젝트만 쓴다. --with-deps 는 캐시가 적중해도 OS 공유
+      # 라이브러리는 매번 보장해야 하므로 항상 돌린다(브라우저 다운로드는 캐시가 스킵).
+      - name: Chromium 설치
+        run: npx playwright install --with-deps chromium
+
+      # next start(Playwright/smoke webServer)가 .next 를 요구한다. fixture 프로파일로 빌드.
+      - run: npm run build:demo
+
+      - run: node scripts/verify-built-pwa.mjs # 빌드 산출물 정합 검사(verify:demo 체인과 동일)
+
+      # HTTP/CSP/OG 스모크. 번들 예산 검사만 뺀다(파일 상단 헤더 참조). 나머지 검사는
+      # 살아 있다: 홈/티켓 200·홈 CSP 가 Turnstile 오리진을 허용 안 함·x-frame DENY·
+      # OG 엔드포인트가 no-store PNG. 자체 next start(:3300)를 띄웠다 내린다.
+      - name: HTTP 스모크(번들 예산 검사 제외)
+        run: node scripts/smoke-http.mjs
+        env:
+          APP_PROFILE: fixture
+          NEXT_PUBLIC_APP_PROFILE: fixture
+          SMOKE_SKIP_BUNDLE_BUDGET: "1"
+
+      # tests/e2e — playwright.config.ts. workers:1(fixture 서버의 인메모리 rate-limit 공유),
+      # retries:1. 실측 기준선: 13 passed / 7 skipped.
+      - run: npm run test:e2e
+
+      # tests/pwa — playwright.production.config.ts. APP_PROFILE 미설정이면 fixture 모드로
+      # next start(:3200) 를 자체 기동한다. APP_PROFILE=production 을 넘기면 RELEASE_BASE_URL
+      # 없이 throw 하므로 여기서는 절대 그 프로파일을 주지 않는다.
+      - run: npm run test:pwa
+
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: ${{ github.workspace }}/playwright-artifacts
+          if-no-files-found: warn
+          retention-days: 14
+
+  # ── Expo 앱: 독립 lockfile 기준 정적 검사 + 실제 Metro/Hermes export ──────────
+  # 루트 tsconfig 에 apps/** 를 include 하면 안 된다 — TS 버전(5.9.3 vs 6.0.3)과
+  # 옵션이 달라 같은 소스를 두 컴파일러가 다르게 본다.
+  app-verify:
+    name: Expo 앱 검증 + Android export
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+          cache-dependency-path: apps/app/package-lock.json
+
+      # ★ --ignore-scripts 는 명령줄 전용이다. .npmrc 에 넣으면 EAS 리눅스 워커의 Skia
+      #   네이티브 링크가 깨진다(check-monorepo 가 .npmrc 파일 삽입을 강제로 막는다).
+      #   typecheck 는 타입 선언만 필요 — Skia 네이티브(수백 MB) 다운로드를 건너뛴다.
+      - name: 앱 의존성(네이티브 스킵)
+        working-directory: apps/app
+        run: npm ci --ignore-scripts
+
+      - name: 앱 린트
+        working-directory: apps/app
+        run: npm run lint
+
+      - name: 타입체크
+        working-directory: apps/app
+        run: npm run typecheck
+
+      - name: 앱 순수 계약 테스트
+        working-directory: apps/app
+        run: npm test
+
+      - name: Expo 프로젝트 진단
+        working-directory: apps/app
+        run: npx expo-doctor
+
+      - name: Expo SDK 의존성 정합
+        working-directory: apps/app
+        run: npx expo install --check
+
+      - name: Android Metro + Hermes export
+        working-directory: apps/app
+        run: npm run export:android
+
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: expo-android-export-metadata
+          path: apps/app/dist/android/metadata.json
+          if-no-files-found: warn
+          retention-days: 14
+
+  # ── 공유 서비스: 브라우저/PWA와 독립된 Node/Web API 계약 ─────────────────────
+  share-api:
+    name: 공유 API build/test/smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+
+      - run: npm ci
+
+      - name: 타입체크
+        working-directory: services/share-api
+        run: npm run typecheck
+
+      - name: 계약 테스트
+        working-directory: services/share-api
+        run: npm test
+
+      - name: fixture HTTP 스모크
+        working-directory: services/share-api
+        run: npm run smoke
+
+      - name: Chromium 설치
+        run: npx playwright install --with-deps chromium
+
+      - name: 공유 랜딩 브라우저 계약
+        run: npm run test:share-landing
+
+      - name: 운영 credential 없는 preflight는 반드시 차단
+        working-directory: services/share-api
+        run: |
+          if npm run preflight; then
+            echo "credential-less production preflight가 잘못 통과했습니다."
+            exit 1
+          fi

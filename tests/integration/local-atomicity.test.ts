@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildSharedSnapshot, fingerprintSharedSnapshot } from "@/domain/canonical";
 import { calculatePlan } from "@/domain/calculation";
 import type { Plan, TicketSnapshot } from "@/domain/models";
+import { webSha256 } from "@/domain/web-ports";
 import {
   claimTicketMotion,
   clearLocalDataForTests,
@@ -49,7 +50,7 @@ async function ticketForSeed(plan: Plan, artworkSeed: string): Promise<TicketSna
     payload,
     canonicalPayload: JSON.stringify(payload),
     artworkSeed,
-    fingerprint: await fingerprintSharedSnapshot(payload),
+    fingerprint: await fingerprintSharedSnapshot(payload, webSha256),
     issueMotionClaimedAt: null,
     createdAt: "2026-07-22T00:00:00.000Z",
   };

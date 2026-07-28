@@ -2,6 +2,14 @@
 node_modules
 .pnpm-store
 coverage
+services/*/dist/
+
+# Expo 가 생성하는 타입. 커밋 대상이 아니며(apps/app/.gitignore) 포맷 검사도 무의미하다.
+apps/app/.expo
+apps/app/dist
+apps/app/expo-env.d.ts
+apps/app/tools/out
+
 playwright-report
 test-results
 public/sw.js
@@ -17,3 +25,10 @@ pnpm-lock.yaml
 **/*.md
 **/*.log
 **/*.txt
+
+# 디자인 보드는 눈으로 판정하는 증거물이다. Prettier의 HTML 재정렬은 inline 요소 사이의
+# 공백을 바꿔 렌더 결과를 건드릴 수 있으므로 바이트 그대로 둔다(같은 폴더의 .mjs/.js 도구는 검사 대상).
+design-lab/**/*.html
+design-lab/**/*.css
+docs/design/**/*.html
+docs/design/**/*.css

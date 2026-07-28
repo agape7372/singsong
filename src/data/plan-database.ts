@@ -1,9 +1,30 @@
 import Dexie, { type EntityTable, type Table, liveQuery } from "dexie";
-import type { Plan, SharedSnapshot, TicketSnapshot, Track } from "@/domain/models";
-import { assertValidPlan } from "@/domain/validation";
+import type { Plan, SharedSnapshot, TicketSnapshot } from "@/domain/models";
+import { base64Url } from "@/domain/bytes";
+import {
+  ACTIVE_PLAN_ID,
+  DEFAULT_PROFILE_COLOR,
+  PROFILE_ID,
+  PlanLimitError,
+  RevisionConflictError,
+  applyPlanMutation,
+  buildImportedPlan,
+  combineManagedShare,
+  emptyProfile as emptyProfileAt,
+  isCompleteReceipt,
+  isExpired as isExpiredAt,
+  isStalePending as isStalePendingAt,
+  isValidCompletionReceipt,
+  newManagedShare as newManagedShareAt,
+  newPlan as newPlanAt,
+} from "@/store/policy";
 
-export const ACTIVE_PLAN_ID = "active-plan";
-export const PROFILE_ID = "me";
+// ★ C8: 정책·상수·에러 클래스의 정본은 @/store/policy 다. Dexie 저장 기전(이 파일)은 M6 까지
+//   살고, node:sqlite 판(packages/store)과 **같은 순수 정책을 공유**해 규칙이 두 벌로 갈라지지
+//   않게 한다(만료 24h·정규식·100곡·revision·기본색). 아래 재-export 로 기존 소비처
+//   (use-active-plan.ts:77 의 `instanceof RevisionConflictError`)를 무변경으로 유지한다.
+export { ACTIVE_PLAN_ID, DEFAULT_PROFILE_COLOR, PROFILE_ID, PlanLimitError, RevisionConflictError };
+
 const CHANNEL_NAME = "singsong-active-plan-v1";
 
 class SingSongDatabase extends Dexie {
@@ -89,10 +110,10 @@ export type ProfileRecord = {
   updatedAt: string;
 };
 
-export const DEFAULT_PROFILE_COLOR = "rose";
-
+// now 기본값을 채우는 얇은 래퍼(순수 코어는 now 필수 — 결정성). BaseProfile 은 photo 축이
+// 없지만 ProfileRecord 의 photo 는 optional 이라 그대로 대입된다.
 function emptyProfile(now = new Date().toISOString()): ProfileRecord {
-  return { id: PROFILE_ID, nickname: "", colorId: DEFAULT_PROFILE_COLOR, updatedAt: now };
+  return emptyProfileAt(now);
 }
 
 type LegacyManagedShare = {
@@ -131,33 +152,10 @@ function db() {
   return database;
 }
 
-export class RevisionConflictError extends Error {
-  constructor(
-    readonly expected: number,
-    readonly actual: number,
-  ) {
-    super(`Plan revision changed: expected ${expected}, actual ${actual}`);
-    this.name = "RevisionConflictError";
-  }
-}
-
-export class PlanLimitError extends Error {
-  constructor() {
-    super("A plan can contain at most 100 tracks");
-    this.name = "PlanLimitError";
-  }
-}
+// RevisionConflictError·PlanLimitError 는 @/store/policy 가 정본(상단에서 import·재-export).
 
 function newPlan(now = new Date().toISOString()): Plan {
-  return {
-    id: ACTIVE_PLAN_ID,
-    revision: 0,
-    createdAt: now,
-    updatedAt: now,
-    items: [],
-    people: null,
-    pricing: null,
-  };
+  return newPlanAt(now);
 }
 
 function signalRevision(revision: number) {
@@ -216,17 +214,9 @@ export async function mutateActivePlan(
     if (current.revision !== expectedRevision) {
       throw new RevisionConflictError(expectedRevision, current.revision);
     }
-    const mutable = mutation(structuredClone(current));
-    if (mutable.items.length > 100) throw new PlanLimitError();
-    const next: Plan = {
-      ...mutable,
-      id: ACTIVE_PLAN_ID,
-      revision: current.revision + 1,
-      createdAt: current.createdAt,
-      updatedAt: new Date().toISOString(),
-      items: mutable.items.map((item, order) => ({ ...item, order })),
-    };
-    assertValidPlan(next);
+    // CAS(위 revision 비교)는 여기 남고, 클론→뮤테이션→100곡→order 재번호→assertValidPlan 은
+    // 공유 정책 applyPlanMutation 이 한다(node:sqlite 판과 규칙 한 벌).
+    const next = applyPlanMutation(current, mutation, new Date().toISOString());
     await db().plans.put(next);
     return next;
   });
@@ -234,18 +224,8 @@ export async function mutateActivePlan(
   return updated;
 }
 
-export async function replaceActivePlan(
-  expectedRevision: number,
-  items: readonly Track[],
-  people: number | null = null,
-  pricing: Plan["pricing"] = null,
-) {
-  return mutateActivePlan(expectedRevision, () => ({
-    items: items.map((item, order) => ({ ...item, id: crypto.randomUUID(), order })),
-    people,
-    pricing,
-  }));
-}
+// replaceActivePlan 은 삭제했다(C8) — 리포 전체 호출자 0건(실측 grep). crypto.randomUUID 구멍
+// (핸드오프 표의 plan-database.ts:244)도 이 삭제로 함께 사라진다.
 
 export async function importSharedPlan(
   expectedRevision: number,
@@ -265,24 +245,8 @@ export async function importSharedPlan(
       throw new RevisionConflictError(expectedRevision, current.revision);
     }
     const now = new Date().toISOString();
-    const plan: Plan = {
-      id: ACTIVE_PLAN_ID,
-      revision: current.revision + 1,
-      createdAt: current.createdAt,
-      updatedAt: now,
-      items: payload.items.map((item, order) => ({
-        id: crypto.randomUUID(),
-        source: item.source,
-        catalogSongId: null,
-        title: item.title,
-        artist: item.artist,
-        karaokeCodes: item.karaokeCodes.map(({ vendor, code }) => ({ vendor, code })),
-        order,
-      })),
-      people: payload.calculation.people,
-      pricing: payload.calculation.pricing,
-    };
-    assertValidPlan(plan);
+    // 공유 스냅샷 → 로컬 플랜 투영은 공유 정책 buildImportedPlan 이 한다(항목마다 새 로컬 id).
+    const plan = buildImportedPlan(current, payload, now, () => crypto.randomUUID());
     await db().plans.put(plan);
     await db().imports.add({ slug, importedAt: now, planRevision: plan.revision });
     return { status: "imported" as const, plan };
@@ -315,51 +279,25 @@ export async function claimTicketMotion(planId: string, revision: number) {
   });
 }
 
+// bearer capability 토큰. btoa+정규식 replace 대신 도메인의 순수 base64Url(트랙 A, bytes.ts:40)
+// 을 쓴다 — canonical.ts 의 중복을 접은 것과 같은 정리(트랙 A 인계). 16→22자(끝 [AQgw])·32→43자로
+// 바이트 동일하다(M15 실측, completeManagedShare 정규식 통과).
 function capabilityToken(bytes: number) {
-  const random = crypto.getRandomValues(new Uint8Array(bytes));
-  let binary = "";
-  random.forEach((byte) => (binary += String.fromCharCode(byte)));
-  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/u, "");
+  return base64Url(crypto.getRandomValues(new Uint8Array(bytes)));
 }
 
-const PENDING_SHARE_RETENTION_MS = 24 * 60 * 60 * 1000;
-
+// isExpired·isStalePending·isCompleteReceipt·combineManagedShare 는 @/store/policy 가 정본
+// (상단 import). 여기서는 now 기본값만 채우는 얇은 래퍼로 감싼다(24h 상수도 policy 로 이동).
 function isExpired(record: ManagedShareReceipt, now = Date.now()) {
-  return record.expiresAt !== null && Date.parse(record.expiresAt) <= now;
+  return isExpiredAt(record, now);
 }
 
 function isStalePending(record: ManagedShareReceipt, now = Date.now()) {
-  return (
-    record.slug === null &&
-    (!Number.isFinite(Date.parse(record.createdAt)) ||
-      Date.parse(record.createdAt) <= now - PENDING_SHARE_RETENTION_MS)
-  );
-}
-
-function isCompleteReceipt(
-  receipt: ManagedShareReceipt,
-): receipt is ManagedShareReceipt & { slug: string; expiresAt: string } {
-  return receipt.slug !== null && receipt.expiresAt !== null;
-}
-
-function combineManagedShare(receipt: ManagedShareReceipt, secret: ManagedShareSecret) {
-  return { ...receipt, ...secret } satisfies ManagedShare;
+  return isStalePendingAt(record, now);
 }
 
 function newManagedShare(fingerprint: string, now = new Date().toISOString()) {
-  const receipt: ManagedShareReceipt = {
-    fingerprint,
-    slug: null,
-    expiresAt: null,
-    createdAt: now,
-  };
-  const secret: ManagedShareSecret = {
-    fingerprint,
-    idempotencyKey: capabilityToken(16),
-    revokeToken: capabilityToken(32),
-    createdAt: now,
-  };
-  return { receipt, secret, combined: combineManagedShare(receipt, secret) };
+  return newManagedShareAt(fingerprint, now, capabilityToken);
 }
 
 async function deleteManagedShareInTransaction(fingerprint: string) {
@@ -428,11 +366,8 @@ export async function completeManagedShare(
   fingerprint: string,
   receipt: { slug: string; revokeToken: string; expiresAt: string },
 ): Promise<ManagedShare> {
-  if (
-    !/^[A-Za-z0-9_-]{21}[AQgw]$/u.test(receipt.slug) ||
-    !/^[A-Za-z0-9_-]{43}$/u.test(receipt.revokeToken) ||
-    !Number.isFinite(Date.parse(receipt.expiresAt))
-  ) {
+  // 형태 검증(정규식 2개 + Date.parse)은 공유 정책 isValidCompletionReceipt 가 정본이다.
+  if (!isValidCompletionReceipt(receipt)) {
     throw new Error("Managed share receipt is invalid");
   }
   return db().transaction("rw", db().managedShares, db().managedShareSecrets, async () => {

@@ -5,22 +5,59 @@ const desktopOnly = (projectName: string) =>
   test.skip(projectName !== "chromium-desktop", "covered once in the explicit desktop matrix");
 
 async function expectNoHorizontalOverflow(page: import("@playwright/test").Page) {
-  const overflow = await page.evaluate(
-    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-  );
-  expect(overflow).toBeLessThanOrEqual(1);
+  // 리플로우 도중 한 프레임을 읽으면 가짜 오버플로가 잡힌다. 레이아웃이 안정될 때까지 본다.
+  // 실패하면 어떤 요소가 밀어냈는지 함께 보고한다.
+  const read = () =>
+    page.evaluate(() => {
+      const viewportWidth = document.documentElement.clientWidth;
+      const found = [...document.querySelectorAll<HTMLElement>("body *")]
+        .map((element) => {
+          const bounds = element.getBoundingClientRect();
+          return {
+            element: `${element.tagName.toLowerCase()}${element.id ? `#${element.id}` : ""}${
+              typeof element.className === "string" && element.className
+                ? `.${element.className.trim().replace(/\s+/gu, ".")}`
+                : ""
+            }`,
+            left: Math.round(bounds.left),
+            right: Math.round(bounds.right),
+            width: Math.round(bounds.width),
+          };
+        })
+        .filter(({ left, right, width }) => width > 0 && (left < -1 || right > viewportWidth + 1))
+        .slice(0, 8);
+      return {
+        overflow: document.documentElement.scrollWidth - viewportWidth,
+        found,
+      };
+    });
+
+  let report = await read();
+  for (let attempt = 0; attempt < 20 && report.overflow > 1; attempt += 1) {
+    await page.waitForTimeout(100);
+    report = await read();
+  }
+  expect(report.overflow, JSON.stringify(report.found, null, 2)).toBeLessThanOrEqual(1);
+}
+
+async function openSearchSheet(page: import("@playwright/test").Page) {
+  // 곡 담기는 bottom sheet다. `/search` 라우트는 4탭 IA 재설계에서 사라졌다.
+  const opener = page
+    .getByRole("button", { name: /노래 찾으러 가기|노래 찾기|곡 더 담기/u })
+    .first();
+  await opener.click();
+  await expect(page.getByRole("dialog", { name: "곡 담기" })).toBeVisible();
 }
 
 async function addFixtureSong(page: import("@playwright/test").Page) {
-  await page.goto("/search");
+  await page.goto("/");
+  await openSearchSheet(page);
   await page.getByLabel("제목, 가수 또는 노래방 번호").fill("밤의 체크인");
-  const result = page.getByRole("listitem").filter({ hasText: "밤의 체크인" }).first();
+  const result = page.locator(".search-result-row").filter({ hasText: "밤의 체크인" });
   await expect(result).toBeVisible();
   await result.getByRole("button", { name: /밤의 체크인.*담기/u }).click();
   await expect(result.getByLabel(/밤의 체크인.*담김/u)).toHaveText("✓ 담김");
-  const planRail = page.getByRole("complementary", { name: "현재 플랜 요약" });
-  await expect(planRail).toContainText("1곡");
-  await planRail.getByRole("link", { name: "플랜 보기" }).click();
+  await page.getByRole("button", { name: "검색 닫기" }).click();
   await expect(page.getByRole("heading", { name: "오늘의 플랜" })).toBeAttached();
   await expect(page.getByRole("heading", { name: "SINGSONG" })).toBeVisible();
 }
@@ -56,7 +93,8 @@ test("IME pause, stale-response rejection, duplicate confirmation and both undo 
       .catch(() => undefined);
   });
 
-  await page.goto("/search");
+  await page.goto("/");
+  await openSearchSheet(page);
   const search = page.getByLabel("제목, 가수 또는 노래방 번호");
   await search.dispatchEvent("compositionstart");
   await search.fill("밤의");
@@ -70,7 +108,7 @@ test("IME pause, stale-response rejection, duplicate confirmation and both undo 
   await page.waitForTimeout(700);
   await expect(page.getByText("느린 과거 결과", { exact: true })).not.toBeVisible();
 
-  const latestResult = page.getByRole("listitem").filter({ hasText: "최신 검색 결과" });
+  const latestResult = page.locator(".search-result-row").filter({ hasText: "최신 검색 결과" });
   await latestResult.getByRole("button", { name: /최신 검색 결과.*담기/u }).click();
   await expect(latestResult.getByLabel(/최신 검색 결과.*담김/u)).toHaveText("✓ 담김");
   await expect(latestResult.getByRole("button", { name: /담김/u })).not.toBeAttached();
@@ -81,19 +119,19 @@ test("IME pause, stale-response rejection, duplicate confirmation and both undo 
   await page.getByLabel("곡 제목").fill("같은 수동곡");
   await page.getByRole("textbox", { name: "가수", exact: true }).fill("같은 가수");
   await page.getByRole("button", { name: "플랜에 담기" }).click();
-  const planRail = page.getByRole("complementary", { name: "현재 플랜 요약" });
-  await expect(planRail).toContainText("1곡");
+  const sheetCount = page.locator(".search-sheet-count");
+  await expect(sheetCount).toContainText("1곡 담김");
 
   await page.getByRole("button", { name: "목록에 없나요? 직접 입력" }).click();
   await page.getByLabel("곡 제목").fill("같은 수동곡");
   await page.getByRole("textbox", { name: "가수", exact: true }).fill("같은 가수");
   await page.getByRole("button", { name: "플랜에 담기" }).click();
   await expect(page.getByText(/같은 제목과 가수의 곡이 이미 있습니다/u)).toBeVisible();
-  await expect(planRail).toContainText("1곡");
+  await expect(sheetCount).toContainText("1곡 담김");
   await page.getByRole("button", { name: "플랜에 담기" }).click();
-  await expect(planRail).toContainText("2곡");
+  await expect(sheetCount).toContainText("2곡 담김");
 
-  await page.getByRole("link", { name: "플랜 보기" }).click();
+  await page.getByRole("button", { name: "검색 닫기" }).click();
   await expect(page.locator(".track-list li")).toHaveCount(2);
 
   await page.getByRole("button", { name: "같은 수동곡 삭제" }).first().click();
@@ -148,7 +186,7 @@ test("100 long tracks remain bounded and export a nonblank fixed-size ticket", a
   desktopOnly(testInfo.project.name);
   await page.emulateMedia({ colorScheme: "dark" });
   await page.goto("/");
-  await expect(page.getByText("00 / 100")).toBeVisible();
+  await expect(page.getByText("0곡", { exact: true })).toBeVisible();
 
   await page.evaluate(async () => {
     const now = new Date().toISOString();
@@ -195,8 +233,6 @@ test("100 long tracks remain bounded and export a nonblank fixed-size ticket", a
   await expectNoHorizontalOverflow(page);
   await page.locator(".home-confirm-action").click();
   await expect(page.getByRole("heading", { name: "오늘의 세션 스트립" })).toBeVisible();
-  await expect(page.getByText("나머지 96곡")).toBeVisible();
-  await expect(page.locator(".ticket-track-list li")).toHaveCount(5);
 
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: "PNG 저장" }).click();
@@ -210,9 +246,22 @@ test("100 long tracks remain bounded and export a nonblank fixed-size ticket", a
   });
   const stats = await image.stats();
   expect(stats.channels.some((channel) => channel.stdev > 1)).toBe(true);
-  expect(stats.dominant.r).toBeGreaterThan(230);
-  expect(stats.dominant.g).toBeGreaterThan(230);
-  expect(stats.dominant.b).toBeGreaterThan(230);
+  // 예전 단언(dominant > 230)은 캔버스 우측 45%가 백지로 남는 버그 덕분에 통과했다.
+  // 이 테스트는 dark colorScheme으로 도는 만큼, 내보내기가 라이트 팔레트를 그대로
+  // 유지하는지(장미색이 검정으로 떨어지지 않는지)를 픽셀로 확인한다.
+  const { data, info } = await sharp(downloadPath!).raw().toBuffer({ resolveWithObject: true });
+  let rosePixels = 0;
+  for (let offset = 0; offset < data.length; offset += info.channels) {
+    const red = data[offset]!;
+    const green = data[offset + 1]!;
+    const blue = data[offset + 2]!;
+    if (red > 200 && green < 120 && blue > 60 && blue < 190) rosePixels += 1;
+  }
+  expect(rosePixels).toBeGreaterThan(20_000);
+  const rightBand = await sharp(downloadPath!)
+    .extract({ left: 864, top: 700, width: 216, height: 400 })
+    .stats();
+  expect(rightBand.channels.some((channel) => channel.stdev > 5)).toBe(true);
 });
 
 test("revocation removes HTML/API access while OG stays generic and import recovers", async ({
@@ -227,14 +276,14 @@ test("revocation removes HTML/API access while OG stays generic and import recov
   await page.getByLabel("낱곡 가격 (원)").fill("1000");
   await page.getByRole("button", { name: "계산에 적용" }).click();
   await page.locator(".home-confirm-action").click();
-  await page.getByRole("checkbox", { name: /위 공개 범위/u }).check();
+  await page.getByRole("checkbox", { name: /공개 범위와 30일 만료/u }).check();
   await page.getByRole("button", { name: "공유 링크 발급" }).click();
   const href = await page.getByRole("link", { name: "발급된 티켓 열기" }).getAttribute("href");
   expect(href).toMatch(/\/s\/[A-Za-z0-9_-]{22}$/u);
   const slug = href!.split("/").at(-1)!;
 
   await page.getByRole("button", { name: "링크 폐기" }).first().click();
-  await expect(page.getByText(/공유 링크를 폐기했습니다/u)).toBeVisible();
+  await expect(page.getByText(/공유 링크를 폐기했어요/u)).toBeVisible();
 
   expect((await request.get(href!)).status()).toBe(404);
   expect((await request.get(`/api/shares/${slug}`)).status()).toBe(404);

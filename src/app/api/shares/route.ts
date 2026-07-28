@@ -4,6 +4,7 @@ import {
   fingerprintSharedSnapshot,
   serializeSharedSnapshot,
 } from "@/domain/canonical";
+import { webSha256 } from "@/domain/web-ports";
 import { getShareRepository } from "@/features/share/repository.server";
 import { ShareRepositoryError } from "@/features/share/types";
 import { DomainValidationError } from "@/domain/validation";
@@ -59,7 +60,7 @@ export async function POST(request: Request) {
       throw new HttpProblem(400, "INVALID_SHARE", "티켓 데이터를 확인해 주세요.");
     const payload = canonicalizeSharedSnapshot(parsed.data.payload);
     const canonicalPayload = serializeSharedSnapshot(payload);
-    const fingerprint = await fingerprintSharedSnapshot(payload);
+    const fingerprint = await fingerprintSharedSnapshot(payload, webSha256);
     const repository = getShareRepository();
     const inspection = await repository.inspect(
       parsed.data.idempotencyKey,

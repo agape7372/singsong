@@ -99,7 +99,16 @@ async function smoke() {
     homeInitialJsGzipBytes += gzipBytes;
     initialScriptSizes.push({ script, gzipBytes });
   }
-  if (homeInitialJsGzipBytes > 170 * 1024) {
+  // ★ 번들 예산 검사만 env 로 끌 수 있다 — CI(.github/workflows/ci.yml)의 e2e job 만
+  //   SMOKE_SKIP_BUNDLE_BUDGET=1 을 세운다. 홈 초기 JS 가 이 예산(170 KiB gzip)을 P3
+  //   이전부터 초과 중이고(실측 2026-07-27: 225.8 KiB, 36% 초과), 원인은 페이지 코드가
+  //   아니라 벤더 청크(motion·@base-ui/react·React)라 P3 와 무관하다. 사용자 결정
+  //   (2026-07-27): 이 검사만 CI 에서 빼고 벤더 다이어트를 별건으로 등록한다.
+  //   ⚠ 예산 숫자 170 은 절대 올리지 않는다 — 로컬 `npm run verify:demo` 는 이 검사를
+  //     계속 강제하므로 복구 기준선이 살아 있다. env 미설정이 기본값(강제)이다.
+  //   측정값은 스킵 여부와 무관하게 아래 최종 JSON(homeInitialJsGzipBytes)으로 항상 보고된다.
+  const enforceBundleBudget = process.env.SMOKE_SKIP_BUNDLE_BUDGET !== "1";
+  if (enforceBundleBudget && homeInitialJsGzipBytes > 170 * 1024) {
     initialScriptSizes.sort((left, right) => right.gzipBytes - left.gzipBytes);
     throw new Error(
       `Home modern initial JavaScript exceeds 170 KiB gzip: ${homeInitialJsGzipBytes}\n${JSON.stringify(initialScriptSizes)}`,

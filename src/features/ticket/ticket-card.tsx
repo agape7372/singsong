@@ -3,14 +3,9 @@
 import { forwardRef, useId } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import type { SharedSnapshot } from "@/domain/models";
+import { formatWonRange } from "@/domain/format";
 
 const fixtureBuild = process.env.NEXT_PUBLIC_APP_PROFILE !== "production";
-
-const won = new Intl.NumberFormat("ko-KR", {
-  style: "currency",
-  currency: "KRW",
-  maximumFractionDigits: 0,
-});
 
 export const TicketCard = forwardRef<
   HTMLElement,
@@ -30,12 +25,10 @@ export const TicketCard = forwardRef<
   const headingId = useId();
   const { calculation } = payload;
   const Heading = headingLevel;
-  const totalLow = won.format(calculation.derived.totalLowWon);
-  const totalHigh = won.format(calculation.derived.totalHighWon);
-  const totalLabel =
-    calculation.derived.totalLowWon === calculation.derived.totalHighWon
-      ? totalLow
-      : `${totalLow}–${totalHigh}`;
+  const totalLabel = formatWonRange(
+    calculation.derived.totalLowWon,
+    calculation.derived.totalHighWon,
+  );
   const serial = fingerprint
     ? fingerprint.slice(0, 10).toUpperCase()
     : payload.artworkSeed.slice(0, 10);

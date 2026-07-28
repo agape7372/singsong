@@ -5,6 +5,7 @@ import type { FormEvent } from "react";
 import { AlertDialog } from "@base-ui/react/alert-dialog";
 import { useRouter, useSearchParams } from "next/navigation";
 import { canonicalizeSharedSnapshot } from "@/domain/canonical";
+import { formatKstDateTime } from "@/domain/format";
 import type { SharedSnapshot } from "@/domain/models";
 import { importSharedPlan } from "@/data/plan-database";
 import { useActivePlan } from "@/features/plan/use-active-plan";
@@ -270,7 +271,7 @@ export function ImportScreen() {
             <p>
               공유 링크 만료:{" "}
               {expiresAt ? (
-                <time dateTime={expiresAt}>{new Date(expiresAt).toLocaleString("ko-KR")}</time>
+                <time dateTime={expiresAt}>{formatKstDateTime(expiresAt)}</time>
               ) : (
                 "확인 중"
               )}

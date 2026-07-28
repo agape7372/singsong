@@ -119,7 +119,9 @@ describe("Turnstile request binding", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it("allows fixture bypass only on loopback", async () => {
+  it("bypasses the human check in the fixture demo profile on any host", async () => {
+    // fixture는 가상 카탈로그 + 로컬 공유 저장소 데모이고 위젯을 렌더하지 않는다.
+    // loopback으로 묶으면 터널/LAN 프리뷰에서 공유 플로우가 영구 실패한다.
     vi.stubEnv("APP_PROFILE", "fixture");
     const key = `${"F".repeat(21)}A`;
 
@@ -128,7 +130,24 @@ describe("Turnstile request binding", () => {
     ).resolves.toBe(true);
     await expect(
       verifyHuman(undefined, new Request("https://preview.example/api/shares"), key),
+    ).resolves.toBe(true);
+  });
+
+  it("still demands a real Turnstile verdict in the production profile", async () => {
+    vi.stubEnv("APP_PROFILE", "production");
+    vi.stubEnv("TURNSTILE_SECRET_KEY", "real-secret-for-contract-test");
+    vi.stubEnv("TURNSTILE_ALLOWED_HOSTNAMES", "tickets.example.com");
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      verifyHuman(
+        undefined,
+        new Request("https://tickets.example.com/api/shares"),
+        `${"H".repeat(21)}A`,
+      ),
     ).resolves.toBe(false);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("fails closed when Siteverify exceeds five seconds", async () => {

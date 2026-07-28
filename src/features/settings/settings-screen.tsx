@@ -88,9 +88,7 @@ export function SettingsScreen() {
       <div className="settings-sheet">
         <section className="settings-group" aria-labelledby="settings-profile-title">
           <h2 id="settings-profile-title">프로필</h2>
-          <p className="settings-note">
-            닉네임과 사진은 이 기기에만 저장되며, 공유 링크나 티켓 이미지에는 포함되지 않습니다.
-          </p>
+          <p className="settings-note">공유 링크나 티켓 이미지에는 들어가지 않아요.</p>
           <div className="profile-editor">
             <ProfileAvatar profile={profile} size={64} className="profile-editor-avatar" />
             <div className="profile-editor-fields">
@@ -150,26 +148,30 @@ export function SettingsScreen() {
 
         <section className="settings-group" aria-labelledby="settings-install-title">
           <h2 id="settings-install-title">설치</h2>
-          <p className="settings-note">
-            홈 화면에 추가하면 브라우저 탭 없이 앱처럼 열 수 있어요. 임시 미리보기 주소는 영구
-            서비스가 아니며, 주소가 바뀌면 이 기기의 플랜이 자동으로 옮겨지지 않습니다.
-          </p>
-          <ul className="settings-steps">
-            <li>
-              <strong>iPhone Safari</strong> — 공유 → 홈 화면에 추가 → ‘웹 앱으로 열기’ 활성화 →
-              추가
-            </li>
-            <li>
-              <strong>Android Chrome</strong> — 더보기 → 홈 화면에 추가 → 설치
-            </li>
-          </ul>
+          <p className="settings-note">홈 화면에 추가하면 앱처럼 열려요.</p>
+          <details className="settings-disclosure">
+            <summary>기기별 설치 방법</summary>
+            <ul className="settings-steps">
+              <li>
+                <strong>iPhone Safari</strong> — 공유 → 홈 화면에 추가 → ‘웹 앱으로 열기’ 활성화 →
+                추가
+              </li>
+              <li>
+                <strong>Android Chrome</strong> — 더보기 → 홈 화면에 추가 → 설치
+              </li>
+            </ul>
+            <p className="settings-note">
+              임시 미리보기 주소는 영구 서비스가 아니에요. 주소가 바뀌면 이 기기의 플랜은 따라오지
+              않아요.
+            </p>
+          </details>
         </section>
 
         <section className="settings-group" aria-labelledby="settings-data-title">
           <h2 id="settings-data-title">데이터</h2>
           <p className="settings-note">
-            플랜·발권 기록·프로필은 이 기기의 브라우저에 자동 저장됩니다. 서버로 전송되지 않으며,
-            브라우저 저장 공간을 지우면 함께 사라집니다.
+            플랜·발권 기록·프로필은 이 브라우저에만 저장돼요. 저장 공간을 지우면 함께 사라져요.
+            검색어는 주소나 로그에 남기지 않아요.
           </p>
           <p className="settings-row">
             <Link className="button-link" href="/import#storage-status">
@@ -205,14 +207,6 @@ export function SettingsScreen() {
               </AlertDialog.Viewport>
             </AlertDialog.Portal>
           </AlertDialog.Root>
-        </section>
-
-        <section className="settings-group" aria-labelledby="settings-info-title">
-          <h2 id="settings-info-title">정보</h2>
-          <p className="settings-note">
-            싱송(작업명)은 로컬 우선 노래방 세션 플래너입니다. 곡·계산·발권 데이터는 이 기기에만
-            머무릅니다.
-          </p>
         </section>
       </div>
 

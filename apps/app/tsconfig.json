@@ -1,0 +1,34 @@
+{
+  // ★ apps/app 은 자체 lockfile로 격리 설치된다. Metro의 TypeScript resolver도 같은 경계를
+  //   지킬 수 있도록 저장소 루트 설정을 상속하지 않고, 공통 타입 안전성 옵션을 직접 선언한다.
+  //   Expo의 module/moduleResolution/jsx/lib 설정은 그대로 상속한다.
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/assets/*": ["./assets/*"],
+      "@singsong/domain": ["../../packages/domain/src/index.ts"],
+      "@singsong/domain/*": ["../../packages/domain/src/*"],
+      "@singsong/store": ["../../packages/store/src/index.ts"],
+      "@singsong/store/*": ["../../packages/store/src/*"],
+      "@singsong/ticket-art": ["../../packages/ticket-art/src/index.ts"],
+      "@singsong/ticket-art/*": ["../../packages/ticket-art/src/*"],
+      "@singsong/tokens": ["../../packages/tokens/src/index.ts"],
+      "@singsong/tokens/*": ["../../packages/tokens/src/*"],
+      "zod": ["./node_modules/zod"]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "../../packages/*/src/**/*.ts",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
+  ]
+}

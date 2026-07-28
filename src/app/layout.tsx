@@ -45,6 +45,10 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
+  // Android Chrome defaults to resizes-visual, which leaves dvh/fixed layers sized
+  // for the full screen while the IME covers them. resizes-content shrinks the
+  // layout viewport so the 곡 담기 sheet keeps its result rows visible.
+  interactiveWidget: "resizes-content",
   colorScheme: "light dark",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#FAF7F0" },

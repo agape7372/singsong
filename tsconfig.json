@@ -1,18 +1,13 @@
 {
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "target": "ES2022",
     "lib": ["dom", "dom.iterable", "es2022", "webworker"],
     "allowJs": false,
-    "skipLibCheck": true,
-    "strict": true,
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
     "plugins": [
@@ -22,16 +17,28 @@
     ],
     "types": ["@serwist/next/typings", "vitest/globals"],
     "paths": {
+      "@/domain": ["./packages/domain/src/index.ts"],
+      "@/domain/*": ["./packages/domain/src/*"],
+      "@singsong/domain": ["./packages/domain/src/index.ts"],
+      "@singsong/domain/*": ["./packages/domain/src/*"],
+      "@/store": ["./packages/store/src/index.ts"],
+      "@/store/*": ["./packages/store/src/*"],
       "@/*": ["./src/*"]
     }
   },
   "include": [
     "next-env.d.ts",
     ".next/types/**/*.ts",
+    "packages/*/src/**/*.ts",
+    "packages/store/test/**/*.ts",
+    "services/*/src/**/*.ts",
+    "services/*/api/**/*.ts",
+    "services/*/test/**/*.ts",
     "src/**/*.ts",
     "src/**/*.tsx",
     "tests/**/*.ts",
     "tests/**/*.tsx",
+    "e2e/landing/**/*.ts",
     "scripts/**/*.mjs",
     "next.config.mjs",
     "vitest.config.ts",

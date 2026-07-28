@@ -1,0 +1,72 @@
+# EAS 빌드 업로드 제외 목록
+#
+# ★ 이 파일이 존재하는 순간 EAS 는 트리 안의 **모든 `.gitignore` 를 무시한다.**
+#   루트 `.gitignore` 도, `apps/app/.gitignore` 도 더 이상 읽히지 않는다.
+#   따라서 여기 다시 적지 않은 규칙은 전부 "업로드함" 으로 뒤집힌다 —
+#   빠뜨리면 조용히 커지기만 하고 아무도 눈치채지 못한다.
+#
+#   경로는 **저장소 루트 기준**이다(`git rev-parse --show-toplevel` = 이 파일이 있는 곳).
+#   앞의 `/` 가 그 뜻이고, 그래서 `/docs` 는 `apps/app/docs` 를 건드리지 않는다.
+#
+#   규칙을 지우거나 추가할 때는 `node tools/check-monorepo.mjs` 로 확인하라.
+
+# ── 의존성 ──────────────────────────────────────────────────────────────
+# EAS 워커가 lockfile 로 직접 설치한다. 올려 봐야 플랫폼이 안 맞는다.
+node_modules
+
+# ── 네이티브 빌드와 무관한 최상위 디렉터리 ─────────────────────────────
+# /docs 는 147MB — 그중 docs/design 이 147MB 다(디자인 보드 PNG). 단일 최대 절감.
+/docs
+/design-lab
+/supabase
+/test-results
+/coverage
+/.next
+/out
+/playwright-report
+/blob-report
+# public/og 는 152KB 라 남긴다 — 지울 이유가 없다.
+
+# ── 로컬 비밀값 ─────────────────────────────────────────────────────────
+# 위 override 규칙 때문에 루트 `.gitignore` 의 .env 보호가 **무효화된다.**
+# 다시 적지 않으면 로컬 .env 가 EAS 워커로 올라간다. (.env.example 은 값이 없어 유지)
+.env
+.env.local
+.env.*.local
+
+# ── apps/app/.gitignore 재진술 ──────────────────────────────────────────
+# 루트 기준 경로로 다시 써야 적용된다.
+/apps/app/android
+/apps/app/ios
+/apps/app/.expo
+/apps/app/dist
+/apps/app/web-build
+# 하프톤 검증 하네스 산출물(apps/app/tools/verify-halftone.mjs) — 228KB
+/apps/app/tools/out
+# 폰 전달용 APK 56MB. dev 서버가 public/ 을 정적 서빙할 뿐, 빌드 입력이 아니다.
+/apps/app/public/*.apk
+/apps/app/public/ping.txt
+/apps/app/.metro-health-check*
+/apps/app/.kotlin
+
+# 서명 자재는 EAS credentials 가 관리한다. 소스 번들에 실려선 안 된다.
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pem
+
+# ── 잡동사니 ────────────────────────────────────────────────────────────
+*.tsbuildinfo
+*.pid
+*.orig.*
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+.DS_Store
+Thumbs.db
+
+# ⚠ /apps 와 /packages 는 절대 제외하지 말 것 — 빌드 대상 그 자체다.
+#   (tools/check-monorepo.mjs 가 이 조건을 강제한다. 그 검사는 주석을 걷어낸 뒤
+#    판정하므로, 바로 이 경고문에 스스로 걸리지 않는다.)

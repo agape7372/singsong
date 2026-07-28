@@ -2,15 +2,36 @@
 
 ## 현재 상태
 
-- build capability: `LOCAL_DEMO_READY` — Node 24.18/Next 16.2.11에서 dependency audit와 CUTLINE mobile-shell fixture production artifact의 static/test/build/start/smoke/E2E/PWA/performance를 검증한 release candidate
+- 제품 경로: Expo 네이티브 앱(`apps/app`) + 공유 API/랜딩(`services/share-api`)
+- 저장소 capability: `NATIVE_REPOSITORY_READY` — 플랜·티켓·PNG·공유 링크·딥링크 가져오기·
+  보관함·발견·설정 흐름과 fixture API smoke를 로컬 자동 검증할 수 있음
 - production gate: `BLOCKED_EXTERNAL`
-- 가장 큰 blocker: 권리 승인된 production karaoke catalog와 실제 production infra/device/legal evidence가 없음
-- 배포 상태: staging/production 배포를 수행하지 않았음
-- phone preview: `ACTIVE_PREVIEW/READY` — 2026-07-23 Station `main` 빌드와 Folded Session S 아이콘을 Quick Tunnel 주소에 재게시하고 공개 E2E/PWA를 통과함
+- 가장 큰 blocker: 권리 승인 production catalog, 실제 Supabase/Redis/HTTPS origin,
+  앱 서명·Expo 빌드 계정, Android/iOS 실기기와 카카오 공유 증거
+- 배포 상태: 새 공유 서비스와 EAS production APK를 배포하지 않았음
+- 레거시 상태: Next/PWA와 기존 Quick Tunnel은 rollback/reference일 뿐 네이티브 배포 증거가 아님
 
-실제 명령/exit code/build/start/E2E 결과는 `VERIFICATION_REPORT.md`가 유일한 최종 근거다. `docs/verification/QA_MATRIX_V3.md`도 같은 최종 증거로 갱신했다. 로컬 fixture 후보의 PASS는 실제 release build, production service 또는 공개 배포 PASS가 아니다.
+네이티브 전환의 행별 판정은 `docs/PARITY_LEDGER.md`, 기기에서 반드시 확인할 항목은
+`docs/verification/NATIVE_DEVICE_CHECKLIST.md`가 소유한다. 외부 게이트가 닫히기 전에는
+Next/PWA 트리를 삭제하지 않는다.
 
-## 로컬에서 구현된 것
+실제 명령/exit code/build/E2E 결과는 `VERIFICATION_REPORT.md`가 유일한 최종 근거다.
+`docs/verification/QA_MATRIX_V3.md`는 보존된 PWA 검증표이며 네이티브 최신 판정을 소유하지
+않는다. 로컬 fixture 후보의 PASS는 실제 release build, production service 또는 공개 배포
+PASS가 아니다.
+
+## 네이티브 경로에 구현된 것
+
+- expo-sqlite 단일 활성 플랜과 revision CAS, 0–100곡, 재정렬·삭제·되돌리기
+- 합성 36곡 검색, 직접 입력·중복 확인, 인원·가격·예산 계산
+- 공용 ticket scene의 Skia 화면/CPU PNG와 SVG 랜딩, revision 보관
+- 1080×1350 PNG의 갤러리 저장과 OS 공유, 30일 링크 생성·복사·폐기
+- 공유 중/완료 보관함, 발견, 로컬 프로필 사진·6색 테마·OTA 표면·전체 삭제
+- custom/HTTPS 딥링크 정규화, 읽기 전용 미리보기, 명시적 가져오기·교체·되돌리기
+- 공유 API의 fixture/Supabase seam, 분산 rate-limit seam, CSP/no-store/noindex,
+  절대 OG URL, association 파일과 credential-less fail-closed preflight
+
+## 보존된 Next/PWA 기준선에 구현되어 있던 것
 
 - 가입 없는 한 활성 plan: fixture 검색, 직접 추가, 최대 100곡, 위/아래 reorder, 삭제/undo, 확인형 새 플랜/즉시 undo
 - 사용자가 입력하는 곡/시간 가격과 인원, `fallback-v1` 시간·비용·인당 범위, reverse prefix helper
@@ -28,27 +49,39 @@ Fixture의 곡/가수/TJ/KY 번호는 모두 `TEST DATA`이며 실제 catalog �
 
 ## Staging/production에서 실제 되는 것으로 확인된 것
 
-없음. 이 run은 외부 deploy, Supabase migration 적용, Turnstile/domain 연결, scheduler/backup 설정을 수행하지 않았다. 따라서 production repository와 deployment는 코드/문서 준비 상태이며 운영 PASS가 아니다.
+없음. 이 run은 외부 deploy, Supabase migration 적용, Redis/domain 연결,
+scheduler/backup 설정을 수행하지 않았다. 따라서 production repository와 deployment는
+코드/문서 준비 상태이며 운영 PASS가 아니다.
 
 ## 로컬 검증 결과
 
-- exact Node `24.18.0`/pnpm `11.9.0`, latest renewal format/lint/type와 39 files/194 tests PASS
-- Next/ESLint config `16.2.11`, PostCSS override `8.5.20`; prod+dev 전체 audit level low known vulnerability 0, 613-entry lock policy PASS
-- latest Station current는 public-origin fixture production build와 공개 Chromium 13 pass/7 intentional skip PASS; 리뉴얼 전 byte-exact 233-path clean snapshot은 37 files/185 tests, coverage threshold, PWA artifact/smoke PASS
-- built-app home/ticket/OG smoke 200, OG 30,423 bytes, home JS gzip 167,035 bytes; current PWA precache 49/forbidden 0/required brand assets 3, retained clean baseline precache 45
-- Chromium 20 discovered 중 13 pass/7 intentional project-gated skip, mobile organizer 1/1, keyboard/focus와 최신 public-origin built-PWA 3/3 PASS
-- cold/warm lab, home JS gzip, search distribution, calculation/ticket scripted latency PASS; field p75는 표본 없어 `NOT_RUN + NONE`
+- Node `v24.11.1`/npm `11.6.2`, frozen root/app install, monorepo guard 17/17,
+  guard tests 20/20, token 정본 56개/선언 102개 PASS
+- 루트 format/lint/type, M1 12개 gate, Vitest 64 files/504 tests와 커버리지
+  statements 83.53%, branches 76.02%, functions 84.11%, lines 85.69% PASS
+- Expo 앱 lint/type, 15개 계약 테스트, Expo doctor 20/20, install check,
+  2,220-module Android Hermes bytecode export PASS
+- 공유 API typecheck/build/smoke와 144개 테스트, 실제 브라우저 랜딩/axe/revoke 3/3 PASS
+- 보존된 Next 16.2.11 fixture production build PASS
+- 앱 전체와 루트 운영 의존성 감사 0건. 전체 루트 감사에는 보존된
+  ESLint/minimatch 3의 `brace-expansion` 개발 의존성 high 9건이 남으며, 호환성을 깨는
+  v5 강제 override는 사용하지 않음
+- 서비스 production preflight와 앱 EAS production hook은 자격 증명/origin이 없을 때
+  의도대로 `BLOCKED_EXTERNAL`/exit 1
 
-audit/install의 sandbox package/cache `EACCES`와 Chromium spawn `EPERM`은 승인된 동일 명령 재실행에서 PASS했다. stale Next 16.1.7 generated types는 clean-generated 뒤 16.2.11로 재생성했고, cold coverage의 OG timeout은 assertion을 유지한 명시적 integration ceiling에서 targeted/full 회귀 PASS로 닫았다. 이는 제품 실패를 숨긴 것이 아니라 generated-state와 managed sandbox 경계를 기록한 해결된 재시도다. 정확한 수치는 `VERIFICATION_REPORT.md`에 있다.
+Chromium 첫 실행의 sandbox `spawn EPERM`은 승인된 동일 소스 재실행에서 3/3 PASS했다.
+정확한 명령과 판정은 `VERIFICATION_REPORT.md`의 2026-07-28 네이티브 완료 절이 소유한다.
 
-## 임시 스마트폰 preview
+## 보존된 PWA 스마트폰 preview 기록
 
-- URL: `https://interactions-suffered-participate-empire.trycloudflare.com`
-- owner process: fixture app PID 43664 (`127.0.0.1:34173`), Quick Tunnel PID 43376
-- lifecycle: `ACTIVE_PREVIEW/READY`; stable host, staging 또는 production 아님
-- current public flow: 홈·검색 API·manifest·Folded Session S icon·service worker 200, Chromium organizer→recipient→import 전체 13 pass/7 intentional skip와 public PWA 3/3
-- current Station UI: Folded Session S 헤더, `SINGSONG`, bold numeric count, single `+`, `시간`, centered `완료`, redundant completion hint 없음
-- current brand cache contract: manifest/metadata/header는 `folded-session-s-{180,192,512}.png`, runtime cache는 `singsong-static-v2`; legacy icon filenames는 호환 alias
+- URL: `https://interactions-suffered-participate-empire.trycloudflare.com` (2026-07-23 기록,
+  2026-07-28 생존 여부 미검증)
+- 당시 owner process: fixture app PID 43664 (`127.0.0.1:34173`), Quick Tunnel PID 43376
+- 당시 lifecycle: `ACTIVE_PREVIEW/READY`; stable host, staging 또는 production은 아니었음
+- 검증 당시 public flow: 홈·검색 API·manifest·Folded Session S icon·service worker 200,
+  Chromium organizer→recipient→import 13 pass/7 intentional skip와 public PWA 3/3
+- 검증 당시 brand cache contract: `folded-session-s-{180,192,512}.png`,
+  runtime cache `singsong-static-v2`
 - isolation: 이전 3000번 포트 기반 터널은 싱송 종료 뒤 Podoal을 오노출해 종료했다. 다른 앱을 중지하지 않고 싱송을 전용 34173번 포트로 분리했다.
 - Android Chrome 설치: **더보기 → 홈 화면에 추가 → 설치**
 - iPhone Safari 설치: **더보기/공유 → 홈 화면에 추가 → ‘웹 앱으로 열기’ 활성화 → 추가**
@@ -67,7 +100,7 @@ origin-bound IndexedDB가 자동 이전되지 않으므로 임시 preview를 장
 | Supabase                | infrastructure owner                  | new project URL, `sb_secret_` key, migration 권한          | real ACL/RPC/TTL/race/scheduler report                  |
 | Legacy key disable      | Supabase project owner                | Dashboard/Management 권한                                  | legacy anon/service-role disable + redacted old-key 401 |
 | Share HMAC/rate secrets | security owner                        | 32+ byte independent secrets, active version               | secret-manager references, rotation rehearsal           |
-| Turnstile               | domain/security owner                 | production site/secret, exact host/action                  | Siteverify negative/timeout/replay evidence             |
+| Proxy/rate limit        | domain/security owner                 | Vercel trusted header, Redis URL/token, IP HMAC            | real header/spoof/timeout/rate evidence                 |
 | Domain/CDN              | release owner                         | HTTPS canonical URL, cache/log policy                      | no-store/noindex/no-referrer/CSP/OG matrix              |
 | Legal/privacy           | owner/legal/ops                       | privacy/terms/takedown contact/SLA/brand approval          | approved documents and named on-call                    |
 | Operations              | SRE/owner                             | monitoring, quota, backup, restore, rollback, key rotation | rehearsal with RPO/RTO and alerts                       |
@@ -75,27 +108,30 @@ origin-bound IndexedDB가 자동 이전되지 않으므로 임시 preview를 장
 
 ## Production setup
 
-1. `pnpm install --frozen-lockfile`로 설치하고 toolchain/hash를 확인한 뒤 `pnpm audit --audit-level=low`가 known vulnerability 0인지 확인한다.
-2. 새 Supabase project에 `supabase/migrations/20260722010000_share_snapshot_v1.sql`을 적용한다.
-3. `docs/catalog/SQL_PRIVILEGE_CHECKLIST.md`에 따라 private direct privilege 0과 exact RPC 6개를 실제 role로 확인한다.
-4. daily UTC cleanup RPC schedule과 row/byte/rate bucket/expiry alerts를 설정한다. migration 파일이 scheduler 자체 활성화를 증명한다고 가정하지 않는다.
-5. `.env.example`의 production 값을 secret manager에 넣는다. raw value를 shell log, ticket, docs, test artifact에 기록하지 않는다.
-6. catalog production provider/ingestion을 `CATALOG_RIGHTS.md`, `INGESTION_RUNBOOK.md`, `PROVENANCE.md`, `TAKEDOWN.md` 승인 뒤에만 활성화한다.
-7. `pnpm build:release` 후 stable HTTPS preview URL을 `RELEASE_BASE_URL`과 `NEXT_PUBLIC_SITE_URL`에 일치시켜 `pnpm verify:release`를 실행한다. 임시 Quick Tunnel의 shell 200은 이 gate를 대신하지 않는다. 이 script는 `APP_PROFILE=release`를 명시하고 내부 runtime만 production 호환값으로 매핑한다.
-8. `pnpm start` 때 Node instrumentation이 pure runtime env contract를 재검증하고 Supabase required-key RPC로 active·historical slug HMAC key를 모두 확인하는지 관찰한다. 실패한 instance는 traffic에서 제외한다.
-9. actual device와 legal/ops 행이 PASS한 뒤에만 사람이 production traffic 승인을 내린다.
+1. 루트와 `apps/app`에서 각각 `npm ci`를 실행하고 repository gate를 재현한다.
+2. 새 Supabase project에 `supabase/migrations/20260722010000_share_snapshot_v1.sql`을
+   적용하고 private direct privilege 0과 allowlist RPC를 실제 role로 확인한다.
+3. 권리 승인 catalog manifest/provider와 Supabase·slug HMAC·Redis/IP HMAC 비밀을
+   secret manager에 넣는다. raw 값은 log, ticket, 문서, artifact에 기록하지 않는다.
+4. stable HTTPS `SITE_ORIGIN`, `VERCEL=1`, Android release fingerprint와
+   `IOS_APP_ID`를 설정하고 `npm run share-api:preflight`를 통과시킨다.
+5. 같은 service artifact를 배포해 association content-type, OG crawler, proxy 수신 IP,
+   revoke/expiry/cleanup, alert와 backup/restore를 실제 환경에서 확인한다.
+6. 배포된 origin을 `EXPO_PUBLIC_SHARE_API_ORIGIN`으로 넣고 clean commit에서
+   `eas build --platform android --profile production`을 실행한다.
+7. Android/iOS 실기기 체크리스트, 폰 A→B handoff, OTA manifest를 닫은 뒤에만
+   사람이 production traffic과 레거시 트리 삭제를 승인한다.
 
-필수 environment:
-
-- public/runtime config: `APP_PROFILE=release`, `NEXT_PUBLIC_APP_PROFILE=release`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_ALLOWED_HOSTNAMES`
-- server-only: `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `SHARE_SLUG_ACTIVE_KEY_VERSION`, 해당 `SHARE_SLUG_HMAC_KEY_V<n>`, `RATE_LIMIT_IP_HMAC_KEY_V1`, `TURNSTILE_SECRET_KEY`
-- catalog gate: `CATALOG_RIGHTS_MANIFEST_PATH`, `CATALOG_RIGHTS_MANIFEST_SHA256`, `CATALOG_PROVIDER_URL`, `CATALOG_PROVIDER_API_KEY`
-- release verification only: `RELEASE_BASE_URL` (배포한 HTTPS preview 또는 production origin; `verify:release`와 `test:pwa:release`의 대상)
-- optional ops: `RATE_LIMIT_REDIS_URL`, `RATE_LIMIT_REDIS_TOKEN`, `OBSERVABILITY_DSN`
+필수 environment는 `services/share-api/.env.example`이 정본이다. 핵심 범주는
+`APP_PROFILE`, `SITE_ORIGIN`, Supabase, `SHARE_SLUG_*`, `RATE_LIMIT_*`, `CATALOG_*`,
+`ANDROID_APP_SHA256_CERT_FINGERPRINTS`, `IOS_APP_ID`다. 앱에는 public HTTPS
+`EXPO_PUBLIC_SHARE_API_ORIGIN`만 주입한다.
 
 ## Deploy와 rollback
 
-배포 install은 `pnpm install --frozen-lockfile`, build는 `pnpm build:release`, runtime은 `pnpm start`다. `build:production`은 호환 alias다. 이전 verified immutable app artifact를 항상 보존한다.
+공유 서비스 install은 루트 `npm ci`, build는 `npm run share-api:build`다. 앱은
+`EXPO_PUBLIC_SHARE_API_ORIGIN`을 고정한 clean commit에서 EAS production profile로 만든다.
+이전 verified immutable 서비스와 앱 artifact를 항상 보존한다.
 
 Rollback 순서:
 
@@ -110,14 +146,15 @@ Rollback 순서:
 
 - [ ] production catalog rights/provenance/coverage/new-song SLA/takedown
 - [ ] Supabase migration, direct ACL 0, RPC 6, legacy keys disabled
-- [ ] Turnstile exact host/action/time, proxy IP, rate quotas, fail-closed timeout
+- [ ] Redis/trusted proxy IP, rate quotas, HMAC rotation, fail-closed timeout
 - [ ] expiry/revoke/cleanup scheduler와 capacity alerts
 - [ ] privacy/terms/takedown contact/brand, incident owner
 - [ ] backup/restore/RPO/RTO와 application rollback rehearsal
 - [ ] domain no-store/noindex/no-referrer/CSP/access-log retention
 - [ ] iOS/Android/Kakao/PWA/native share/PNG/OG/VoiceOver/TalkBack
 - [ ] actual organizer/recipient study and truthful marketing copy
-- [x] repository-owned Critical/High 0와 current mobile-shell required automated PASS
+- [x] repository-owned runtime Critical/High 0와 현재 네이티브 자동 게이트 PASS
+- [ ] 보존된 ESLint 개발 도구 체인의 upstream `brace-expansion` high 해소
 
 ## 알려진 저장소 측 추적 항목
 
@@ -153,10 +190,8 @@ Root가 이 항목을 이번 run에서 해결하면 `UNKNOWN_RESOLUTIONS.md`, `R
 - repository `test-results/**/.last-run.json`은 이전 실패 generated metadata이며 final PASS 근거가 아니다.
 - generated build/service worker: `.next/`, `public/sw.js` (재생성 가능, source evidence 아님)
 
-## Active preview owner와 종료
+## 과거 preview process 취급
 
-`ACTIVE_RUN.lock`은 존재하지 않는다. root release agent가 사용자 확인을 위해 시작한 app PID
-43664와 tunnel PID 43376은 현재 의도적으로 유지한다. clean shutdown으로 표시하지 않으며,
-사용자가 확인을 끝냈을 때 root가 command line·listener·PID를 다시 대조한 뒤 자신이 시작한
-두 process만 종료한다. 이 문서는 다른 owner의 process를 중지하거나 broad process cleanup을
-허가하지 않는다.
+`ACTIVE_RUN.lock`은 존재하지 않는다. app PID 43664와 tunnel PID 43376은 과거 실행 기록일
+뿐 현재 owner 증거가 아니다. 종료 대상으로 간주하기 전에 root가 command line·listener·PID를
+다시 대조해야 하며, 다른 owner의 process 또는 broad process cleanup은 허가하지 않는다.

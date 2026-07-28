@@ -2,13 +2,15 @@ import { describe, expect, it } from "vitest";
 import {
   buildSharedSnapshot,
   createTicketSnapshot,
+  encodeArtworkSeed,
   fingerprintSharedSnapshot,
-  generateArtworkSeed,
   serializeSharedSnapshot,
 } from "@/domain/canonical";
 import { calculatePlan } from "@/domain/calculation";
 import type { Plan } from "@/domain/models";
+import { webSha256 } from "@/domain/web-ports";
 import { DomainValidationError } from "@/domain/validation";
+import { testPorts } from "../setup/domain-ports";
 
 const plan: Plan = {
   id: "local-only",
@@ -55,7 +57,7 @@ describe("canonical shared snapshot", () => {
       }),
     };
 
-    const ticket = await createTicketSnapshot(boundaryPlan);
+    const ticket = await createTicketSnapshot(boundaryPlan, testPorts);
     expect(ticket.payload.items).toHaveLength(100);
     expect(new TextEncoder().encode(ticket.canonicalPayload).byteLength).toBeLessThanOrEqual(
       96 * 1024,
@@ -82,13 +84,13 @@ describe("canonical shared snapshot", () => {
       calculatePlan(1, plan.pricing!, plan.people!),
       "AAAAAAAAAAAAAAAAAAAAAA",
     );
-    const first = await fingerprintSharedSnapshot(payload);
+    const first = await fingerprintSharedSnapshot(payload, webSha256);
     const reordered = JSON.parse(
       JSON.stringify(payload, Object.keys(payload).reverse()),
     ) as unknown;
     // A valid deep clone, even if caller insertion order differs, is reconstructed by the serializer.
     const clone = structuredClone(payload);
-    expect(await fingerprintSharedSnapshot(clone)).toBe(first);
+    expect(await fingerprintSharedSnapshot(clone, webSha256)).toBe(first);
     expect(first).toMatch(/^[a-f0-9]{64}$/u);
     expect(reordered).toBeDefined();
   });
@@ -116,8 +118,8 @@ describe("canonical shared snapshot", () => {
   });
 
   it("encodes exactly 128 bits of artwork entropy and rejects other lengths", () => {
-    expect(generateArtworkSeed(new Uint8Array(16))).toBe("AAAAAAAAAAAAAAAAAAAAAA");
-    expect(() => generateArtworkSeed(new Uint8Array(15))).toThrow(
+    expect(encodeArtworkSeed(new Uint8Array(16))).toBe("AAAAAAAAAAAAAAAAAAAAAA");
+    expect(() => encodeArtworkSeed(new Uint8Array(15))).toThrow(
       expect.objectContaining({ code: "INVALID_RANDOM_SEED" }),
     );
   });
@@ -163,7 +165,7 @@ describe("canonical shared snapshot", () => {
   });
 
   it("creates a self-consistent immutable local ticket snapshot", async () => {
-    const ticket = await createTicketSnapshot(plan);
+    const ticket = await createTicketSnapshot(plan, testPorts);
 
     expect(ticket).toMatchObject({
       planId: plan.id,
@@ -173,6 +175,7 @@ describe("canonical shared snapshot", () => {
     expect(ticket.artworkSeed).toHaveLength(22);
     expect(ticket.fingerprint).toMatch(/^[a-f0-9]{64}$/u);
     expect(ticket.canonicalPayload).toBe(serializeSharedSnapshot(ticket.payload));
-    expect(Number.isFinite(Date.parse(ticket.createdAt))).toBe(true);
+    // 강화: 포트의 now 가 실제로 createdAt 에 먹는지 증명한다(testPorts.now = FIXED_NOW_MS).
+    expect(ticket.createdAt).toBe("2026-07-22T00:00:00.000Z");
   });
 });

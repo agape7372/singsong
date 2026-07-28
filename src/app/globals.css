@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   color-scheme: light dark;
   --canvas: #faf7f0;
   --paper: #ffffff;
@@ -18,11 +18,27 @@
   --danger: #b82f39;
   --focus: #15131a;
   --shadow-strip: 0 16px 45px rgb(67 32 50 / 9%);
-  --shadow-ticket: 0 24px 70px rgb(50 25 39 / 15%);
+  /* 70px blur는 스크롤마다 다시 칠하는 면적이 크고 아래 패널까지 잠기게 만든다. */
+  --shadow-ticket: 0 14px 32px rgb(50 25 39 / 14%);
   --radius-control: 8px;
   --radius-action: 10px;
   --radius-strip: 14px;
-  --radius-ticket: 20px;
+  --radius-ticket: 24px;
+  --radius-full: 999px;
+
+  /* 티켓 전용 스코프. 값은 src/features/ticket/ticket-artwork.json 의 palette 와 같아야 하며
+     tests/static/ticket-art-contract.test.ts 가 두 곳을 대조한다.
+     PNG·OG 는 항상 이 라이트 팔레트로 출력하므로 다크에서도 바꾸지 않는다. */
+  --ticket-paper: #f6efdc;
+  --ticket-ink: #15131a;
+  --ticket-ink-muted: #665f68;
+  --ticket-accent-fill: #ff3d6e;
+  --ticket-accent-text: #d91f52;
+  --ticket-money-text: #8a5200;
+  --ticket-border-control: #817984;
+  --ticket-canvas: #faf7f0;
+  --ticket-surface-muted: #fff5f8;
+  --ticket-border-subtle: #e2dbcf;
   --layout-gutter: clamp(1rem, 4vw, 1.5rem);
   --safe-bottom: max(0.75rem, env(safe-area-inset-bottom));
   --primary-nav-height: calc(3.75rem + var(--safe-bottom));
@@ -57,7 +73,20 @@
     --danger: #ff8177;
     --focus: #f5eef3;
     --shadow-strip: 0 18px 48px rgb(0 0 0 / 22%);
-    --shadow-ticket: 0 26px 74px rgb(0 0 0 / 34%);
+    --shadow-ticket: 0 14px 34px rgb(0 0 0 / 32%);
+
+    /* 인앱 티켓은 사용자 테마를 따른다(정본 §9-2). PNG·OG만 항상 라이트로 출력하는데,
+       그 둘은 ticket-art.ts의 리터럴 팔레트를 쓰므로 여기 값에 영향받지 않는다. */
+    --ticket-paper: #241c2a;
+    --ticket-ink: #f5eef3;
+    --ticket-ink-muted: #b8a9bc;
+    --ticket-accent-fill: #ff6b9b;
+    --ticket-accent-text: #ff8ab1;
+    --ticket-money-text: #f5a623;
+    --ticket-border-control: #88798d;
+    --ticket-canvas: #16111c;
+    --ticket-surface-muted: #281d27;
+    --ticket-border-subtle: #413547;
   }
 }
 
@@ -202,12 +231,15 @@ h3 {
   background: var(--canvas);
 }
 
+/* 글자 크기를 키우면 워드마크 + 4탭 + 오버플로 메뉴가 한 줄에 못 들어간다.
+   줄바꿈을 허용해야 200~400% 확대에서도 가로 스크롤이 생기지 않는다(WCAG reflow). */
 .site-header-inner {
   display: flex;
   width: min(100%, 1000px);
   min-height: 3.65rem;
   align-items: center;
-  gap: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
   margin: 0 auto;
   padding: 0.5rem var(--layout-gutter);
 }
@@ -353,7 +385,6 @@ h3 {
   padding-bottom: calc(var(--primary-nav-height) + var(--bottom-slot-height) + 1.5rem);
 }
 
-.task-shell-search,
 .narrow-shell {
   width: min(calc(100% - (2 * var(--layout-gutter))), 720px);
 }
@@ -487,6 +518,8 @@ h3 {
   flex: 1;
   overflow-y: auto;
   padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+  /* sticky 검색 바 높이만큼 확보해야 포커스 이동/앵커 스크롤이 바 뒤로 숨지 않는다. */
+  scroll-padding-top: 4.5rem;
 }
 
 /* 프로필 아바타 */
@@ -941,9 +974,13 @@ h3 {
   font-size: 0.8rem;
 }
 
+/* 티켓 그림자(--shadow-ticket)는 24px 내려앉아 70px 번진다. 0.6rem만 띄우면 이 패널이
+   그림자 안에 잠겨 글자가 가려 보인다. 그림자 아래로 확실히 내리고 자체 배경으로 덮는다. */
 .collection-share,
 .collection-archive {
-  margin-top: 0.6rem;
+  position: relative;
+  z-index: 1;
+  margin-top: 1.6rem;
   padding: 0.7rem 0.85rem;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-action);
@@ -1657,7 +1694,6 @@ textarea {
 
 .track-list,
 .result-list,
-.ticket-track-list,
 .managed-shares-list {
   margin: 0;
   padding: 0;
@@ -2085,13 +2121,16 @@ textarea {
   font-size: 0.74rem;
 }
 
+/* 시트 안에서만 쓰이므로 sticky 기준은 시트 본문 상단(0)이다.
+   과거 /search 페이지 시절의 3.65rem(사이트 헤더 높이)을 남겨 두면
+   sticky 요소가 아래로 밀리며 유령 띠가 생기고 다음 요소를 덮는다. */
 .search-ledger-head {
   position: sticky;
   z-index: 15;
-  top: 3.65rem;
+  top: 0;
   margin-inline: -0.25rem;
   padding: 0.3rem 0.25rem 0.7rem;
-  background: var(--canvas);
+  background: var(--paper);
 }
 
 .search-input-wrap {
@@ -2420,22 +2459,35 @@ button.home-confirm-action {
   width: min(calc(100% - (2 * var(--layout-gutter))), 760px);
 }
 
+/* 링크가 단어 중간에서 잘려 제목과 겹치지 않도록, 좁으면 아래 줄로 내린다.
+   body의 overflow-wrap:anywhere 때문에 shrink를 막지 않으면 ‘순서 다시 편/집’으로 쪼개진다. */
 .ticket-screen-heading {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
   margin-bottom: 1.1rem;
+}
+
+.ticket-screen-heading > *:first-child {
+  min-width: 0;
+  flex: 1 1 14rem;
+}
+
+.ticket-screen-heading > a {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .ticket-screen-heading h1 {
   max-width: 16ch;
 }
 
+/* 티켓 자체가 이미 카드다. 무대에 테두리·배경까지 주면 카드가 상자를 뚫고 나온 것처럼
+   보이고(특히 다크에서 색이 붙는다) 화면에 rounded surface가 하나 더 늘어난다. 여백만 남긴다. */
 .ticket-stage {
   padding: clamp(0.6rem, 3vw, 1.25rem);
-  border: 1px solid var(--border-subtle);
-  background: var(--surface-muted);
 }
 
 .ticket-card {
@@ -2456,8 +2508,10 @@ button.home-confirm-action {
   grid-template-rows: auto minmax(150px, 1fr) auto;
   margin: 0 auto;
   overflow: hidden;
+  /* 카드 밖으로 새는 페인트가 없다는 걸 명시해 스크롤 리페인트 범위를 줄인다. */
+  contain: paint;
   border: 1px solid var(--card-border);
-  border-radius: 1.5rem;
+  border-radius: var(--radius-ticket);
   background: var(--card-paper);
   color: var(--card-ink);
   box-shadow: var(--shadow-ticket);
@@ -2550,58 +2604,6 @@ button.home-confirm-action {
   font-weight: 800;
   letter-spacing: 0.05em;
   text-align: center;
-}
-
-.ticket-track-list {
-  min-height: 0;
-  margin: 0.75rem 0 0;
-  overflow: auto;
-  padding: 0 var(--card-pad);
-}
-
-.ticket-track-list li {
-  display: grid;
-  grid-template-columns: 1.75rem minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 0.55rem;
-  border-top: 1px solid var(--ticket-border-subtle, var(--border-subtle));
-  padding: 0.55rem 0;
-}
-
-.ticket-track-list > li:first-child {
-  border-top: 0;
-}
-
-.ticket-track-list > li > span {
-  align-self: start;
-  color: var(--card-ink-muted);
-  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-  font-size: 0.74rem;
-  font-weight: 800;
-}
-
-.ticket-track-copy strong,
-.ticket-track-copy small {
-  display: block;
-}
-
-.ticket-track-copy strong {
-  font-size: 0.95rem;
-  line-height: 1.3;
-}
-
-.ticket-track-copy small,
-.ticket-code {
-  color: var(--card-ink-muted);
-  font-size: 0.74rem;
-}
-
-.ticket-code {
-  text-align: right;
-}
-
-.ticket-more-items {
-  grid-template-columns: 1.75rem minmax(0, 1fr) !important;
 }
 
 .ticket-totals {
@@ -2721,8 +2723,9 @@ button.home-confirm-action {
   z-index: 0;
   width: 100%;
   height: 100%;
+  /* multiply를 걸면 카드 전체가 합성 고속경로에서 빠져 스크롤마다 다시 칠해진다.
+     단색 노이즈라 낮은 불투명도에서는 normal과 눈에 띄는 차이가 없다. */
   opacity: 0.16;
-  mix-blend-mode: multiply;
   pointer-events: none;
 }
 
@@ -2732,6 +2735,7 @@ button.home-confirm-action {
   z-index: 1;
   isolation: isolate;
   display: grid;
+  /* 포스터 헤드는 중앙 정렬을 유지한다(사용자 결정 2026-07-26). PNG·OG도 여기에 맞춘다. */
   justify-items: center;
   padding: calc(var(--card-pad) - 0.2rem) var(--card-pad) 0.4rem;
   text-align: center;
@@ -2765,7 +2769,8 @@ button.home-confirm-action {
   inset: 0;
   z-index: -1;
   color: var(--card-accent);
-  text-align: center;
+  /* 본문과 같은 정렬이어야 고스트가 글자 뒤에 정확히 겹친다(좌측 정렬 전환 후). */
+  text-align: inherit;
   transform: translate(3px, 3px);
   content: attr(data-text);
   pointer-events: none;
@@ -2827,13 +2832,16 @@ button.home-confirm-action {
 
 .ticket-composition-grain {
   opacity: 0.14;
-  mix-blend-mode: multiply;
 }
 
 /* 티켓 앞↔뒷 플립 */
 .flip-scene {
   width: min(100%, 420px);
-  height: min(90dvh, 720px);
+  /* dvh 는 모바일 크롬에서 주소창이 접혔다 펴질 때마다 값이 바뀐다. 스크롤 중 카드 높이가
+     오르내리면서 아래 패널까지 밀렸다 당겨져 간격이 48px↔94px 로 튀었다(녹화 프레임 실측).
+     svh 는 주소창이 보이는 상태 기준으로 고정이라 스크롤에 반응하지 않는다. */
+  height: min(90vh, 720px);
+  height: min(90svh, 720px);
   margin: 0 auto;
   perspective: 1400px;
 }
@@ -2881,11 +2889,11 @@ button.home-confirm-action {
   transform: rotateY(180deg);
 }
 
-/* 플립 힌트 */
+/* 플립 힌트 — 스텁 우하단은 총액 자리라 겹친다. 비어 있는 상단 우측에 둔다. */
 .flip-toggle::after {
   position: absolute;
+  top: 0.7rem;
   right: 0.9rem;
-  bottom: 0.7rem;
   z-index: 3;
   padding: 0.1rem 0.5rem;
   border-radius: var(--radius-full);
@@ -2975,6 +2983,11 @@ button.home-confirm-action {
   margin: 0;
 }
 
+/* 과금 방식은 라벨·값이 둘 다 길어 반 칸에 안 들어간다. 한 줄을 통째로 쓴다. */
+.ticket-back-summary > div:last-child {
+  grid-column: 1 / -1;
+}
+
 .ticket-back-summary > div {
   display: flex;
   align-items: baseline;
@@ -2982,10 +2995,19 @@ button.home-confirm-action {
   gap: 0.5rem;
 }
 
+/* body의 overflow-wrap:anywhere가 여기까지 내려오면 좁은 열에서 '과금 방/식',
+   '곡당 요/금'처럼 단어 중간이 끊긴다. 라벨·값은 통째로만 줄바꿈한다. */
+.ticket-back-summary dt,
+.ticket-back-summary dd {
+  overflow-wrap: normal;
+  word-break: keep-all;
+}
+
 .ticket-back-summary dt {
   color: var(--card-ink-muted);
   font-size: 0.76rem;
   font-weight: 760;
+  white-space: nowrap;
 }
 
 .ticket-back-summary dd {
@@ -3023,12 +3045,15 @@ button.home-confirm-action {
   }
 }
 
+/* 패널이 티켓 그림자 위에 얹히도록 스태킹을 올린다. */
 .ticket-share-panel,
 .ticket-share-result,
 .managed-shares,
 .share-receipt {
+  position: relative;
+  z-index: 1;
   width: min(100%, 540px);
-  margin: 1rem auto 0;
+  margin: 1.9rem auto 0;
   border: 1px solid var(--border-control);
   border-radius: var(--radius-control);
   padding: 1rem;
@@ -3080,7 +3105,40 @@ button.home-confirm-action {
   margin-top: 0.12rem;
 }
 
+/* 상세 고지는 접어 둔다. 행동 화면에는 결정에 필요한 한 줄만 남긴다. */
+.share-disclosure-details,
+.settings-disclosure {
+  margin-bottom: 0.75rem;
+}
+
+.share-disclosure-details > summary,
+.settings-disclosure > summary {
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
+  color: var(--accent-text);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.share-disclosure-details > summary::marker,
+.settings-disclosure > summary::marker {
+  color: var(--ink-muted);
+}
+
+.ticket-demo-note {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.75rem 0 0;
+  color: var(--ink-muted);
+  font-size: 0.75rem;
+}
+
 .ticket-actions {
+  position: relative;
+  z-index: 1;
   display: grid;
   width: min(100%, 540px);
   gap: 0.6rem;
@@ -3111,6 +3169,15 @@ button.home-confirm-action {
   margin: 0.7rem auto 0;
   color: var(--ink-muted);
   font-size: 0.8rem;
+}
+
+/* 실패는 성공/힌트와 같은 회색으로 보이면 안 된다. */
+.ticket-status[data-tone="error"] {
+  border-left: 3px solid var(--danger);
+  padding: 0.45rem 0.6rem;
+  color: var(--danger);
+  font-size: 0.86rem;
+  font-weight: 600;
 }
 
 .managed-shares {
@@ -3176,9 +3243,15 @@ button.home-confirm-action {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
   width: min(100%, 760px);
   margin: 0 auto 1rem;
+}
+
+.shared-ticket-heading > *:first-child {
+  min-width: 0;
+  flex: 1 1 14rem;
 }
 
 .shared-ticket-heading > p {
@@ -3191,41 +3264,6 @@ button.home-confirm-action {
 .shared-detail-column {
   display: grid;
   gap: 1rem;
-}
-
-.shared-ledger {
-  min-width: 0;
-  border: 1px solid var(--border-control);
-  border-radius: var(--radius-strip);
-  padding: 1rem;
-  background: var(--paper);
-}
-
-.shared-ledger ol {
-  max-height: 38rem;
-  margin: 0;
-  padding: 0;
-  overflow: auto;
-  list-style: none;
-}
-
-.shared-ledger li {
-  display: grid;
-  grid-template-columns: 1.75rem minmax(0, 1fr) auto;
-  gap: 0.55rem;
-  border-top: 1px solid var(--border-subtle);
-  padding: 0.62rem 0;
-}
-
-.shared-ledger li > span,
-.shared-ledger li small {
-  color: var(--ink-muted);
-  font-size: 0.7rem;
-}
-
-.shared-ledger li strong,
-.shared-ledger li small {
-  display: block;
 }
 
 .handoff-panel {
@@ -3622,7 +3660,10 @@ button.home-confirm-action {
   .primary-nav {
     position: static;
     display: flex;
+    min-width: 0;
+    max-width: 100%;
     min-height: auto;
+    flex-wrap: wrap;
     gap: 0.15rem;
     margin-left: auto;
     border: 0;
@@ -3632,6 +3673,7 @@ button.home-confirm-action {
 
   .primary-nav a {
     min-width: 5.4rem;
+    max-width: 100%;
     min-height: 2.75rem;
     grid-auto-flow: column;
     justify-content: center;

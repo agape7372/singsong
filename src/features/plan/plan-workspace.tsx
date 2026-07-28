@@ -4,6 +4,8 @@ import { useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { createTicketSnapshot } from "@/domain/canonical";
+import { webPorts } from "@/domain/web-ports";
+import { josa } from "@/domain/josa";
 import { DOMAIN_LIMITS, normalizeTrackText } from "@/domain/validation";
 import type { Plan, PricingConfig, Track } from "@/domain/models";
 import type { CatalogTrack } from "@/features/catalog/types";
@@ -41,16 +43,11 @@ function WorkspaceLoading() {
         >
           <div className="section-heading">
             <div>
-              <p className="step-label">
-                곡 순서{" "}
-                <span className="serial-meta" aria-hidden="true">
-                  QUEUE / 01
-                </span>
-              </p>
+              <p className="step-label">곡 순서</p>
               <h2 id="loading-strip-title">오늘의 순서를 여는 중</h2>
             </div>
             <span className="count-stamp" aria-hidden="true">
-              -- / 100
+              --
             </span>
           </div>
           <ol className="track-list loading-track-list" aria-hidden="true">
@@ -74,7 +71,8 @@ function WorkspaceLoading() {
 }
 
 export function PlanWorkspace() {
-  const { plan, error, notice, isSaving, mutate, dismissError, announce } = useActivePlan();
+  const { plan, getPlan, error, notice, isSaving, mutate, dismissError, announce } =
+    useActivePlan();
   const [removed, setRemoved] = useState<RemovedTrack | null>(null);
   const [resetBackup, setResetBackup] = useState<ResetBackup | null>(null);
   const [newPlanDialogOpen, setNewPlanDialogOpen] = useState(false);
@@ -114,9 +112,11 @@ export function PlanWorkspace() {
   }
 
   async function addCatalogTrack(catalog: CatalogTrack) {
-    if (plan!.items.length >= 100) return false;
-    if (plan!.items.some((item) => item.catalogSongId === catalog.id)) {
-      announce(`‘${catalog.title}’은 이미 플랜에 담겨 있습니다.`);
+    // 연타 중에는 렌더 상태가 한 박자 늦으므로 최신 스냅샷으로 검사한다.
+    const latest = getPlan() ?? plan!;
+    if (latest.items.length >= 100) return false;
+    if (latest.items.some((item) => item.catalogSongId === catalog.id)) {
+      announce(`‘${catalog.title}’${josa(catalog.title, "은/는")} 이미 담겨 있어요.`);
       return false;
     }
     const karaokeCodes = Object.entries(catalog.karaokeCodes)
@@ -142,7 +142,9 @@ export function PlanWorkspace() {
         people: current.people,
         pricing: current.pricing,
       }),
-      `‘${catalog.title}’을 ${plan!.items.length + 1}번째 곡으로 담았습니다.`,
+      // 번호는 저장이 끝난 뒤의 실제 길이로 만든다(연타 시 번호 중복/건너뜀 방지).
+      (updated) =>
+        `‘${catalog.title}’${josa(catalog.title, "을/를")} ${updated.items.length}번째 곡으로 담았어요.`,
     );
     if (added) {
       trackAnalytics({ name: "song_added", source: "catalog" });
@@ -153,7 +155,7 @@ export function PlanWorkspace() {
   }
 
   async function addManualTrack(input: ManualTrackInput) {
-    if (plan!.items.length >= 100) return false;
+    if ((getPlan() ?? plan!).items.length >= 100) return false;
     const added = await mutate(
       (current) => ({
         items: [
@@ -173,7 +175,7 @@ export function PlanWorkspace() {
         people: current.people,
         pricing: current.pricing,
       }),
-      `‘${input.title}’을 직접 입력해 담았습니다.`,
+      `‘${input.title}’${josa(input.title, "을/를")} 직접 입력해 담았어요.`,
     );
     if (added) {
       trackAnalytics({ name: "song_added", source: "manual" });
@@ -303,10 +305,10 @@ export function PlanWorkspace() {
     if (issuing.current || !plan!.people || !plan!.pricing || plan!.items.length === 0) return;
     issuing.current = true;
     try {
-      const ticket = await createTicketSnapshot(plan!);
+      const ticket = await createTicketSnapshot(plan!, webPorts);
       const { saveTicket } = await import("@/data/plan-database");
       await saveTicket(ticket);
-      announce("이 revision의 티켓을 발급했습니다.");
+      announce("지금 순서로 티켓을 만들었어요.");
       // `/ticket` has a deliberately broader production CSP for Turnstile.
       // A full navigation is required because a client transition retains the
       // CSP of the document that originally loaded `/`.
