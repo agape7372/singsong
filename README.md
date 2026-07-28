@@ -84,8 +84,8 @@ Node `v24.11.1`/npm `11.6.2`에서 루트 64파일/504테스트와 커버리지
 install check는 최신 상태였다. 보존된 Next 16.2.11 롤백 빌드도 패치된 PostCSS/Sharp로
 성공했다.
 
-앱 전체 감사와 루트 운영 의존성 감사(`npm audit --omit=dev`)는 취약점 0건이다. 전체 루트
-감사에는 보존된 ESLint/minimatch 3 개발 체인의 `brace-expansion` high 9건이 남는다.
+앱과 루트의 운영 의존성 감사(`npm audit --omit=dev`)는 취약점 0건이다. 전체 앱·루트
+감사에는 ESLint/minimatch 3 개발 체인의 `brace-expansion` high 9건이 남는다.
 `brace-expansion` 5를 강제하면 CommonJS 호출 계약이 깨지므로 억지 override를 사용하지 않는다.
 upstream 도구 체인 교체 전까지 운영 게이트와 개발 도구 위험을 분리해 추적한다.
 

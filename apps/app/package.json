@@ -26,11 +26,11 @@
     "verify": "npm run lint && npm run typecheck && npm run doctor && expo install --check && npm run export:android"
   },
   "dependencies": {
+    "@shopify/react-native-skia": "2.6.2",
     "@singsong/domain": "file:../../packages/domain",
     "@singsong/store": "file:../../packages/store",
     "@singsong/ticket-art": "file:../../packages/ticket-art",
     "@singsong/tokens": "file:../../packages/tokens",
-    "@shopify/react-native-skia": "2.6.2",
     "expo": "~57.0.8",
     "expo-build-properties": "~57.0.7",
     "expo-clipboard": "~57.0.1",
@@ -62,7 +62,11 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
+    "@emnapi/core": "2.0.0-alpha.3",
+    "@emnapi/runtime": "2.0.0-alpha.3",
     "@types/react": "~19.2.2",
+    "eslint": "^9.39.5",
+    "eslint-config-expo": "~57.0.0",
     "typescript": "~6.0.3",
     "vitest": "4.1.10"
   }

@@ -23,14 +23,14 @@
 | Format/lint/type | `PASS` | Prettier 전체, ESLint warning 0, `tsc --noEmit` |
 | M1 core | `PASS` | 맨 Node 헤드리스 gate 12/12 |
 | Root coverage | `PASS` | 64 files / 504 tests; statements 83.53%, branches 76.02%, functions 84.11%, lines 85.69% |
-| Expo app | `PASS` | lint, typecheck, 1 file / 15 tests |
+| Expo app | `PASS` | isolated `npm ci` 875 packages; lint, typecheck, 1 file / 15 tests |
 | Expo dependency health | `PASS` | Expo doctor 20/20, `expo install --check` 최신 |
 | Android bundle | `PASS` | React Compiler + Hermes, 2,220 modules, 약 5.6MB HBC |
 | Share API | `PASS` | typecheck/build, 6 files / 144 tests, fixture route smoke |
 | Share landing browser | `PASS` | 실제 API create, script-free HTML/SVG, absolute OG, axe, revoke/unknown 404 — 3/3 |
 | Preserved Next build | `PASS` | Next 16.2.11 Webpack fixture production build, 모든 route 생성 |
-| Runtime dependency audit | `PASS` | app 전체 0건, root `npm audit --omit=dev` 0건 |
-| Full root audit | `TRACKED_DEV_ONLY` | 보존된 ESLint/minimatch 3의 `brace-expansion` high 9건 |
+| Runtime dependency audit | `PASS` | app/root `npm audit --omit=dev` 0건 |
+| Full app/root audit | `TRACKED_DEV_ONLY` | ESLint/minimatch 3의 `brace-expansion` high 9건 |
 | Share production preflight | `PASS_FAIL_CLOSED` | 운영 입력 없이 `BLOCKED_EXTERNAL`, exit 1, blocker 이름만 출력 |
 | EAS build hook | `PASS_FAIL_CLOSED` | local profile은 skip; production origin 없이는 `BLOCKED`, exit 1 |
 

@@ -40,8 +40,8 @@ or deployed.
 Expo doctor 20/20/install check/Android Hermes export, 공유 API 144 tests/smoke,
 브라우저 랜딩 3/3과 보존된 Next build를 통과했다.
 
-앱 전체와 root runtime 감사는 취약점 0건이다. 전체 root 감사에는 보존된 ESLint/minimatch 3
-개발 체인의 `brace-expansion` high 9건이 남는다. 호환되지 않는 v5 강제 override는 제거했고
+앱과 root runtime 감사는 취약점 0건이다. 전체 앱·root 감사에는 ESLint/minimatch 3 개발
+체인의 `brace-expansion` high 9건이 남는다. 호환되지 않는 v5 강제 override는 제거했고
 upstream 도구 교체 항목으로 추적한다. Production rights·credentials·Supabase/Redis/domain·
 device/user/legal/operations는 `BLOCKED_EXTERNAL`이며 실제 서비스/EAS release deploy를
 수행하지 않았다.
